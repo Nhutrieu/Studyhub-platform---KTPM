@@ -1,0 +1,549 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+    <meta charset="UTF-8">
+    <title>Chính sách bảo mật - KoiCare System</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="description" content="Chính sách bảo mật của KoiCare System (KoiCareS) quy định cách chúng tôi thu thập, sử dụng và bảo vệ dữ liệu cá nhân của bạn.">
+    <!-- Load Inter font for professional typography -->
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            /* Palette lấy cảm hứng từ Koi (Black, Gold, Deep Blue) - Giữ nguyên đồng bộ với Terms */
+            --bg-body: #0a0b1f; 
+            --bg-card: #151833; 
+            --border-subtle: #333d52;
+            --text-main: #f0f3f8; 
+            --text-muted: #94a3b8;
+            --accent: #f59e0b; /* Màu vàng cam chuyên nghiệp */
+            --accent-soft: rgba(245, 158, 11, 0.15);
+            --accent-border: #fcd34d; /* Màu vàng sáng */
+            --link: #60a5fa; /* Link màu xanh dịu */
+            --header-border: #2c334d;
+        }
+
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+        }
+
+        html, body {
+            height: 100%;
+        }
+
+        body {
+            font-family: 'Inter', -apple-system, BlinkMacSystemFont, "Segoe UI", system-ui, sans-serif;
+            background-color: var(--bg-body);
+            background-image:
+                radial-gradient(circle at 15% 15%, rgba(13, 107, 255, 0.1), transparent 45%),
+                radial-gradient(circle at 85% 85%, rgba(255, 193, 7, 0.1), transparent 50%);
+            color: var(--text-main);
+            line-height: 1.8;
+            font-size: 15px;
+        }
+
+        .page-wrap {
+            min-height: 100vh;
+            padding: 40px 20px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .card {
+            width: 100%;
+            max-width: 1000px;
+            background: var(--bg-card);
+            border-radius: 16px;
+            border: 1px solid var(--border-subtle);
+            box-shadow:
+                0 4px 6px rgba(0, 0, 0, 0.1),
+                0 15px 30px rgba(0, 0, 0, 0.35),
+                0 0 0 1px rgba(100, 116, 139, 0.1);
+            padding: 30px 40px 35px;
+            backdrop-filter: blur(4px);
+            transition: box-shadow 0.3s ease;
+        }
+
+        .card:hover {
+             box-shadow:
+                0 4px 8px rgba(0, 0, 0, 0.15),
+                0 20px 40px rgba(0, 0, 0, 0.45),
+                0 0 0 1px var(--accent);
+        }
+
+        header {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            gap: 16px;
+            margin-bottom: 24px;
+            border-bottom: 2px solid var(--header-border);
+            padding-bottom: 16px;
+        }
+
+        .brand {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+        }
+
+        .brand-logo {
+            width: 48px;
+            height: 48px;
+            border-radius: 50%;
+            overflow: hidden;
+            border: 2px solid var(--accent);
+            background: var(--accent-soft);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: var(--accent);
+            flex-shrink: 0;
+            box-shadow: 0 0 10px rgba(245, 158, 11, 0.3);
+        }
+        
+        /* SVG icon style for visual consistency */
+        .brand-logo svg {
+            filter: drop-shadow(0 0 2px rgba(252, 211, 77, 0.6));
+        }
+
+        .brand-text-main {
+            font-size: 24px;
+            font-weight: 700;
+            letter-spacing: -0.02em;
+            color: var(--text-main);
+        }
+
+        .brand-text-sub {
+            font-size: 14px;
+            color: var(--text-muted);
+            margin-top: -4px;
+        }
+
+        .meta {
+            text-align: right;
+            font-size: 13px;
+            color: var(--text-muted);
+        }
+
+        .meta span {
+            display: block;
+        }
+
+        h1 {
+            font-size: 32px;
+            margin-bottom: 10px;
+            font-weight: 700;
+            border-bottom: 1px solid var(--header-border);
+            padding-bottom: 10px;
+        }
+
+        h2 {
+            font-size: 22px;
+            margin: 30px 0 10px;
+            color: var(--accent-border);
+            font-weight: 600;
+        }
+        
+        .subsection-title {
+            font-size: 17px;
+            margin: 20px 0 8px;
+            color: var(--text-main);
+            font-weight: 600;
+        }
+
+        p {
+            margin: 12px 0;
+        }
+
+        ul {
+            margin: 10px 0 16px 20px;
+            padding-left: 10px;
+            list-style-type: disc;
+        }
+
+        li {
+            margin-bottom: 6px;
+        }
+
+        .muted {
+            color: var(--text-muted);
+            font-size: 14px;
+        }
+
+        a {
+            color: var(--link);
+            text-decoration: none;
+            transition: color 0.2s;
+        }
+
+        a:hover {
+            color: var(--accent-border);
+            text-decoration: underline;
+        }
+
+        .toc-wrapper {
+            display: flex;
+            gap: 30px;
+            margin: 20px 0 0;
+        }
+
+        .toc {
+            flex: 0 0 280px; 
+            background: linear-gradient(135deg, rgba(251, 191, 36, 0.08), rgba(21, 24, 51, 0.95));
+            border-radius: 12px;
+            border: 1px solid rgba(251, 191, 36, 0.4);
+            padding: 18px;
+            font-size: 14px;
+            align-self: flex-start;
+            position: sticky;
+            top: 20px;
+        }
+
+        .toc-title {
+            font-weight: 700;
+            font-size: 16px;
+            margin-bottom: 10px;
+            color: var(--accent-border);
+            text-transform: uppercase;
+        }
+
+        .toc ul {
+            margin: 8px 0 0 12px;
+            list-style-type: none;
+            padding-left: 0;
+        }
+
+        .toc li {
+            margin-bottom: 6px;
+        }
+
+        .toc a {
+            color: var(--text-muted);
+            font-weight: 500;
+        }
+
+        .toc a:hover {
+            color: var(--accent);
+            text-decoration: none;
+        }
+
+        .content {
+            flex: 1 1 0;
+            min-width: 0;
+        }
+
+        .badge-note {
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            background: var(--accent-soft);
+            border-radius: 8px;
+            padding: 6px 14px;
+            border: 1px solid var(--accent);
+            font-size: 12px;
+            color: var(--accent-border);
+            margin-bottom: 16px;
+            font-weight: 600;
+        }
+
+        .section-divider {
+            border-top: 1px solid var(--header-border);
+            margin: 30px 0 20px;
+        }
+
+        code {
+            font-family: 'Fira Code', Consolas, monospace;
+            font-size: 14px;
+            background: rgba(30, 41, 59, 0.8);
+            padding: 3px 6px;
+            border-radius: 4px;
+            color: #d1d5db;
+        }
+
+        footer {
+            margin-top: 30px;
+            padding-top: 20px;
+            border-top: 2px solid var(--header-border);
+            font-size: 13px;
+            color: var(--text-muted);
+            display: flex;
+            flex-wrap: wrap;
+            gap: 12px 20px;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        footer a {
+            color: var(--link);
+        }
+
+        /* Responsive Adjustments */
+        @media (max-width: 1024px) {
+            .toc {
+                flex: 0 0 240px;
+            }
+        }
+
+        @media (max-width: 800px) {
+            .card {
+                padding: 25px 25px 30px;
+            }
+
+            header {
+                flex-direction: column;
+                align-items: flex-start;
+                gap: 12px;
+            }
+
+            .meta {
+                text-align: left;
+            }
+
+            .toc-wrapper {
+                flex-direction: column;
+                gap: 20px;
+            }
+
+            .toc {
+                width: 100%;
+                position: static;
+                order: -1;
+            }
+
+            h1 {
+                font-size: 28px;
+            }
+
+            h2 {
+                font-size: 20px;
+            }
+        }
+
+        @media (max-width: 480px) {
+            .page-wrap {
+                padding: 20px 10px;
+            }
+            .card {
+                padding: 18px 15px 20px;
+                border-radius: 12px;
+            }
+            h1 {
+                font-size: 24px;
+            }
+            .brand-text-main {
+                font-size: 20px;
+            }
+            .brand-logo {
+                width: 40px;
+                height: 40px;
+            }
+        }
+    </style>
+</head>
+<body>
+
+<div class="page-wrap">
+    <article class="card">
+
+        <header>
+            <div class="brand">
+                <div class="brand-logo" title="Logo KoiCare System">
+                    <!-- SVG icon cá Koi cách điệu -->
+                    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor" width="28" height="28">
+                        <path fill-rule="evenodd" d="M11.54 22.351A2.25 2.25 0 0014.288 22.1L18 20.25v-8.216A2.25 2.25 0 0015.75 9.75H8.25A2.25 2.25 0 006 12.034v8.216l3.712 1.851a2.25 2.25 0 002.576 0zM12.75 6a.75.75 0 00-1.5 0v2.25H9v2.25H7.5V12h9v-1.5h-1.5V8.25H12.75V6zM12 4.5a1.5 1.5 0 110-3 1.5 1.5 0 010 3z" clip-rule="evenodd" />
+                    </svg>
+                </div>
+                <div>
+                    <div class="brand-text-main">KoiCare System</div>
+                    <div class="brand-text-sub">Chính sách bảo mật dữ liệu</div>
+                </div>
+            </div>
+
+            <div class="meta">
+                <span>Cập nhật lần cuối: <strong>22/11/2025</strong></span>
+                <span class="muted">Bảo vệ quyền riêng tư và dữ liệu của bạn là ưu tiên hàng đầu của chúng tôi.</span>
+            </div>
+        </header>
+
+        <div class="badge-note">
+            🔒 Bảo mật dữ liệu &nbsp;–&nbsp; Áp dụng cho mọi người dùng của KoiCareS.
+        </div>
+
+        <h1>Chính sách bảo mật – KoiCare System (KoiCareS)</h1>
+
+        <p>
+            Chính sách bảo mật này mô tả cách KoiCare System (<strong>"Chúng tôi"</strong>, <strong>"KoiCareS"</strong>)
+            thu thập, sử dụng, tiết lộ và bảo vệ thông tin cá nhân của bạn (<strong>"Bạn"</strong>, <strong>"Người dùng"</strong>)
+            khi bạn sử dụng dịch vụ của chúng tôi.
+        </p>
+
+        <div class="toc-wrapper">
+            <nav class="toc" aria-label="Mục lục chính sách">
+                <div class="toc-title">Mục lục chi tiết</div>
+                <ul>
+                    <li><a href="#sec1">1. Loại dữ liệu thu thập</a></li>
+                    <li><a href="#sec2">2. Mục đích sử dụng dữ liệu</a></li>
+                    <li><a href="#sec3">3. Chia sẻ dữ liệu</a></li>
+                    <li><a href="#sec4">4. Cookie và Công nghệ theo dõi</a></li>
+                    <li><a href="#sec5">5. Bảo mật dữ liệu</a></li>
+                    <li><a href="#sec6">6. Quyền của Người dùng</a></li>
+                    <li><a href="#sec7">7. Dữ liệu trẻ em</a></li>
+                    <li><a href="#sec8">8. Thay đổi Chính sách</a></li>
+                    <li><a href="#sec9">9. Thông tin liên hệ</a></li>
+                </ul>
+            </nav>
+
+            <div class="content">
+
+                <section id="sec1">
+                    <h2>1. Loại dữ liệu thu thập</h2>
+                    
+                    <div class="subsection-title">1.1. Dữ liệu bạn cung cấp trực tiếp</div>
+                    <p>Đây là thông tin bạn cung cấp khi đăng ký, tạo hồ sơ hồ cá hoặc sử dụng các tính năng tương tác:</p>
+                    <ul>
+                        <li>Thông tin tài khoản: Tên, địa chỉ email, mật khẩu (được mã hóa).</li>
+                        <li>Thông tin hồ cá: Tên hồ, kích thước, loại lọc, nhiệt độ, các thông số nước (pH, Amonia, Nitrit...).</li>
+                        <li>Dữ liệu chăm sóc: Lịch cho ăn, thay nước, ghi chú sức khỏe, hình ảnh cá Koi.</li>
+                    </ul>
+
+                    <div class="subsection-title">1.2. Dữ liệu thu thập tự động</div>
+                    <p>Khi bạn truy cập dịch vụ, chúng tôi tự động thu thập các thông tin sau:</p>
+                    <ul>
+                        <li>Dữ liệu sử dụng: Thời gian truy cập, các tính năng được sử dụng, trang đã xem, và hành vi tương tác.</li>
+                        <li>Dữ liệu kỹ thuật: Địa chỉ IP, loại trình duyệt, hệ điều hành, thông tin thiết bị di động, và dữ liệu nhật ký (log data).</li>
+                    </ul>
+                </section>
+
+                <section id="sec2">
+                    <h2>2. Mục đích sử dụng dữ liệu</h2>
+                    <p>Chúng tôi sử dụng dữ liệu thu thập được cho các mục đích chính sau:</p>
+                    <ul>
+                        <li><strong>Cung cấp và duy trì dịch vụ:</strong> Để vận hành KoiCareS, cho phép bạn quản lý hồ cá và truy cập dữ liệu của mình.</li>
+                        <li><strong>Cá nhân hóa trải nghiệm:</strong> Điều chỉnh nội dung và thông báo dựa trên cấu hình hồ cá và sở thích của bạn.</li>
+                        <li><strong>Cải thiện dịch vụ:</strong> Phân tích xu hướng sử dụng để nâng cấp tính năng, khắc phục lỗi và tối ưu hiệu suất.</li>
+                        <li><strong>Liên lạc:</strong> Gửi thông báo về hoạt động tài khoản, cập nhật dịch vụ, hoặc phản hồi yêu cầu hỗ trợ.</li>
+                        <li><strong>An ninh và phòng chống gian lận:</strong> Phát hiện, ngăn chặn và ứng phó với các hoạt động bất hợp pháp hoặc vi phạm Điều khoản sử dụng.</li>
+                    </ul>
+                </section>
+
+                <section id="sec3">
+                    <h2>3. Chia sẻ dữ liệu</h2>
+                    <p>Chúng tôi cam kết không bán, cho thuê hoặc trao đổi dữ liệu cá nhân của bạn với bên thứ ba cho mục đích thương mại.</p>
+
+                    <div class="subsection-title">3.1. Nhà cung cấp dịch vụ</div>
+                    <p>Chúng tôi có thể chia sẻ dữ liệu với các nhà cung cấp dịch vụ bên thứ ba (ví dụ: dịch vụ lưu trữ đám mây, công cụ phân tích) nhằm mục đích duy trì và vận hành dịch vụ. Các bên này bị ràng buộc bởi hợp đồng bảo mật và chỉ được phép sử dụng dữ liệu cho các mục đích cụ thể do KoiCareS chỉ định.</p>
+
+                    <div class="subsection-title">3.2. Yêu cầu pháp lý</div>
+                    <p>Chúng tôi có thể tiết lộ dữ liệu cá nhân nếu pháp luật yêu cầu hoặc nếu chúng tôi tin rằng hành động đó là cần thiết để tuân thủ quy trình pháp lý, bảo vệ quyền lợi, tài sản của KoiCareS hoặc người dùng khác.</p>
+                </section>
+
+                <section id="sec4">
+                    <h2>4. Cookie và Công nghệ theo dõi</h2>
+                    <p>KoiCareS sử dụng "cookies" và các công nghệ theo dõi tương tự để theo dõi hoạt động trên dịch vụ của chúng tôi và lưu giữ một số thông tin. Cookie là các tệp nhỏ được gửi đến trình duyệt của bạn từ một trang web và được lưu trữ trên thiết bị của bạn.</p>
+                    <ul>
+                        <li><strong>Cookie thiết yếu:</strong> Cần thiết cho việc vận hành dịch vụ (ví dụ: duy trì phiên đăng nhập).</li>
+                        <li><strong>Cookie phân tích:</strong> Giúp chúng tôi hiểu cách người dùng tương tác với dịch vụ để cải thiện trải nghiệm.</li>
+                    </ul>
+                    <p>Bạn có thể hướng dẫn trình duyệt của mình từ chối tất cả cookie hoặc chỉ ra khi nào cookie được gửi. Tuy nhiên, nếu bạn không chấp nhận cookie, bạn có thể không sử dụng được một số phần của Dịch vụ của chúng tôi.</p>
+                </section>
+
+                <section id="sec5">
+                    <h2>5. Bảo mật dữ liệu</h2>
+                    <p>Chúng tôi áp dụng các biện pháp bảo mật kỹ thuật và tổ chức hợp lý để bảo vệ thông tin cá nhân của bạn khỏi truy cập trái phép, tiết lộ, thay đổi hoặc phá hủy. Các biện pháp này bao gồm:</p>
+                    <ul>
+                        <li>Mã hóa (Encryption) dữ liệu truyền tải và dữ liệu lưu trữ nhạy cảm (ví dụ: mật khẩu).</li>
+                        <li>Kiểm soát truy cập nghiêm ngặt đối với nhân viên và đối tác.</li>
+                        <li>Thường xuyên đánh giá rủi ro và cập nhật các giao thức bảo mật.</li>
+                    </ul>
+                    <p>Tuy nhiên, không có phương pháp truyền tải qua Internet hoặc phương pháp lưu trữ điện tử nào là an toàn 100%. Do đó, KoiCareS không thể đảm bảo an ninh tuyệt đối cho dữ liệu của bạn.</p>
+                </section>
+
+                <section id="sec6">
+                    <h2>6. Quyền của Người dùng</h2>
+                    <p>Tùy thuộc vào nơi cư trú và luật pháp hiện hành, bạn có các quyền sau đối với dữ liệu cá nhân của mình:</p>
+                    <ul>
+                        <li><strong>Quyền truy cập:</strong> Yêu cầu bản sao dữ liệu cá nhân mà chúng tôi đang giữ về bạn.</li>
+                        <li><strong>Quyền chỉnh sửa:</strong> Yêu cầu sửa chữa mọi thông tin không đầy đủ hoặc không chính xác.</li>
+                        <li><strong>Quyền xóa:</strong> Yêu cầu xóa dữ liệu cá nhân của bạn (trừ khi chúng tôi có nghĩa vụ pháp lý phải giữ lại).</li>
+                        <li><strong>Quyền phản đối:</strong> Phản đối việc xử lý dữ liệu của bạn cho một số mục đích nhất định.</li>
+                    </ul>
+                    <p>Để thực hiện các quyền này, vui lòng liên hệ với chúng tôi qua email hỗ trợ được cung cấp dưới đây. Chúng tôi sẽ xử lý yêu cầu của bạn theo quy định pháp luật.</p>
+                </section>
+
+                <section id="sec7">
+                    <h2>7. Dữ liệu trẻ em</h2>
+                    <p>Dịch vụ của chúng tôi không dành cho người dưới 13 tuổi (hoặc độ tuổi tối thiểu tương đương theo luật pháp địa phương). Chúng tôi không cố ý thu thập thông tin nhận dạng cá nhân từ bất kỳ ai dưới 13 tuổi. Nếu bạn là cha mẹ hoặc người giám hộ và biết rằng con bạn đã cung cấp Dữ liệu cá nhân cho chúng tôi, vui lòng liên hệ với chúng tôi.</p>
+                </section>
+
+                <section id="sec8">
+                    <h2>8. Thay đổi Chính sách</h2>
+                    <p>Chúng tôi có thể cập nhật Chính sách bảo mật này theo thời gian. Chúng tôi sẽ thông báo cho bạn về bất kỳ thay đổi nào bằng cách đăng Chính sách bảo mật mới trên trang này và cập nhật ngày "Cập nhật lần cuối" ở đầu trang.</p>
+                    <p>Bạn nên xem lại Chính sách bảo mật này định kỳ để biết về mọi thay đổi. Các thay đổi đối với Chính sách bảo mật này có hiệu lực khi chúng được đăng trên trang này.</p>
+                </section>
+
+                <section id="sec9">
+                    <h2>9. Thông tin liên hệ</h2>
+                    <p>Nếu bạn có bất kỳ câu hỏi nào về Chính sách bảo mật này, vui lòng liên hệ với chúng tôi:</p>
+                    <ul>
+                        <li>Qua Email: <a href="mailto:support@koicaresystem.com">support@koicaresystem.com</a></li>
+                        <li>Xem thêm: <a href="terms.html">Điều khoản sử dụng</a></li>
+                    </ul>
+                </section>
+
+                <div class="section-divider"></div>
+
+                <p class="muted">
+                    <strong>Lưu ý:</strong> Chính sách này được thiết kế để tuân thủ các nguyên tắc bảo vệ dữ liệu chung. Tùy thuộc vào khu vực hoạt động, có thể cần bổ sung các điều khoản cụ thể theo luật GDPR, CCPA, hoặc luật pháp Việt Nam.
+                </p>
+            </div>
+        </div>
+
+        <footer>
+            <span>© <span id="current-year"></span> KoiCare System. All rights reserved.</span>
+            <span>Tham khảo: <a href="terms.html">Điều khoản sử dụng</a></span>
+        </footer>
+
+    </article>
+</div>
+
+<script>
+    // Hàm cập nhật năm hiện tại và tạo hiệu ứng active cho Mục lục
+    document.addEventListener('DOMContentLoaded', (event) => {
+        const yearSpan = document.getElementById('current-year');
+        if (yearSpan) {
+            yearSpan.textContent = new Date().getFullYear();
+        }
+
+        const sections = document.querySelectorAll('.content section');
+        const tocLinks = document.querySelectorAll('.toc a');
+
+        const observer = new IntersectionObserver((entries) => {
+            entries.forEach(entry => {
+                const id = entry.target.getAttribute('id');
+                const tocLink = document.querySelector(`.toc a[href="#${id}"]`);
+                if (tocLink) {
+                    if (entry.isIntersecting && entry.intersectionRatio >= 0.2) {
+                        tocLink.style.color = 'var(--accent-border)';
+                        tocLink.style.fontWeight = '700';
+                    } else {
+                        tocLink.style.color = 'var(--text-muted)';
+                        tocLink.style.fontWeight = '500';
+                    }
+                }
+            });
+        }, {
+            rootMargin: '0px 0px -60% 0px', 
+            threshold: 0.2
+        });
+
+        sections.forEach(section => {
+            observer.observe(section);
+        });
+    });
+</script>
+
+</body>
+</html>

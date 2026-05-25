@@ -1,0 +1,103 @@
+@import url('https://fonts.googleapis.com/icon?family=Material+Icons');
+
+#users-table {
+  margin: 24px 0 0 0;
+  width: 100%;
+  max-width: 1100px;
+}
+
+.um-toolbar {
+  display: flex;
+  gap: 8px;
+  margin-bottom: 10px;
+  flex-wrap: wrap;
+}
+.um-toolbar input, .um-toolbar select {
+  border: 1px solid #dde5ee;
+  border-radius: 8px;
+  padding: 8px 10px;
+  font-size: 14px;
+  background: #fff;
+}
+.um-btn {
+  padding: 8px 12px;
+  border-radius: 8px;
+  border: 1px solid #d9e3ef;
+  background: #f6f9fc;
+  cursor: pointer;
+  font-weight: 600;
+}
+.um-btn[disabled] { opacity: 0.5; cursor: not-allowed; }
+
+.um-table {
+  width: 100%;
+  border-collapse: collapse;
+  background: #fff;
+  border-radius: 12px;
+  overflow: hidden;
+  box-shadow: 0 4px 16px rgba(0,0,0,0.06);
+}
+.um-table th, .um-table td {
+  border-bottom: 1px solid #eef2f6;
+  padding: 10px 12px;
+  text-align: left;
+  font-size: 14px;
+}
+.um-table thead th {
+  background: #f7f9fc;
+  font-weight: 700;
+  color: #233;
+}
+.um-table tbody tr:hover td { background: #fbfdff; }
+
+th.sortable { cursor: pointer; user-select: none; }
+th.sortable .arrow { opacity: .6; font-size: 12px; }
+
+.status-badge {
+  display:inline-block;
+  padding:6px 8px;
+  border-radius:999px;
+  font-weight:600;
+  font-size:13px;
+  border:1px solid transparent;
+}
+.status-badge.online {
+  background:#e8f5e9; color:#2e7d32; border-color:#c8e6c9;
+}
+.status-badge.offline {
+  background:#f3f6f9; color:#546e7a; border-color:#e1e8ee;
+}
+
+.pill {
+  display:inline-block;
+  padding:4px 8px;
+  border-radius: 999px;
+  font-weight: 700;
+  font-size: 12px;
+  border: 1px solid transparent;
+}
+.pill-on { background:#e6f4ff; color:#1769aa; border-color:#cbe6ff; }
+.pill-off { background:#ffe7e7; color:#b3261e; border-color:#ffc9c9; }
+
+.action-btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 6px 10px;
+  font-size: 13px;
+  border-radius: 8px;
+  cursor: pointer;
+  border: 1px solid #e6e8ef;
+  background: #f8fafc;
+  transition: all .15s ease;
+}
+.action-btn:hover { transform: translateY(-1px); }
+.action-btn.danger { background:#fff3f3; border-color:#ffd6d6; color:#c62828; }
+.action-btn.danger:hover { background:#ffe3e3; }
+
+.um-pager {
+  display:flex; align-items:center; justify-content:space-between;
+  margin-top: 10px;
+}
+.um-pager-info { color:#456; font-size: 13px; }
+.um-error { color:#c62828; font-weight:600; }

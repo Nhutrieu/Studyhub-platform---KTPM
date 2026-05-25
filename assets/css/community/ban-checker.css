@@ -1,0 +1,641 @@
+/* assets/css/community/ban-checker.css */
+/* Ban Status Bar */
+.user-ban-status-bar {
+    position: fixed;
+    top: 0;
+    left: 0;
+    right: 0;
+    background: linear-gradient(135deg, #d32f2f 0%, #b71c1c 100%);
+    color: white;
+    padding: 12px 20px;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    z-index: 9998;
+    box-shadow: 0 4px 20px rgba(0,0,0,0.3);
+    animation: slideDown 0.3s ease;
+}
+
+.user-ban-status-bar.warning {
+    background: linear-gradient(135deg, #ff9800 0%, #f57c00 100%);
+}
+
+@keyframes slideDown {
+    from { transform: translateY(-100%); }
+    to { transform: translateY(0); }
+}
+
+.ban-status-content {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    flex: 1;
+}
+
+.ban-status-content .material-icons {
+    font-size: 20px;
+    flex-shrink: 0;
+}
+
+.ban-status-text {
+    font-size: 14px;
+    font-weight: 500;
+}
+
+.ban-status-details {
+    color: #ffcc80;
+    text-decoration: underline;
+    font-weight: bold;
+    font-size: 13px;
+    margin-left: 10px;
+    cursor: pointer;
+}
+
+.ban-status-details:hover {
+    color: white;
+}
+
+.ban-status-close {
+    background: rgba(255,255,255,0.2);
+    border: none;
+    color: white;
+    cursor: pointer;
+    font-size: 20px;
+    width: 32px;
+    height: 32px;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: background 0.2s;
+}
+
+.ban-status-close:hover {
+    background: rgba(255,255,255,0.3);
+}
+
+/* Ban Modal */
+.user-ban-modal-overlay {
+    position: fixed;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background: rgba(0, 0, 0, 0.8);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    z-index: 9999;
+    animation: fadeIn 0.3s ease;
+}
+
+@keyframes fadeIn {
+    from { opacity: 0; }
+    to { opacity: 1; }
+}
+
+.user-ban-modal {
+    background: white;
+    border-radius: 16px;
+    width: 90%;
+    max-width: 500px;
+    max-height: 90vh;
+    overflow-y: auto;
+    box-shadow: 0 25px 80px rgba(0, 0, 0, 0.4);
+    animation: modalSlideUp 0.4s ease;
+}
+
+@keyframes modalSlideUp {
+    from { transform: translateY(40px); opacity: 0; }
+    to { transform: translateY(0); opacity: 1; }
+}
+
+.ban-modal-header {
+    background: linear-gradient(135deg, #d32f2f 0%, #b71c1c 100%);
+    color: white;
+    padding: 24px;
+    border-radius: 16px 16px 0 0;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+}
+
+.ban-modal-header h2 {
+    margin: 0;
+    font-size: 22px;
+    flex: 1;
+    text-align: center;
+    font-weight: 600;
+}
+
+.ban-modal-header .material-icons {
+    font-size: 32px;
+}
+
+.ban-modal-close {
+    background: rgba(255, 255, 255, 0.2);
+    border: none;
+    color: white;
+    font-size: 28px;
+    cursor: pointer;
+    width: 40px;
+    height: 40px;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: background 0.2s;
+}
+
+.ban-modal-close:hover {
+    background: rgba(255, 255, 255, 0.3);
+}
+
+.ban-modal-body {
+    padding: 30px;
+}
+
+.ban-alert-icon {
+    text-align: center;
+    margin-bottom: 25px;
+}
+
+.ban-alert-icon .material-icons {
+    font-size: 70px;
+    color: #d32f2f;
+    opacity: 0.9;
+}
+
+.ban-info-section {
+    background: #f9f9f9;
+    border-radius: 12px;
+    padding: 20px;
+    margin-bottom: 25px;
+    border: 1px solid #eee;
+}
+
+.ban-info-row {
+    display: flex;
+    margin-bottom: 16px;
+    padding-bottom: 16px;
+    border-bottom: 1px solid #e0e0e0;
+}
+
+.ban-info-row:last-child {
+    border-bottom: none;
+    margin-bottom: 0;
+    padding-bottom: 0;
+}
+
+.ban-info-label {
+    flex: 0 0 160px;
+    font-weight: 600;
+    color: #555;
+    font-size: 15px;
+    display: flex;
+    align-items: flex-start;
+    gap: 8px;
+}
+
+.ban-info-value {
+    flex: 1;
+    font-size: 15px;
+    line-height: 1.5;
+}
+
+.ban-type-badge {
+    display: inline-block;
+    padding: 8px 18px;
+    border-radius: 20px;
+    font-size: 14px;
+    font-weight: bold;
+    color: white;
+    box-shadow: 0 2px 8px rgba(0,0,0,0.15);
+}
+
+.ban-type-badge.post_only {
+    background: linear-gradient(135deg, #f44336 0%, #d32f2f 100%);
+}
+
+.ban-type-badge.comment_only {
+    background: linear-gradient(135deg, #ff9800 0%, #f57c00 100%);
+}
+
+.ban-type-badge.full_ban {
+    background: linear-gradient(135deg, #d32f2f 0%, #b71c1c 100%);
+}
+
+.ban-reason-box {
+    background: white;
+    padding: 15px;
+    border-radius: 10px;
+    border-left: 5px solid #d32f2f;
+    line-height: 1.6;
+    box-shadow: 0 2px 10px rgba(0,0,0,0.05);
+    font-size: 14.5px;
+}
+
+.ban-remaining-time {
+    display: block;
+    color: #666;
+    font-size: 13px;
+    margin-top: 5px;
+    font-style: italic;
+}
+
+.ban-code {
+    background: #f0f0f0;
+    padding: 6px 12px;
+    border-radius: 6px;
+    font-family: 'Courier New', monospace;
+    font-size: 14px;
+    color: #333;
+    border: 1px solid #ddd;
+}
+
+.ban-warning-section {
+    background: #fff3e0;
+    border: 2px solid #ffb74d;
+    border-radius: 12px;
+    padding: 20px;
+    display: flex;
+    align-items: flex-start;
+    gap: 15px;
+    margin-top: 25px;
+}
+
+.ban-warning-icon .material-icons {
+    color: #ff9800;
+    font-size: 28px;
+    flex-shrink: 0;
+}
+
+.ban-warning-text {
+    flex: 1;
+}
+
+.ban-warning-text p {
+    margin: 0 0 10px 0;
+    color: #5d4037;
+    line-height: 1.6;
+    font-size: 14.5px;
+}
+
+.ban-warning-text p:last-child {
+    margin-bottom: 0;
+}
+
+.ban-modal-footer {
+    padding: 24px;
+    border-top: 1px solid #eee;
+    display: flex;
+    gap: 15px;
+    justify-content: center;
+    background: #f8f9fa;
+    border-radius: 0 0 16px 16px;
+}
+
+.ban-modal-btn {
+    padding: 14px 28px;
+    border-radius: 10px;
+    border: none;
+    font-weight: 600;
+    font-size: 15px;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 10px;
+    transition: all 0.3s;
+    min-width: 140px;
+}
+
+.ban-modal-btn.primary {
+    background: linear-gradient(135deg, #2196f3 0%, #0d47a1 100%);
+    color: white;
+}
+
+.ban-modal-btn.primary:hover {
+    transform: translateY(-3px);
+    box-shadow: 0 6px 20px rgba(33, 150, 243, 0.4);
+}
+
+.ban-modal-btn.secondary {
+    background: #f5f5f5;
+    color: #666;
+    border: 2px solid #ddd;
+}
+
+.ban-modal-btn.secondary:hover {
+    background: #e0e0e0;
+}
+/* Popup khiếu nại */
+.appeal-modal-overlay {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background: rgba(0, 0, 0, 0.7);
+    z-index: 10000;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    backdrop-filter: blur(3px);
+}
+
+.appeal-modal {
+    background: white;
+    border-radius: 12px;
+    width: 90%;
+    max-width: 500px;
+    box-shadow: 0 10px 40px rgba(0, 0, 0, 0.3);
+    animation: modalSlideIn 0.3s ease-out;
+}
+
+.appeal-modal-header {
+    padding: 20px 25px;
+    border-bottom: 1px solid #eee;
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    border-radius: 12px 12px 0 0;
+    color: white;
+}
+
+.appeal-modal-header h2 {
+    margin: 0;
+    font-size: 1.3rem;
+    flex: 1;
+    color: white;
+}
+
+.appeal-modal-header .material-icons {
+    font-size: 1.5rem;
+}
+
+.appeal-modal-close {
+    background: rgba(255, 255, 255, 0.2);
+    border: none;
+    color: white;
+    font-size: 1.8rem;
+    width: 36px;
+    height: 36px;
+    border-radius: 50%;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: all 0.2s;
+}
+
+.appeal-modal-close:hover {
+    background: rgba(255, 255, 255, 0.3);
+    transform: rotate(90deg);
+}
+
+.appeal-modal-body {
+    padding: 25px;
+}
+
+.appeal-info {
+    background: #f0f7ff;
+    border-radius: 8px;
+    padding: 15px;
+    margin-bottom: 20px;
+    border-left: 4px solid #667eea;
+}
+
+.appeal-info p {
+    margin: 8px 0;
+    display: flex;
+    align-items: flex-start;
+    gap: 10px;
+    font-size: 0.95rem;
+    color: #555;
+}
+
+.appeal-info .material-icons {
+    color: #667eea;
+    font-size: 1.1rem;
+    flex-shrink: 0;
+    margin-top: 2px;
+}
+
+.appeal-note {
+    background: #fff8e1;
+    border-left-color: #ffb300 !important;
+    margin-top: 15px !important;
+    padding: 10px 15px;
+    border-radius: 6px;
+}
+
+.appeal-note .material-icons {
+    color: #ffb300 !important;
+}
+
+.form-group {
+    margin-bottom: 0;
+}
+
+.form-group label {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    font-weight: 600;
+    margin-bottom: 10px;
+    color: #333;
+}
+
+.appeal-reason-input {
+    width: 100%;
+    padding: 15px;
+    border: 2px solid #e0e0e0;
+    border-radius: 8px;
+    font-family: inherit;
+    font-size: 1rem;
+    resize: vertical;
+    transition: all 0.3s;
+}
+
+.appeal-reason-input:focus {
+    outline: none;
+    border-color: #667eea;
+    box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.1);
+}
+
+.char-count {
+    text-align: right;
+    font-size: 0.9rem;
+    color: #777;
+    margin-top: 8px;
+}
+
+.current-chars {
+    font-weight: bold;
+}
+
+.appeal-error {
+    background: #ffebee;
+    color: #c62828;
+    padding: 12px 15px;
+    border-radius: 8px;
+    margin-top: 15px;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    animation: slideDown 0.3s ease-out;
+    border-left: 4px solid #c62828;
+}
+
+.appeal-error .material-icons {
+    flex-shrink: 0;
+}
+
+.appeal-modal-footer {
+    padding: 20px 25px;
+    border-top: 1px solid #eee;
+    display: flex;
+    justify-content: flex-end;
+    gap: 15px;
+}
+
+.appeal-modal-btn {
+    padding: 12px 25px;
+    border: none;
+    border-radius: 8px;
+    font-weight: 600;
+    font-size: 0.95rem;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
+    transition: all 0.3s;
+    min-width: 140px;
+}
+
+.appeal-modal-btn.secondary {
+    background: #f5f5f5;
+    color: #666;
+}
+
+.appeal-modal-btn.secondary:hover {
+    background: #e0e0e0;
+}
+
+.appeal-modal-btn.primary {
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    color: white;
+}
+
+.appeal-modal-btn.primary:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 5px 15px rgba(102, 126, 234, 0.4);
+}
+
+.appeal-modal-btn.primary:disabled {
+    opacity: 0.6;
+    cursor: not-allowed;
+    transform: none !important;
+    box-shadow: none !important;
+}
+
+/* Success state */
+.appeal-success {
+    text-align: center;
+    padding: 30px 20px;
+}
+
+.success-icon .material-icons {
+    font-size: 4rem;
+    color: #4caf50;
+    margin-bottom: 20px;
+}
+
+.appeal-success h3 {
+    color: #333;
+    margin-bottom: 15px;
+    font-size: 1.4rem;
+}
+
+.appeal-success p {
+    color: #666;
+    line-height: 1.6;
+    margin-bottom: 10px;
+}
+
+.success-note {
+    background: #f1f8e9;
+    padding: 15px;
+    border-radius: 8px;
+    margin-top: 20px;
+    color: #33691e !important;
+    border-left: 4px solid #4caf50;
+}
+
+.success-actions {
+    margin-top: 25px;
+}
+
+.success-btn {
+    background: #4caf50;
+    color: white;
+    border: none;
+    padding: 12px 30px;
+    border-radius: 8px;
+    font-weight: 600;
+    cursor: pointer;
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    transition: all 0.3s;
+}
+
+.success-btn:hover {
+    background: #388e3c;
+    transform: translateY(-2px);
+}
+
+/* Animations */
+@keyframes modalSlideIn {
+    from {
+        opacity: 0;
+        transform: translateY(-20px) scale(0.95);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0) scale(1);
+    }
+}
+
+@keyframes slideDown {
+    from {
+        opacity: 0;
+        transform: translateY(-10px);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+/* Responsive */
+@media (max-width: 600px) {
+    .appeal-modal {
+        width: 95%;
+        margin: 10px;
+    }
+    
+    .appeal-modal-header,
+    .appeal-modal-body,
+    .appeal-modal-footer {
+        padding: 15px;
+    }
+    
+    .appeal-modal-btn {
+        min-width: 120px;
+        padding: 10px 20px;
+    }
+}

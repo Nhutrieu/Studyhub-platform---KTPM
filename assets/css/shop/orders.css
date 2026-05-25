@@ -1,0 +1,281 @@
+/* * ORDERS CSS - Styled like Tailwind CSS
+ * Font Family: System UI
+ */
+
+/* === RESET & LAYOUT === */
+.orders-page {
+  max-width: 1024px;
+  margin: 30px auto 60px;
+  padding: 0 16px;
+  font-family: ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+  color: #334155; /* Slate-700 */
+}
+
+/* === HEADER === */
+.orders-header {
+  margin-bottom: 24px;
+}
+
+.orders-header h1 {
+  font-size: 28px;
+  font-weight: 700;
+  color: #0f172a; /* Slate-900 */
+  margin: 0 0 8px;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.orders-header h1 i {
+  color: #0ea5e9; /* Sky-500 */
+}
+
+.orders-header p {
+  margin: 0;
+  color: #64748b; /* Slate-500 */
+  font-size: 15px;
+}
+
+/* === EMPTY STATE === */
+.orders-empty {
+  background: #ffffff;
+  border-radius: 16px;
+  box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
+  padding: 40px 20px;
+  text-align: center;
+  border: 1px solid #f1f5f9;
+}
+
+.orders-empty img {
+  max-width: 200px;
+  width: 100%;
+  margin-bottom: 20px;
+  opacity: 0.9;
+}
+
+.orders-empty p {
+  font-size: 16px;
+  color: #475569;
+  margin-bottom: 24px;
+}
+
+/* === BUTTONS === */
+.btn.primary {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  background-color: #0ea5e9; /* Sky-500 */
+  color: #ffffff;
+  border-radius: 9999px; /* Pill shape */
+  padding: 10px 24px;
+  font-size: 15px;
+  font-weight: 600;
+  text-decoration: none;
+  transition: all 0.2s ease;
+  box-shadow: 0 2px 4px rgba(14, 165, 233, 0.3);
+}
+
+.btn.primary:hover {
+  background-color: #0284c7; /* Sky-600 */
+  transform: translateY(-1px);
+  box-shadow: 0 4px 6px rgba(14, 165, 233, 0.4);
+}
+
+/* === ORDER CARD (LIST) === */
+.orders-list {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+}
+
+.order-card {
+  display: block;
+  text-decoration: none;
+  background: #ffffff;
+  border-radius: 12px;
+  border: 1px solid #e2e8f0; /* Slate-200 */
+  padding: 0; /* Reset padding for internal sections */
+  transition: all 0.2s ease-in-out;
+  overflow: hidden;
+}
+
+.order-card:hover {
+  border-color: #bae6fd; /* Sky-200 */
+  box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05);
+  transform: translateY(-2px);
+}
+
+/* Card Top */
+.order-card-top {
+  padding: 16px 20px;
+  background-color: #f8fafc; /* Slate-50 */
+  border-bottom: 1px solid #f1f5f9;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.order-id {
+  font-weight: 700;
+  font-size: 16px;
+  color: #334155;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.order-badges {
+  display: flex;
+  gap: 8px;
+  align-items: center;
+}
+
+/* STATUS COLORS (BADGES) */
+.status-badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  padding: 4px 12px;
+  border-radius: 6px;
+  font-size: 13px;
+  font-weight: 600;
+  letter-spacing: 0.02em;
+}
+
+/* 1. Success (Completed) - Green */
+.status-success {
+  background-color: #dcfce7; /* Emerald-100 */
+  color: #166534; /* Emerald-800 */
+  border: 1px solid #bbf7d0;
+}
+
+/* 2. Info (Processing, Shipped) - Blue */
+.status-info {
+  background-color: #e0f2fe; /* Sky-100 */
+  color: #0369a1; /* Sky-700 */
+  border: 1px solid #bae6fd;
+}
+
+/* 3. Warning (Dispute, AdminReview) - Amber/Orange */
+.status-warning {
+  background-color: #fef3c7; /* Amber-100 */
+  color: #b45309; /* Amber-700 */
+  border: 1px solid #fde68a;
+}
+
+/* 4. Danger (Cancelled, Refunded) - Red */
+.status-danger {
+  background-color: #ffe4e6; /* Rose-100 */
+  color: #be123c; /* Rose-700 */
+  border: 1px solid #fecdd3;
+}
+
+/* 5. Neutral (Pending) - Slate */
+.status-neutral {
+  background-color: #f1f5f9; /* Slate-100 */
+  color: #475569; /* Slate-600 */
+  border: 1px solid #e2e8f0;
+}
+
+/* Card Middle */
+.order-card-middle {
+  padding: 16px 20px;
+}
+
+.order-info-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+  gap: 12px;
+}
+
+.info-item {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 14px;
+}
+
+.info-item .label {
+  color: #64748b; /* Slate-500 */
+}
+
+.info-item .value {
+  color: #0f172a; /* Slate-900 */
+  font-weight: 500;
+}
+
+/* Payment Status Dot */
+.payment-dot {
+  width: 10px;
+  height: 10px;
+  border-radius: 50%;
+  display: inline-block;
+}
+.status-paid { background-color: #22c55e; box-shadow: 0 0 0 2px #dcfce7; }
+.status-failed { background-color: #ef4444; }
+.status-cancelled { background-color: #94a3b8; }
+.status-pending-pay { background-color: #f59e0b; }
+
+/* Card Bottom */
+.order-card-bottom {
+  padding: 14px 20px;
+  border-top: 1px dashed #e2e8f0;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  background-color: #ffffff;
+}
+
+.order-total {
+  font-size: 15px;
+  color: #334155;
+}
+
+.order-total span {
+  color: #ef4444; /* Red-500 */
+  font-weight: 700;
+  font-size: 18px;
+  margin-left: 6px;
+}
+
+.order-action {
+  font-size: 14px;
+  font-weight: 600;
+  color: #0ea5e9;
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  transition: gap 0.2s;
+}
+
+.order-card:hover .order-action {
+  gap: 10px; /* Hiệu ứng mũi tên dịch chuyển */
+}
+
+/* === RESPONSIVE === */
+@media (max-width: 640px) {
+  .order-card-top {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 10px;
+  }
+  
+  .order-badges {
+    width: 100%;
+    flex-wrap: wrap;
+  }
+
+  .order-info-grid {
+    grid-template-columns: 1fr;
+  }
+  
+  .order-card-bottom {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 12px;
+  }
+  
+  .order-action {
+    align-self: flex-end;
+  }
+}

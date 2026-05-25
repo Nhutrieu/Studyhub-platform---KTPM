@@ -1,0 +1,173 @@
+/* ======================
+  BIẾN CÓ SẴN + NÂNG CAO (Professional Palette)
+====================== */
+:root {
+    /* Xanh nước & cam Koi - Consistent with products/vouchers */
+    --koi-primary: #0ea5e9; /* Sky 500 */
+    --koi-primary-dark: #0369a1; /* Sky 700 */
+    --koi-accent: #f97316; /* Orange 500 */
+    --koi-accent-warm: #ff6600;
+
+    /* Nền sáng */
+    --koi-bg: #f1f5f9; /* Slate 100 */
+    --koi-surface: #ffffff; /* White */
+    --koi-surface-soft: #f8fafc; /* Slate 50 */
+
+    --koi-border: #e2e8f0; /* Slate 200 */
+    --koi-border-soft: #f0f9ff; /* Sky 50 */
+    --koi-text: #0f172a; /* Slate 900 */
+    --koi-muted: #64748b; /* Slate 500 */
+    --koi-danger: #ef4444; /* Red 500 */
+    --koi-success: #10b981; /* Green 500 */
+
+    /* Professional shadows (Enhanced) */
+    --koi-shadow-sm: 0 1px 3px rgba(15, 23, 42, 0.04);
+    --koi-shadow-md: 0 4px 16px rgba(15, 23, 42, 0.1);
+    --koi-shadow-lg: 0 16px 32px rgba(15, 23, 42, 0.15);
+}
+
+/* ======================
+  LAYOUT CHUNG (Sử dụng Tailwind trong PHP)
+====================== */
+.main-content {
+    /* Kept for context but mostly driven by tailwind in kois.php */
+    min-height: calc(100vh - 60px);
+    font-family: 'Segoe UI', 'Roboto', 'Helvetica', 'Arial', 'sans-serif';
+    color: var(--koi-text);
+}
+
+/* Custom Scrollbar for Modals (Used in kois.php) */
+.custom-scroll::-webkit-scrollbar { width: 6px; height: 6px; }
+.custom-scroll::-webkit-scrollbar-track { background: var(--koi-surface-soft); border-radius: 4px; }
+.custom-scroll::-webkit-scrollbar-thumb { background: var(--koi-border); border-radius: 4px; }
+.custom-scroll::-webkit-scrollbar-thumb:hover { background: var(--koi-muted); }
+
+/* Animation for Modals (Reused from existing structure) */
+@keyframes modalEnter {
+    from { opacity: 0; transform: translateY(20px) scale(0.98); }
+    to { opacity: 1; transform: translateY(0) scale(1); }
+}
+.modal-enter { animation: modalEnter 0.3s cubic-bezier(0.16, 1, 0.3, 1) forwards; }
+
+/* ======================
+  NÚT THÊM CÁ (FAB) - Fixed position elements for better UX
+====================== */
+.fab-container {
+    position: fixed;
+    bottom: 24px;
+    left: 24px;
+    z-index: 9990; /* High Z-index for floating actions */
+    display: flex;
+    flex-direction: column;
+    gap: 12px; /* Space between buttons */
+}
+
+.add-koi-link {
+    background: linear-gradient(135deg, var(--koi-primary), var(--koi-primary-dark));
+    color: var(--koi-surface);
+    font-size: 28px;
+    border-radius: 50%;
+    width: 64px; /* Slightly larger */
+    height: 64px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    text-decoration: none;
+    box-shadow: var(--koi-shadow-lg);
+    transition: transform 0.2s ease, box-shadow 0.2s ease, background 0.2s ease;
+}
+
+.add-koi-link:hover {
+    background: linear-gradient(135deg, var(--koi-primary-dark), #0284c7);
+    transform: scale(1.08); /* Reduced scale for subtle effect */
+    box-shadow: 0 10px 20px rgba(14, 165, 233, 0.4);
+}
+
+/* ======================
+  NÚT SẮP XẾP (Enhanced Look)
+====================== */
+.sort-btn {
+    background: var(--koi-surface);
+    border: 1px solid var(--koi-border);
+    color: var(--koi-primary);
+    border-radius: 50%;
+    width: 48px;
+    height: 48px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+    box-shadow: var(--koi-shadow-sm);
+    transition: all 0.2s ease;
+    font-size: 20px;
+}
+
+.sort-btn:hover {
+    background: var(--koi-primary);
+    color: var(--koi-surface);
+    transform: scale(1.05);
+    box-shadow: var(--koi-shadow-md);
+}
+
+.sort-menu {
+    display: none;
+    position: absolute;
+    bottom: 60px; /* Position above button */
+    left: 0;
+    background: var(--koi-surface);
+    border-radius: 12px;
+    box-shadow: var(--koi-shadow-lg);
+    border: 1px solid var(--koi-border);
+    overflow: hidden;
+    animation: slideUp 0.25s ease;
+    z-index: 1000;
+}
+.growth-history-container {
+    max-height: 400px;  /* Giới hạn chiều cao */
+    overflow-y: auto;  /* Cho phép cuộn dọc */
+    padding-right: 12px; /* Đảm bảo không bị che khuất thanh cuộn */
+}
+
+.growth-history-container::-webkit-scrollbar {
+    width: 8px;
+}
+
+.growth-history-container::-webkit-scrollbar-track {
+    background: #f1f5f9;
+    border-radius: 10px;
+}
+
+.growth-history-container::-webkit-scrollbar-thumb {
+    background: #cbd5e1;
+    border-radius: 10px;
+}
+
+.growth-history-container::-webkit-scrollbar-thumb:hover {
+    background: #94a3b8;
+}
+
+/* For Firefox */
+.growth-history-container {
+    scrollbar-width: thin;
+    scrollbar-color: #cbd5e1 #f1f5f9;
+}
+  
+/* ======================
+  RESPONSIVE (Minimal fixes needed as Tailwind in PHP handles most)
+====================== */
+@media (max-width: 768px) {
+    .fab-container {
+        bottom: 16px;
+        left: 16px;
+        gap: 10px;
+    }
+    .add-koi-link {
+        width: 54px;
+        height: 54px;
+        font-size: 24px;
+    }
+    .sort-btn {
+        width: 44px;
+        height: 44px;
+    }
+}

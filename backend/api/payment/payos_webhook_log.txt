@@ -1,0 +1,262 @@
+
+
+==== [Webhook call at 2025-11-01 17:47:21] ====
+Raw data: 
+❌ ERROR: Invalid or missing payload
+
+
+==== [Webhook call at 2025-11-01 17:47:51] ====
+Raw data: {"code":"00","desc":"success","success":true,"data":{"accountNumber":"0329804895","amount":2000,"description":"KOI34","reference":"FT25305514189882","transactionDateTime":"2025-11-01 17:47:52","virtualAccountNumber":"","counterAccountBankId":"01203001","counterAccountBankName":"","counterAccountName":"NGUYEN HOANG THANH QUY","counterAccountNumber":"1039919781","virtualAccountName":"","currency":"VND","orderCode":34,"paymentLinkId":"4902644d06ed4eb4b30103d1ddc0f656","code":"00","desc":"success"},"signature":"37e0d0771504b207ec258a3db2a9a3b2a9af94339109573051ed44aaafa027c6"}
+Signature check:
+- Received: 37e0d0771504b207ec258a3db2a9a3b2a9af94339109573051ed44aaafa027c6
+- Calculated: 37e0d0771504b207ec258a3db2a9a3b2a9af94339109573051ed44aaafa027c6
+Data parsed:
+- OrderCode: 34
+- Amount: 2000
+- Code: 00
+✅ Payment success & stock updated for OrderID=34
+
+
+==== [Webhook call at 2025-11-01 18:13:26] ====
+Raw data: {"code":"00","desc":"success","success":true,"data":{"accountNumber":"0329804895","amount":2000,"description":"KOI40","reference":"FT25305046745501","transactionDateTime":"2025-11-01 18:13:27","virtualAccountNumber":"","counterAccountBankId":"970422","counterAccountBankName":"","counterAccountName":null,"counterAccountNumber":"2281072020614","virtualAccountName":"","currency":"VND","orderCode":40,"paymentLinkId":"58865facbd9b401bb307e3199e2cbec6","code":"00","desc":"success"},"signature":"4558fa2dfe4151af84af2b57a01c1e56408356e56bc2248058e942fae335f6c0"}
+Signature check:
+- Received: 4558fa2dfe4151af84af2b57a01c1e56408356e56bc2248058e942fae335f6c0
+- Calculated: 4558fa2dfe4151af84af2b57a01c1e56408356e56bc2248058e942fae335f6c0
+Data parsed:
+- OrderCode: 40
+- Amount: 2000
+- Code: 00
+✅ Payment success & stock updated for OrderID=40
+
+
+==== [Webhook call at 2025-11-21 14:17:52] ====
+Raw data: {"code":"00","desc":"success","data":{"orderCode":123,"amount":3000,"description":"VQRIO123","accountNumber":"12345678","reference":"TF230204212323","transactionDateTime":"2023-02-04 18:25:00","paymentLinkId":"124c33293c43417ab7879e14c8d9eb18","code":"00","desc":"Thành công","counterAccountBankId":"","counterAccountBankName":"","counterAccountName":"","counterAccountNumber":"","virtualAccountName":"","virtualAccountNumber":"","currency":"VND"},"signature":"e2746511f9286413815f835a0a64f22e1d667e598768e20d5eafeb15ce48b49d"}
+Signature check:
+- Received: e2746511f9286413815f835a0a64f22e1d667e598768e20d5eafeb15ce48b49d
+- Calculated: e2746511f9286413815f835a0a64f22e1d667e598768e20d5eafeb15ce48b49d
+Data parsed:
+- OrderCode: 123
+- Amount: 3000
+- Code: 00
+❌ Exception: Order not found
+
+
+==== [Webhook call at 2025-11-21 14:18:03] ====
+Raw data: {"code":"00","desc":"success","data":{"orderCode":123,"amount":3000,"description":"VQRIO123","accountNumber":"12345678","reference":"TF230204212323","transactionDateTime":"2023-02-04 18:25:00","paymentLinkId":"124c33293c43417ab7879e14c8d9eb18","code":"00","desc":"Thành công","counterAccountBankId":"","counterAccountBankName":"","counterAccountName":"","counterAccountNumber":"","virtualAccountName":"","virtualAccountNumber":"","currency":"VND"},"signature":"e2746511f9286413815f835a0a64f22e1d667e598768e20d5eafeb15ce48b49d"}
+Signature check:
+- Received: e2746511f9286413815f835a0a64f22e1d667e598768e20d5eafeb15ce48b49d
+- Calculated: e2746511f9286413815f835a0a64f22e1d667e598768e20d5eafeb15ce48b49d
+Data parsed:
+- OrderCode: 123
+- Amount: 3000
+- Code: 00
+❌ Exception: Order not found
+
+
+==== [Webhook call at 2025-11-21 14:19:45] ====
+Raw data: {"code":"00","desc":"success","data":{"orderCode":123,"amount":3000,"description":"VQRIO123","accountNumber":"12345678","reference":"TF230204212323","transactionDateTime":"2023-02-04 18:25:00","paymentLinkId":"124c33293c43417ab7879e14c8d9eb18","code":"00","desc":"Thành công","counterAccountBankId":"","counterAccountBankName":"","counterAccountName":"","counterAccountNumber":"","virtualAccountName":"","virtualAccountNumber":"","currency":"VND"},"signature":"e2746511f9286413815f835a0a64f22e1d667e598768e20d5eafeb15ce48b49d"}
+Signature check:
+- Received: e2746511f9286413815f835a0a64f22e1d667e598768e20d5eafeb15ce48b49d
+- Calculated: e2746511f9286413815f835a0a64f22e1d667e598768e20d5eafeb15ce48b49d
+Data parsed:
+- OrderCode: 123
+- Amount: 3000
+- Code: 00
+❌ Exception: Order not found
+
+
+==== [Webhook call at 2025-11-21 14:20:02] ====
+Raw data: 
+❌ ERROR: Invalid or missing payload
+
+
+==== [Webhook call at 2025-11-21 14:23:04] ====
+Raw data: {"code":"00","desc":"success","data":{"orderCode":123,"amount":3000,"description":"VQRIO123","accountNumber":"12345678","reference":"TF230204212323","transactionDateTime":"2023-02-04 18:25:00","paymentLinkId":"124c33293c43417ab7879e14c8d9eb18","code":"00","desc":"Thành công","counterAccountBankId":"","counterAccountBankName":"","counterAccountName":"","counterAccountNumber":"","virtualAccountName":"","virtualAccountNumber":"","currency":"VND"},"signature":"e2746511f9286413815f835a0a64f22e1d667e598768e20d5eafeb15ce48b49d"}
+Signature check:
+- Received: e2746511f9286413815f835a0a64f22e1d667e598768e20d5eafeb15ce48b49d
+- Calculated: e2746511f9286413815f835a0a64f22e1d667e598768e20d5eafeb15ce48b49d
+Data parsed:
+- OrderCode: 123
+- Amount: 3000
+- Code: 00
+❌ Exception: Order not found
+
+
+==== [Webhook call at 2025-11-21 14:23:04] ====
+Raw data: {"code":"00","desc":"success","data":{"orderCode":123,"amount":3000,"description":"VQRIO123","accountNumber":"12345678","reference":"TF230204212323","transactionDateTime":"2023-02-04 18:25:00","paymentLinkId":"124c33293c43417ab7879e14c8d9eb18","code":"00","desc":"Thành công","counterAccountBankId":"","counterAccountBankName":"","counterAccountName":"","counterAccountNumber":"","virtualAccountName":"","virtualAccountNumber":"","currency":"VND"},"signature":"e2746511f9286413815f835a0a64f22e1d667e598768e20d5eafeb15ce48b49d"}
+Signature check:
+- Received: e2746511f9286413815f835a0a64f22e1d667e598768e20d5eafeb15ce48b49d
+- Calculated: e2746511f9286413815f835a0a64f22e1d667e598768e20d5eafeb15ce48b49d
+Data parsed:
+- OrderCode: 123
+- Amount: 3000
+- Code: 00
+❌ Exception: Order not found
+
+
+==== [Webhook call at 2025-11-21 14:23:36] ====
+Raw data: {"code":"00","desc":"success","data":{"orderCode":123,"amount":3000,"description":"VQRIO123","accountNumber":"12345678","reference":"TF230204212323","transactionDateTime":"2023-02-04 18:25:00","paymentLinkId":"124c33293c43417ab7879e14c8d9eb18","code":"00","desc":"Thành công","counterAccountBankId":"","counterAccountBankName":"","counterAccountName":"","counterAccountNumber":"","virtualAccountName":"","virtualAccountNumber":"","currency":"VND"},"signature":"e2746511f9286413815f835a0a64f22e1d667e598768e20d5eafeb15ce48b49d"}
+Signature check:
+- Received: e2746511f9286413815f835a0a64f22e1d667e598768e20d5eafeb15ce48b49d
+- Calculated: e2746511f9286413815f835a0a64f22e1d667e598768e20d5eafeb15ce48b49d
+Data parsed:
+- OrderCode: 123
+- Amount: 3000
+- Code: 00
+❌ Exception: Order not found
+
+
+==== [Webhook call at 2025-11-21 14:24:06] ====
+Raw data: {"code":"00","desc":"success","data":{"orderCode":123,"amount":3000,"description":"VQRIO123","accountNumber":"12345678","reference":"TF230204212323","transactionDateTime":"2023-02-04 18:25:00","paymentLinkId":"124c33293c43417ab7879e14c8d9eb18","code":"00","desc":"Thành công","counterAccountBankId":"","counterAccountBankName":"","counterAccountName":"","counterAccountNumber":"","virtualAccountName":"","virtualAccountNumber":"","currency":"VND"},"signature":"e2746511f9286413815f835a0a64f22e1d667e598768e20d5eafeb15ce48b49d"}
+Signature check:
+- Received: e2746511f9286413815f835a0a64f22e1d667e598768e20d5eafeb15ce48b49d
+- Calculated: e2746511f9286413815f835a0a64f22e1d667e598768e20d5eafeb15ce48b49d
+Data parsed:
+- OrderCode: 123
+- Amount: 3000
+- Code: 00
+❌ Exception: Order not found
+
+
+==== [Webhook call at 2025-11-21 14:24:35] ====
+Raw data: {"code":"00","desc":"success","data":{"orderCode":123,"amount":3000,"description":"VQRIO123","accountNumber":"12345678","reference":"TF230204212323","transactionDateTime":"2023-02-04 18:25:00","paymentLinkId":"124c33293c43417ab7879e14c8d9eb18","code":"00","desc":"Thành công","counterAccountBankId":"","counterAccountBankName":"","counterAccountName":"","counterAccountNumber":"","virtualAccountName":"","virtualAccountNumber":"","currency":"VND"},"signature":"e2746511f9286413815f835a0a64f22e1d667e598768e20d5eafeb15ce48b49d"}
+Signature check:
+- Received: e2746511f9286413815f835a0a64f22e1d667e598768e20d5eafeb15ce48b49d
+- Calculated: e2746511f9286413815f835a0a64f22e1d667e598768e20d5eafeb15ce48b49d
+Data parsed:
+- OrderCode: 123
+- Amount: 3000
+- Code: 00
+❌ Exception: Order not found
+
+
+==== [Webhook call at 2025-11-21 14:49:48] ====
+Raw data: {"code":"00","desc":"success","data":{"orderCode":123,"amount":3000,"description":"VQRIO123","accountNumber":"12345678","reference":"TF230204212323","transactionDateTime":"2023-02-04 18:25:00","paymentLinkId":"124c33293c43417ab7879e14c8d9eb18","code":"00","desc":"Thành công","counterAccountBankId":"","counterAccountBankName":"","counterAccountName":"","counterAccountNumber":"","virtualAccountName":"","virtualAccountNumber":"","currency":"VND"},"signature":"e2746511f9286413815f835a0a64f22e1d667e598768e20d5eafeb15ce48b49d"}
+Signature check:
+- Received: e2746511f9286413815f835a0a64f22e1d667e598768e20d5eafeb15ce48b49d
+- Calculated: e2746511f9286413815f835a0a64f22e1d667e598768e20d5eafeb15ce48b49d
+Data parsed:
+- OrderCode: 123
+- Amount: 3000
+- Code: 00
+⚠ OrderID 123 not found – có thể là webhook test, bỏ qua.
+
+
+==== [Webhook call at 2025-11-21 14:52:25] ====
+Raw data: {"code":"00","desc":"success","success":true,"data":{"accountNumber":"0329804895","amount":5000,"description":"KOI63","reference":"FT25325531237556","transactionDateTime":"2025-11-21 14:50:26","virtualAccountNumber":"","counterAccountBankId":"01203001","counterAccountBankName":"","counterAccountName":"NGUYEN HOANG THANH QUY","counterAccountNumber":"1039919781","virtualAccountName":"","currency":"VND","orderCode":63,"paymentLinkId":"1dfe13e8c1e24d138e790b17a71ca264","code":"00","desc":"success"},"signature":"c84526914248a8e65f47c5a4f8cffdbab7054d823e78a3e14949b81ea5e7c2aa"}
+Signature check:
+- Received: c84526914248a8e65f47c5a4f8cffdbab7054d823e78a3e14949b81ea5e7c2aa
+- Calculated: c84526914248a8e65f47c5a4f8cffdbab7054d823e78a3e14949b81ea5e7c2aa
+Data parsed:
+- OrderCode: 63
+- Amount: 5000
+- Code: 00
+✅ Payment success & stock updated for OrderID=63
+
+
+==== [Webhook call at 2025-11-21 14:54:01] ====
+Raw data: {"code":"00","desc":"success","success":true,"data":{"accountNumber":"0329804895","amount":5000,"description":"KOI64","reference":"FT25325204938338","transactionDateTime":"2025-11-21 14:53:02","virtualAccountNumber":"","counterAccountBankId":"01203001","counterAccountBankName":"","counterAccountName":"NGUYEN HOANG THANH QUY","counterAccountNumber":"1039919781","virtualAccountName":"","currency":"VND","orderCode":64,"paymentLinkId":"c17bbb0b66934d3eb1b9ddb5358f6393","code":"00","desc":"success"},"signature":"f1a7d72a2ec373be8fe84e0490174c41bf1d1963fe268f9158ec3af1351a3329"}
+Signature check:
+- Received: f1a7d72a2ec373be8fe84e0490174c41bf1d1963fe268f9158ec3af1351a3329
+- Calculated: f1a7d72a2ec373be8fe84e0490174c41bf1d1963fe268f9158ec3af1351a3329
+Data parsed:
+- OrderCode: 64
+- Amount: 5000
+- Code: 00
+✅ Payment success & stock updated for OrderID=64
+
+
+==== [Webhook call at 2025-11-21 15:30:50] ====
+Raw data: {"code":"00","desc":"success","success":true,"data":{"accountNumber":"0329804895","amount":5000,"description":"KOI67","reference":"FT25325767990844","transactionDateTime":"2025-11-21 15:30:51","virtualAccountNumber":"","counterAccountBankId":"01203001","counterAccountBankName":"","counterAccountName":"NGUYEN HOANG THANH QUY","counterAccountNumber":"1039919781","virtualAccountName":"","currency":"VND","orderCode":67,"paymentLinkId":"b37f2c276e5f4b5699c121c958f50b4f","code":"00","desc":"success"},"signature":"13aa120a6c81b58526ae8ff9a1190a2f476ddc14307aed99e31a3d36081ebb43"}
+Signature check:
+- Received: 13aa120a6c81b58526ae8ff9a1190a2f476ddc14307aed99e31a3d36081ebb43
+- Calculated: 13aa120a6c81b58526ae8ff9a1190a2f476ddc14307aed99e31a3d36081ebb43
+Data parsed:
+- OrderCode: 67
+- Amount: 5000
+- Code: 00
+✅ Payment success & stock updated for OrderID=67
+
+
+==== [Webhook call at 2025-11-22 17:41:47] ====
+Raw data: {"code":"00","desc":"success","success":true,"data":{"accountNumber":"0329804895","amount":10000,"description":"KOI72","reference":"FT25326857963498","transactionDateTime":"2025-11-22 17:41:46","virtualAccountNumber":"","counterAccountBankId":"01203001","counterAccountBankName":"","counterAccountName":"NGUYEN HOANG THANH QUY","counterAccountNumber":"1039919781","virtualAccountName":"","currency":"VND","orderCode":72,"paymentLinkId":"171b7f0d870740628bc0653aa8c0ece7","code":"00","desc":"success"},"signature":"1d3c3c6510b44afe33f6e95627123b996c40147e9ad269346cdb8e8810965f7d"}
+Signature check:
+- Received: 1d3c3c6510b44afe33f6e95627123b996c40147e9ad269346cdb8e8810965f7d
+- Calculated: 1d3c3c6510b44afe33f6e95627123b996c40147e9ad269346cdb8e8810965f7d
+Data parsed:
+- OrderCode: 72
+- Amount: 10000
+- Code: 00
+✅ Payment success & stock updated for OrderID=72
+
+
+==== [Webhook call at 2025-11-23 07:29:18] ====
+Raw data: {"code":"00","desc":"success","success":true,"data":{"accountNumber":"0329804895","amount":6000,"description":"KOI74","reference":"FT25328908731803","transactionDateTime":"2025-11-23 07:29:17","virtualAccountNumber":"","counterAccountBankId":"01203001","counterAccountBankName":"","counterAccountName":"NGUYEN HOANG THANH QUY","counterAccountNumber":"1039919781","virtualAccountName":"","currency":"VND","orderCode":74,"paymentLinkId":"034566b1a792425e9d828954b84b7c95","code":"00","desc":"success"},"signature":"8e681c819c355b2deb07ea2bc30caf45311b934cc6f89c55067af87e9e0bb4f0"}
+Signature check:
+- Received: 8e681c819c355b2deb07ea2bc30caf45311b934cc6f89c55067af87e9e0bb4f0
+- Calculated: 8e681c819c355b2deb07ea2bc30caf45311b934cc6f89c55067af87e9e0bb4f0
+Data parsed:
+- OrderCode: 74
+- Amount: 6000
+- Code: 00
+✅ Payment success & stock updated for OrderID=74
+
+
+==== [Webhook call at 2025-11-29 13:22:39] ====
+Raw data: {"code":"00","desc":"success","success":true,"data":{"accountNumber":"0329804895","amount":2000,"description":"KOI89","reference":"FT25333596977035","transactionDateTime":"2025-11-29 13:20:38","virtualAccountNumber":"","counterAccountBankId":"970436","counterAccountBankName":"","counterAccountName":"NGUYEN HOANG THANH QUY","counterAccountNumber":"1039919781","virtualAccountName":"","currency":"VND","orderCode":89,"paymentLinkId":"3bc73e729c484aaabd06acf9ce594d0a","code":"00","desc":"success"},"signature":"3c8a09e6acd6ce67ff694972cce4289999b35802b7485d8bb390db380ab106b3"}
+Signature check:
+- Received: 3c8a09e6acd6ce67ff694972cce4289999b35802b7485d8bb390db380ab106b3
+- Calculated: 3c8a09e6acd6ce67ff694972cce4289999b35802b7485d8bb390db380ab106b3
+Data parsed:
+- OrderCode: 89
+- Amount: 2000
+- Code: 00
+✅ Payment success & stock updated for OrderID=89
+
+
+==== [Webhook call at 2025-11-29 13:23:51] ====
+Raw data: {"code":"00","desc":"success","success":true,"data":{"accountNumber":"0329804895","amount":2000,"description":"KOI90","reference":"FT25333963093280","transactionDateTime":"2025-11-29 13:23:51","virtualAccountNumber":"","counterAccountBankId":"970436","counterAccountBankName":"","counterAccountName":"NGUYEN HOANG THANH QUY","counterAccountNumber":"1039919781","virtualAccountName":"","currency":"VND","orderCode":90,"paymentLinkId":"8ba2b3c0e30e422985ce9316dda5f923","code":"00","desc":"success"},"signature":"c7103e34d9406e936680d3f7c501fe4f1a0e4f1c14d4d4d038737e543ee49f10"}
+Signature check:
+- Received: c7103e34d9406e936680d3f7c501fe4f1a0e4f1c14d4d4d038737e543ee49f10
+- Calculated: c7103e34d9406e936680d3f7c501fe4f1a0e4f1c14d4d4d038737e543ee49f10
+Data parsed:
+- OrderCode: 90
+- Amount: 2000
+- Code: 00
+✅ Payment success & stock updated for OrderID=90
+
+
+==== [Webhook call at 2025-11-29 13:35:28] ====
+Raw data: {"code":"00","desc":"success","success":true,"data":{"accountNumber":"0329804895","amount":2000,"description":"KOI91","reference":"FT25333211645694","transactionDateTime":"2025-11-29 13:35:27","virtualAccountNumber":"","counterAccountBankId":"970436","counterAccountBankName":"","counterAccountName":"NGUYEN HOANG THANH QUY","counterAccountNumber":"1039919781","virtualAccountName":"","currency":"VND","orderCode":91,"paymentLinkId":"efb9b03916bd4c88a077d7eed6525c7a","code":"00","desc":"success"},"signature":"7248039a71b3753bc3064b4a914e16c6b46dfd0fbe603de1eba0d141b32244c4"}
+Signature check:
+- Received: 7248039a71b3753bc3064b4a914e16c6b46dfd0fbe603de1eba0d141b32244c4
+- Calculated: 7248039a71b3753bc3064b4a914e16c6b46dfd0fbe603de1eba0d141b32244c4
+Data parsed:
+- OrderCode: 91
+- Amount: 2000
+- Code: 00
+✅ Payment SUCCESS for OrderID=91
+
+
+==== [Webhook call at 2025-11-29 19:56:14] ====
+Raw data: {"code":"00","desc":"success","success":true,"data":{"accountNumber":"0329804895","amount":2000,"description":"KOI94","reference":"FT25333120513896","transactionDateTime":"2025-11-29 19:56:14","virtualAccountNumber":"","counterAccountBankId":"01203001","counterAccountBankName":"","counterAccountName":"NGUYEN HOANG THANH QUY","counterAccountNumber":"1039919781","virtualAccountName":"","currency":"VND","orderCode":94,"paymentLinkId":"33a2a13ce43f4c13a75e92fd03b95abc","code":"00","desc":"success"},"signature":"aee10e6f5b284611508450dcdba2b698a5035203990e37f620177130f02ad5cd"}
+Signature check:
+- Received: aee10e6f5b284611508450dcdba2b698a5035203990e37f620177130f02ad5cd
+- Calculated: aee10e6f5b284611508450dcdba2b698a5035203990e37f620177130f02ad5cd
+Data parsed:
+- OrderCode: 94
+- Amount: 2000
+- Code: 00
+✅ Payment SUCCESS for OrderID=94
+
+
+==== [Webhook call at 2025-11-29 20:29:01] ====
+Raw data: {"code":"00","desc":"success","success":true,"data":{"accountNumber":"0329804895","amount":9999,"description":"KOI99","reference":"FT25333750389227","transactionDateTime":"2025-11-29 20:29:01","virtualAccountNumber":"","counterAccountBankId":"01203001","counterAccountBankName":"","counterAccountName":"NGUYEN HOANG THANH QUY","counterAccountNumber":"1039919781","virtualAccountName":"","currency":"VND","orderCode":99,"paymentLinkId":"0d82ff04e42b4668b55fe7568dadb958","code":"00","desc":"success"},"signature":"18050e889b7c02c4e1cd35556c530b479dae936065a841f0a0055c8b2a0b6914"}
+Signature check:
+- Received: 18050e889b7c02c4e1cd35556c530b479dae936065a841f0a0055c8b2a0b6914
+- Calculated: 18050e889b7c02c4e1cd35556c530b479dae936065a841f0a0055c8b2a0b6914
+Data parsed:
+- OrderCode: 99
+- Amount: 9999
+- Code: 00
+✅ Payment SUCCESS for OrderID=99

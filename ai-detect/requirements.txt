@@ -1,0 +1,13 @@
+# Core AI / YOLO
+ultralytics==8.2.103
+
+# Computer Vision
+opencv-python-headless
+numpy
+pillow
+
+# Web API (Flask)
+flask
+
+# Utils
+requests

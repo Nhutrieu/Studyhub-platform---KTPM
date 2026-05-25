@@ -1,0 +1,56 @@
+.register-container { 
+    max-width: 320px; 
+    margin: 60px auto; 
+    background: url('/HeThongChamSocCaKoi/assets/images/login.jpg') no-repeat center; 
+    background-size: cover; 
+    padding: 40px 20px; 
+    border-radius: 12px; 
+    box-shadow: 0 0 10px rgba(0,0,0,0.1); 
+    position: relative; 
+}
+.register-container::before { 
+    content: ""; 
+    position: absolute; 
+    top: 0; left: 0; right: 0; bottom: 0; 
+    background: rgba(255,255,255,0.85); 
+    border-radius: 12px; 
+}
+.register-form { position: relative; z-index: 1; }
+.register-form h2 { text-align: center; margin-bottom: 20px; color: #0077a3; }
+.register-form input { 
+    width: 100%; 
+    padding: 10px; 
+    margin-bottom: 15px; 
+    border: 1px solid #ccc; 
+    border-radius: 20px; 
+    font-size: 14px; 
+}
+.register-form a { 
+    display: block; 
+    font-size: 12px; 
+    text-align: right; 
+    margin-bottom: 10px; 
+    text-decoration: none; 
+    color: #0077a3; 
+}
+.register-form button { 
+    width: 100%; 
+    padding: 10px; 
+    border: none; 
+    border-radius: 20px; 
+    background-color: #0077a3; 
+    color: white; 
+    font-weight: bold; 
+    font-size: 16px; 
+    cursor: pointer; 
+}
+.register-form button:hover { background-color: #005f87; }
+.register-form .message {
+    margin-bottom: 12px;
+    border-radius: 8px;
+    padding: 9px 0;
+    font-size: 15px;
+    font-weight: bold;
+}
+.register-form .success { background: #d4edda; color: #155724; border: 1px solid #c3e6cb;}
+.register-form .error { background: #f8d7da; color: #721c24; border: 1px solid #f5c6cb;}

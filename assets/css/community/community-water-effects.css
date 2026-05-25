@@ -1,0 +1,293 @@
+/* ===== Water Effects - Hiệu ứng nước cho Cộng đồng Cá Koi ===== */
+
+/* Hiệu ứng sóng nước background */
+.water-bg {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  z-index: -3 !important;
+  overflow: hidden;
+  opacity: 0.1;
+  pointer-events: none;
+}
+
+.water-wave {
+  position: absolute;
+  background: linear-gradient(45deg, rgba(26, 110, 184, 0.3), rgba(78, 205, 196, 0.3));
+  border-radius: 40% 60% 60% 40% / 60% 30% 70% 40%;
+  animation: waterFlow 20s infinite linear;
+  filter: blur(20px);
+}
+
+.water-wave:nth-child(1) {
+  width: 300px;
+  height: 300px;
+  top: 10%;
+  left: 10%;
+  animation-duration: 25s;
+  animation-delay: 0s;
+}
+
+.water-wave:nth-child(2) {
+  width: 250px;
+  height: 250px;
+  top: 20%;
+  right: 15%;
+  animation-duration: 30s;
+  animation-delay: -5s;
+  background: linear-gradient(45deg, rgba(255, 107, 107, 0.2), rgba(255, 142, 83, 0.2));
+}
+
+.water-wave:nth-child(3) {
+  width: 200px;
+  height: 200px;
+  bottom: 15%;
+  left: 20%;
+  animation-duration: 35s;
+  animation-delay: -10s;
+  background: linear-gradient(45deg, rgba(78, 205, 196, 0.2), rgba(69, 183, 209, 0.2));
+}
+
+@keyframes waterFlow {
+  0% {
+    transform: translate(0, 0) rotate(0deg);
+    border-radius: 40% 60% 60% 40% / 60% 30% 70% 40%;
+  }
+  33% {
+    transform: translate(30px, -20px) rotate(120deg);
+    border-radius: 70% 30% 50% 50% / 30% 40% 60% 70%;
+  }
+  66% {
+    transform: translate(-20px, 20px) rotate(240deg);
+    border-radius: 30% 70% 70% 30% / 40% 60% 40% 60%;
+  }
+  100% {
+    transform: translate(0, 0) rotate(360deg);
+    border-radius: 40% 60% 60% 40% / 60% 30% 70% 40%;
+  }
+}
+
+/* Hiệu ứng bong bóng */
+.bubbles-container {
+  position: fixed;
+  width: 100%;
+  height: 100%;
+  overflow: hidden;
+  z-index: -2 !important;
+  pointer-events: none;
+}
+
+.bubble {
+  position: absolute;
+  bottom: -100px;
+  background: rgba(255, 255, 255, 0.1);
+  border-radius: 50%;
+  animation: bubbleRise 15s infinite ease-in;
+}
+
+.bubble::before {
+  content: '';
+  position: absolute;
+  top: 20%;
+  left: 20%;
+  width: 20%;
+  height: 20%;
+  background: rgba(255, 255, 255, 0.2);
+  border-radius: 50%;
+}
+
+@keyframes bubbleRise {
+  0% {
+    transform: translateY(0) scale(0);
+    opacity: 0;
+  }
+  10% {
+    opacity: 0.8;
+    transform: scale(1);
+  }
+  90% {
+    opacity: 0.8;
+  }
+  100% {
+    transform: translateY(-100vh) scale(1);
+    opacity: 0;
+  }
+}
+
+/* Tạo nhiều bong bóng với kích thước và vị trí khác nhau */
+.bubble:nth-child(1) { left: 10%; width: 40px; height: 40px; animation-duration: 20s; animation-delay: 0s; }
+.bubble:nth-child(2) { left: 20%; width: 30px; height: 30px; animation-duration: 25s; animation-delay: 2s; }
+.bubble:nth-child(3) { left: 30%; width: 50px; height: 50px; animation-duration: 18s; animation-delay: 4s; }
+.bubble:nth-child(4) { left: 40%; width: 35px; height: 35px; animation-duration: 22s; animation-delay: 1s; }
+.bubble:nth-child(5) { left: 50%; width: 45px; height: 45px; animation-duration: 28s; animation-delay: 3s; }
+.bubble:nth-child(6) { left: 60%; width: 25px; height: 25px; animation-duration: 24s; animation-delay: 5s; }
+.bubble:nth-child(7) { left: 70%; width: 55px; height: 55px; animation-duration: 19s; animation-delay: 7s; }
+.bubble:nth-child(8) { left: 80%; width: 30px; height: 30px; animation-duration: 26s; animation-delay: 6s; }
+.bubble:nth-child(9) { left: 90%; width: 40px; height: 40px; animation-duration: 21s; animation-delay: 8s; }
+
+/* Hiệu ứng ánh sáng dưới nước */
+.water-light {
+  position: fixed;
+  width: 100%;
+  height: 100%;
+  background: radial-gradient(circle at 30% 30%, rgba(78, 205, 196, 0.1) 0%, transparent 50%),
+              radial-gradient(circle at 70% 70%, rgba(255, 107, 107, 0.1) 0%, transparent 50%);
+  animation: waterLightMove 30s infinite linear;
+  z-index: -1 !important;
+  pointer-events: none;
+  opacity: 0.3;
+}
+
+@keyframes waterLightMove {
+  0% { transform: translate(0, 0) rotate(0deg); }
+  100% { transform: translate(-50%, -50%) rotate(360deg); }
+}
+
+/* Hiệu ứng cá Koi bơi */
+.koi-fish {
+  position: fixed;
+  width: 100px;
+  height: 40px;
+  background: linear-gradient(45deg, #ff6b6b, #ff8e53, #ffd166);
+  border-radius: 50% 50% 50% 50% / 60% 60% 40% 40%;
+  filter: blur(1px);
+  opacity: 0.05;
+  z-index: -2 !important;
+  pointer-events: none;
+  animation: koiSwimPath 60s infinite linear;
+}
+
+.koi-fish::before {
+  content: '';
+  position: absolute;
+  top: 10px;
+  left: 15px;
+  width: 10px;
+  height: 10px;
+  background: white;
+  border-radius: 50%;
+  opacity: 0.8;
+}
+
+.koi-fish::after {
+  content: '';
+  position: absolute;
+  top: 35px;
+  left: 85px;
+  width: 25px;
+  height: 10px;
+  background: linear-gradient(45deg, #ff6b6b, #ff8e53);
+  border-radius: 50% 50% 50% 50% / 60% 60% 40% 40%;
+  transform: rotate(-30deg);
+}
+
+.koi-fish.blue {
+  background: linear-gradient(45deg, #4ecdc4, #45b7d1, #96ceb4);
+  width: 80px;
+  height: 35px;
+  animation-duration: 70s;
+  animation-delay: -20s;
+}
+
+.koi-fish.orange {
+  background: linear-gradient(45deg, #ffd166, #ff8e53, #ff6b6b);
+  width: 120px;
+  height: 45px;
+  animation-duration: 80s;
+  animation-delay: -40s;
+}
+
+@keyframes koiSwimPath {
+  0% {
+    transform: translate(calc(-100vw - 100px), calc(-100vh - 100px)) rotate(0deg);
+  }
+  25% {
+    transform: translate(calc(50vw - 50px), calc(25vh - 50px)) rotate(90deg);
+  }
+  50% {
+    transform: translate(calc(100vw + 100px), calc(75vh + 100px)) rotate(180deg);
+  }
+  75% {
+    transform: translate(calc(25vw - 25px), calc(100vh + 150px)) rotate(270deg);
+  }
+  100% {
+    transform: translate(calc(-100vw - 100px), calc(-100vh - 100px)) rotate(360deg);
+  }
+}
+
+/* Hiệu ứng gợn nước khi hover */
+.water-ripple {
+  position: absolute;
+  border-radius: 50%;
+  background: radial-gradient(circle, rgba(78, 205, 196, 0.3) 0%, transparent 70%);
+  transform: scale(0);
+  animation: rippleEffect 1s ease-out;
+  pointer-events: none;
+  z-index: 1;
+}
+
+@keyframes rippleEffect {
+  to {
+    transform: scale(4);
+    opacity: 0;
+  }
+}
+
+/* Thêm hiệu ứng gợn nước cho các nút */
+.community-post button,
+.feed-tab-btn,
+.post-action-btn,
+.follow-btn,
+.modal-action-btn,
+.post-submit-btn,
+.comment-submit-btn {
+  position: relative;
+  overflow: hidden;
+}
+
+.community-post button:active::after,
+.feed-tab-btn:active::after,
+.post-action-btn:active::after,
+.follow-btn:active::after,
+.modal-action-btn:active::after,
+.post-submit-btn:active::after,
+.comment-submit-btn:active::after {
+  content: '';
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  width: 5px;
+  height: 5px;
+  background: rgba(255, 255, 255, 0.5);
+  border-radius: 50%;
+  transform: translate(-50%, -50%) scale(0);
+  animation: buttonRipple 0.6s ease-out;
+}
+
+@keyframes buttonRipple {
+  to {
+    transform: translate(-50%, -50%) scale(20);
+    opacity: 0;
+  }
+}
+
+/* Responsive cho hiệu ứng nước */
+@media (max-width: 768px) {
+  .water-wave {
+    opacity: 0.05;
+  }
+  
+  .bubble {
+    display: none;
+  }
+  
+  .koi-fish {
+    display: none;
+  }
+  
+  .water-light {
+    opacity: 0.05;
+  }
+}

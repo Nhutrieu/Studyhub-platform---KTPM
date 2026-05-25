@@ -1,0 +1,100 @@
+{
+  "Version": 1,
+  "WorkspaceRootPath": "D:\\Xampp\\htdocs\\HeThongChamSocCaKoi\\",
+  "Documents": [
+    {
+      "AbsoluteMoniker": "D:0:0:{A2FE74E1-B743-11D0-AE1A-00A0C90FFFC3}|\u003CMiscFiles\u003E|D:\\Xampp\\htdocs\\HeThongChamSocCaKoi\\frontend\\admin\\deposit_management.php||{3B902123-F8A7-4915-9F01-361F908088D0}",
+      "RelativeMoniker": "D:0:0:{A2FE74E1-B743-11D0-AE1A-00A0C90FFFC3}|\u003CMiscFiles\u003E|solutionrelative:frontend\\admin\\deposit_management.php||{3B902123-F8A7-4915-9F01-361F908088D0}"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{A2FE74E1-B743-11D0-AE1A-00A0C90FFFC3}|\u003CMiscFiles\u003E|D:\\Xampp\\htdocs\\HeThongChamSocCaKoi\\frontend\\admin\\dashboard.php||{3B902123-F8A7-4915-9F01-361F908088D0}",
+      "RelativeMoniker": "D:0:0:{A2FE74E1-B743-11D0-AE1A-00A0C90FFFC3}|\u003CMiscFiles\u003E|solutionrelative:frontend\\admin\\dashboard.php||{3B902123-F8A7-4915-9F01-361F908088D0}"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{A2FE74E1-B743-11D0-AE1A-00A0C90FFFC3}|\u003CMiscFiles\u003E|D:\\Xampp\\htdocs\\HeThongChamSocCaKoi\\frontend\\admin\\disputes.php||{3B902123-F8A7-4915-9F01-361F908088D0}",
+      "RelativeMoniker": "D:0:0:{A2FE74E1-B743-11D0-AE1A-00A0C90FFFC3}|\u003CMiscFiles\u003E|solutionrelative:frontend\\admin\\disputes.php||{3B902123-F8A7-4915-9F01-361F908088D0}"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{A2FE74E1-B743-11D0-AE1A-00A0C90FFFC3}|\u003CMiscFiles\u003E|D:\\Xampp\\htdocs\\HeThongChamSocCaKoi\\privacy.html||{40D31677-CBC0-4297-A9EF-89D907823A98}",
+      "RelativeMoniker": "D:0:0:{A2FE74E1-B743-11D0-AE1A-00A0C90FFFC3}|\u003CMiscFiles\u003E|solutionrelative:privacy.html||{40D31677-CBC0-4297-A9EF-89D907823A98}"
+    }
+  ],
+  "DocumentGroupContainers": [
+    {
+      "Orientation": 0,
+      "VerticalTabListWidth": 256,
+      "DocumentGroups": [
+        {
+          "DockedWidth": 200,
+          "SelectedChildIndex": 3,
+          "Children": [
+            {
+              "$type": "Bookmark",
+              "Name": "ST:128:0:{75188d03-9892-4ae2-abf1-207126247ce5}"
+            },
+            {
+              "$type": "Bookmark",
+              "Name": "ST:0:0:{d78612c7-9962-4b83-95d9-268046dad23a}"
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 2,
+              "Title": "disputes.php",
+              "DocumentMoniker": "D:\\Xampp\\htdocs\\HeThongChamSocCaKoi\\frontend\\admin\\disputes.php",
+              "RelativeDocumentMoniker": "frontend\\admin\\disputes.php",
+              "ToolTip": "D:\\Xampp\\htdocs\\HeThongChamSocCaKoi\\frontend\\admin\\disputes.php",
+              "RelativeToolTip": "frontend\\admin\\disputes.php",
+              "ViewState": "AgIAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA==",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.002338|",
+              "WhenOpened": "2025-12-13T11:18:37.152Z",
+              "EditorCaption": ""
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 0,
+              "Title": "deposit_management.php",
+              "DocumentMoniker": "D:\\Xampp\\htdocs\\HeThongChamSocCaKoi\\frontend\\admin\\deposit_management.php",
+              "RelativeDocumentMoniker": "frontend\\admin\\deposit_management.php",
+              "ToolTip": "D:\\Xampp\\htdocs\\HeThongChamSocCaKoi\\frontend\\admin\\deposit_management.php",
+              "RelativeToolTip": "frontend\\admin\\deposit_management.php",
+              "ViewState": "AgIAAAAAAAAAAAAAAAAAAAsAAAAkAAAAAAAAAA==",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.002338|",
+              "WhenOpened": "2025-12-13T11:18:35.969Z",
+              "EditorCaption": ""
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 1,
+              "Title": "dashboard.php",
+              "DocumentMoniker": "D:\\Xampp\\htdocs\\HeThongChamSocCaKoi\\frontend\\admin\\dashboard.php",
+              "RelativeDocumentMoniker": "frontend\\admin\\dashboard.php",
+              "ToolTip": "D:\\Xampp\\htdocs\\HeThongChamSocCaKoi\\frontend\\admin\\dashboard.php",
+              "RelativeToolTip": "frontend\\admin\\dashboard.php",
+              "ViewState": "AgIAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA==",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.002338|",
+              "WhenOpened": "2025-12-13T11:18:34.743Z",
+              "EditorCaption": ""
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 3,
+              "Title": "privacy.html",
+              "DocumentMoniker": "D:\\Xampp\\htdocs\\HeThongChamSocCaKoi\\privacy.html",
+              "RelativeDocumentMoniker": "privacy.html",
+              "ToolTip": "D:\\Xampp\\htdocs\\HeThongChamSocCaKoi\\privacy.html",
+              "RelativeToolTip": "privacy.html",
+              "ViewState": "AgIAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA==",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.001512|",
+              "WhenOpened": "2025-12-13T11:17:52.342Z",
+              "EditorCaption": ""
+            },
+            {
+              "$type": "Bookmark",
+              "Name": "ST:0:0:{34e76e81-ee4a-11d0-ae2e-00a0c90fffc3}"
+            }
+          ]
+        }
+      ]
+    }
+  ]
+}

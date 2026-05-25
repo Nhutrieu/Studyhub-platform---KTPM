@@ -1,0 +1,250 @@
+/* D:\Xampp\htdocs\HeThongChamSocCaKoi\assets\css\shop\products.css */
+
+/* Import font giống bản Preview */
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap');
+
+body {
+    font-family: 'Inter', sans-serif;
+    background-color: #f0f9ff; /* bg-sky-50 */
+}
+
+/* Ẩn thanh cuộn nhưng vẫn cuộn được (cho các list ngang) */
+.no-scrollbar::-webkit-scrollbar {
+    display: none;
+}
+.no-scrollbar {
+    -ms-overflow-style: none;
+    scrollbar-width: none;
+}
+
+/* Animations từ bản React Preview */
+@keyframes slide-in-right {
+    from { transform: translateX(100%); opacity: 0; }
+    to { transform: translateX(0); opacity: 1; }
+}
+
+@keyframes fade-in {
+    from { opacity: 0; }
+    to { opacity: 1; }
+}
+
+@keyframes zoom-in {
+    from { transform: scale(0.95); opacity: 0; }
+    to { transform: scale(1); opacity: 1; }
+}
+
+.animate-slide-in-right {
+    animation: slide-in-right 0.4s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+}
+
+.animate-fade-in {
+    animation: fade-in 0.2s ease-out forwards;
+}
+
+.animate-zoom-in {
+    animation: zoom-in 0.3s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+}
+
+/* Toast Stack positioning */
+.toast-stack {
+    position: fixed;
+    top: 80px; /* Cách top để không che header */
+    right: 24px;
+    z-index: 9999;
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+}
+
+/* Modal Overlay Override (Áp dụng cho cả Form Modal và Delete Modal) */
+#product-form-modal,
+#delete-confirm-modal {
+    display: none; /* Mặc định ẩn, JS sẽ bật flex */
+    position: fixed;
+    inset: 0;
+    z-index: 150;
+    background-color: rgba(15, 23, 42, 0.5); /* slate-900/50 */
+    backdrop-filter: blur(4px);
+    
+    /* Sử dụng flex-start !important để chắc chắn căn lên trên */
+    align-items: flex-start !important; 
+    justify-content: center;
+    padding: 16px;
+}
+
+/* Đảm bảo modal content scroll được trên màn hình nhỏ */
+.modal-content {
+    /* Dùng margin-top để đẩy form xuống (giữ nguyên fix cũ) */
+    margin-top: 85px !important; 
+    
+    /* Tính toán lại chiều cao để không bị khuất bên dưới */
+    max-height: calc(100vh - 120px);
+    overflow-y: auto;
+}
+
+/* Riêng cho modal xóa: nhỏ gọn hơn */
+#delete-confirm-modal .modal-content {
+    max-width: 400px !important;
+    margin-top: 150px !important; /* Đẩy xuống thấp hơn modal form cho đẹp */
+}
+
+/* Spinner loading */
+.media-loading-spinner {
+    position: absolute;
+    width: 20px;
+    height: 20px;
+    border: 2px solid rgba(255, 255, 255, 0.3);
+    border-top-color: #0ea5e9; /* sky-500 */
+    border-radius: 50%;
+    animation: spin 0.8s linear infinite;
+}
+
+@keyframes spin {
+    to { transform: rotate(360deg); }
+}
+
+/* ==========================================================================
+   NEW FIXES (Main Image & Media Library)
+   ========================================================================== */
+
+/* 1. FIX ẢNH CHÍNH: Ép ảnh bao trọn khung nhìn (Object Cover) */
+#primary-image-preview {
+    width: 100% !important;
+    height: 100% !important;
+    max-width: none !important;
+    max-height: none !important;
+    object-fit: cover !important;
+    border-radius: 8px; 
+}
+
+/* 2. FIX MEDIA LIBRARY: Thêm icon Play cho Video */
+#product-media-list > div {
+    position: relative; 
+}
+
+#product-media-list > div:has(video)::before {
+    content: "";
+    position: absolute;
+    inset: 0;
+    background-color: rgba(0, 0, 0, 0.25); 
+    pointer-events: none;
+    z-index: 5;
+    border-radius: inherit;
+}
+
+#product-media-list > div:has(video)::after {
+    content: "▶";
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    font-size: 20px;
+    color: rgba(255, 255, 255, 0.95);
+    filter: drop-shadow(0 2px 4px rgba(0,0,0,0.6));
+    pointer-events: none;
+    z-index: 6;
+    line-height: 1;
+}
+
+/* ==========================================================================
+   RESPONSIVE MOBILE & TABLET (REFINED)
+   ========================================================================== */
+
+@media (max-width: 1023px) {
+    .admin-filters .space-y-1 {
+        display: flex;
+        flex-direction: row;
+        gap: 8px;
+        overflow-x: auto;
+        padding-bottom: 4px;
+        margin-bottom: 12px;
+    }
+    
+    .admin-filters .filter-pill {
+        width: auto !important;
+        white-space: nowrap;
+        flex: 0 0 auto;
+        padding: 8px 12px;
+    }
+}
+
+@media (max-width: 768px) {
+    .toast-stack {
+        top: 70px;
+        left: 16px;
+        right: 16px;
+        width: auto;
+        align-items: center;
+    }
+    .toast-stack > div {
+        width: 100%;
+        max-width: 400px;
+    }
+
+    #product-form-modal,
+    #delete-confirm-modal {
+        align-items: flex-end !important;
+        padding: 0 !important;
+        background-color: rgba(15, 23, 42, 0.65);
+    }
+
+    .modal-content {
+        margin-top: 0 !important;
+        margin-bottom: 0 !important;
+        width: 100% !important;
+        max-width: 100% !important;
+        max-height: 85vh !important;
+        border-radius: 20px 20px 0 0 !important;
+        animation: slide-up 0.35s cubic-bezier(0.16, 1, 0.3, 1) forwards !important;
+    }
+
+    .group .absolute.inset-0.bg-slate-900\/40 {
+        opacity: 1 !important;
+        background-color: transparent !important;
+        align-items: flex-start !important;
+        justify-content: flex-end !important;
+        padding: 8px;
+        pointer-events: auto;
+        height: auto !important;
+        bottom: auto !important;
+    }
+    
+    .group .absolute.inset-0.bg-slate-900\/40 button,
+    .group .absolute.inset-0.bg-slate-900\/40 a {
+        background-color: white;
+        box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+        transform: scale(0.85); 
+        margin-left: 4px;
+    }
+
+    #products-grid {
+        display: grid !important;
+        grid-template-columns: repeat(2, minmax(0, 1fr)) !important;
+        gap: 12px !important;
+    }
+
+    .product-card .p-4 {
+        padding: 10px !important;
+    }
+
+    .product-card h3 {
+        font-size: 13px !important;
+        line-height: 1.4 !important;
+        height: 2.8em !important; 
+        margin-bottom: 4px !important;
+    }
+
+    .product-card .price {
+        font-size: 15px !important;
+    }
+
+    .product-card .shop-address, 
+    .product-card .cate {
+        font-size: 10px !important;
+    }
+}
+
+@keyframes slide-up {
+    from { transform: translateY(100%); }
+    to { transform: translateY(0); }
+}
