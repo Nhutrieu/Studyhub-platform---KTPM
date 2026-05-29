@@ -14,7 +14,9 @@ load_dotenv()
 BASE_DIR = os.path.dirname(__file__)
 PROJECT_DIR = os.path.dirname(BASE_DIR)
 
-BASE_URL = os.getenv("BASE_URL", "http://localhost/HeThongChamSocCaKoi/backend")
+BASE_URL = os.getenv("BASE_URL")
+LOGIN_USERNAME = os.getenv("LOGIN_USERNAME")
+LOGIN_PASSWORD = os.getenv("LOGIN_PASSWORD")
 
 JIRA_BASE_URL = os.getenv("JIRA_BASE_URL")
 JIRA_EMAIL = os.getenv("JIRA_EMAIL")
@@ -36,6 +38,19 @@ os.makedirs(REPORT_DIR, exist_ok=True)
 
 
 def run_newman():
+    missing_envs = []
+    if not BASE_URL:
+        missing_envs.append("BASE_URL")
+    if not LOGIN_USERNAME:
+        missing_envs.append("LOGIN_USERNAME")
+    if not LOGIN_PASSWORD:
+        missing_envs.append("LOGIN_PASSWORD")
+
+    if missing_envs:
+        print("Thiếu biến môi trường: " + ", ".join(missing_envs))
+        print("Hãy thiết lập trong .env (testing) hoặc export trước khi chạy.")
+        return False
+
     newman = shutil.which("newman")
 
     if not newman:
@@ -55,6 +70,10 @@ def run_newman():
         COLLECTION,
         "--env-var",
         f"baseUrl={BASE_URL}",
+        "--env-var",
+        f"username={LOGIN_USERNAME}",
+        "--env-var",
+        f"password={LOGIN_PASSWORD}",
         "--reporters",
         "cli,json",
         "--reporter-json-export",

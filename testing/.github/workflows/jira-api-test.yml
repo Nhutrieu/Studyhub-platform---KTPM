@@ -3,7 +3,8 @@ name: Jira API Testing Pipeline
 on:
   push:
     branches:
-      - main
+      - develop
+      - feature/*
 
 jobs:
   jira-api-test:

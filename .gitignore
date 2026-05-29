@@ -5,5 +5,8 @@ models/
 *.pt
 uploads/
 vendor/
-
+.env
 database/
+TEST_CASES.md
+reports/
+docs/

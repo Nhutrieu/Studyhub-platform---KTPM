@@ -1,7 +1,9 @@
 name: KOI API Tests
 on:
   push:
-    branches: [ main ]
+    branches:
+      - develop
+      - feature/*
   schedule:
     - cron: '0 2 * * *'
 

@@ -1,0 +1,265 @@
+{
+  "info": {
+    "_postman_id": "358423b7-7ad1-43bd-a3d9-ad53a6226f32",
+    "name": "Koi Fish API Copy",
+    "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json",
+    "_exporter_id": "55081282"
+  },
+  "item": [
+    {
+      "name": "Login API",
+      "item": [
+        {
+          "name": "Get Login Page",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "var html = pm.response.text();",
+                  "",
+                  "var tokenMatch = /name=\"csrf_token\"\\s+value=\"([^\"]+)\"/.exec(html);",
+                  "",
+                  "if (tokenMatch) {",
+                  "    pm.environment.set('csrfToken', tokenMatch[1]);",
+                  "}",
+                  "",
+                  "var cookieJar = pm.cookies.jar();",
+                  "cookieJar.get(pm.request.url, 'PHPSESSID', function(err, cookie) {",
+                  "    var sessionId = cookie && cookie.value ? cookie.value : null;",
+                  "",
+                  "    if (!sessionId) {",
+                  "        var setCookie = pm.response.headers.get('Set-Cookie') || pm.response.headers.get('set-cookie');",
+                  "        if (setCookie) {",
+                  "            var match = /PHPSESSID=([^;]+)/.exec(setCookie);",
+                  "            if (match) {",
+                  "                sessionId = match[1];",
+                  "            }",
+                  "        }",
+                  "    }",
+                  "",
+                  "    if (sessionId) {",
+                  "        pm.environment.set('sessionId', sessionId);",
+                  "        console.log('SESSION (GET):', sessionId);",
+                  "    }",
+                  "});",
+                  "",
+                  "pm.test('CSRF token exists', function () {",
+                  "    pm.expect(pm.environment.get('csrfToken')).to.be.ok;",
+                  "});"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/frontend/auth/login_normal.php",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "frontend",
+                "auth",
+                "login_normal.php"
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Post Login",
+          "event": [
+            {
+              "listen": "prerequest",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "var sessionId = pm.environment.get('sessionId');",
+                  "if (sessionId) {",
+                  "    pm.request.headers.upsert({",
+                  "        key: 'Cookie',",
+                  "        value: 'PHPSESSID=' + sessionId",
+                  "    });",
+                  "}",
+                  "",
+                  "console.log('USING SESSION (LOGIN):', sessionId);"
+                ]
+              }
+            },
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('Login response is redirect or success', function () {",
+                  "    pm.expect([200, 302]).to.include(pm.response.code);",
+                  "});",
+                  "",
+                  "var location = pm.response.headers.get('Location') || pm.response.headers.get('location') || '';",
+                  "console.log('LOGIN LOCATION:', location);",
+                  "if (pm.response.code === 302) {",
+                  "    pm.test('Login redirect to dashboard', function () {",
+                  "        pm.expect(location).to.match(/\\/HeThongChamSocCaKoi\\/(frontend\\/(admin|shop|customer)\\/|index\\.php)/);",
+                  "    });",
+                  "} else {",
+                  "    var body = pm.response.text();",
+                  "    pm.test('Login returns dashboard page', function () {",
+                  "        pm.expect(body).to.not.include('Đăng nhập KoiCareS');",
+                  "    });",
+                  "}",
+                  "",
+                  "var cookieJar = pm.cookies.jar();",
+                  "cookieJar.get(pm.request.url, 'PHPSESSID', function(err, cookie) {",
+                  "    var sessionId = cookie && cookie.value ? cookie.value : null;",
+                  "",
+                  "    if (!sessionId) {",
+                  "        var setCookie = pm.response.headers.get('Set-Cookie') || pm.response.headers.get('set-cookie');",
+                  "        if (setCookie) {",
+                  "            var match = /PHPSESSID=([^;]+)/.exec(setCookie);",
+                  "            if (match) {",
+                  "                sessionId = match[1];",
+                  "            }",
+                  "        }",
+                  "    }",
+                  "",
+                  "    if (sessionId) {",
+                  "        pm.environment.set('sessionId', sessionId);",
+                  "        console.log('SESSION:', sessionId);",
+                  "    }",
+                  "});"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/x-www-form-urlencoded"
+              }
+            ],
+            "body": {
+              "mode": "urlencoded",
+              "urlencoded": [
+                {
+                  "key": "csrf_token",
+                  "value": "{{csrfToken}}"
+                },
+                {
+                  "key": "username",
+                  "value": "{{username}}"
+                },
+                {
+                  "key": "password",
+                  "value": "{{password}}"
+                },
+                {
+                  "key": "remember_me",
+                  "value": "on"
+                }
+              ]
+            },
+            "url": {
+              "raw": "{{baseUrl}}/backend/api/auth/login.php",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "backend",
+                "api",
+                "auth",
+                "login.php"
+              ]
+            },
+            "protocolProfileBehavior": {
+              "followRedirects": false
+            }
+          },
+          "response": []
+        }
+      ]
+    },
+    {
+      "name": "Add Koi - Missing Name",
+      "event": [
+        {
+          "listen": "prerequest",
+          "script": {
+            "exec": [
+              "var sessionId = pm.environment.get('sessionId');",
+              "if (sessionId) {",
+              "    pm.request.headers.upsert({",
+              "        key: 'Cookie',",
+              "        value: 'PHPSESSID=' + sessionId",
+              "    });",
+              "}",
+              "",
+              "console.log('USING SESSION:', sessionId);"
+            ],
+            "type": "text/javascript",
+            "packages": {},
+            "requests": {}
+          }
+        },
+        {
+          "listen": "test",
+          "script": {
+            "exec": [
+              "pm.test('Status code is 400', function () {",
+              "    pm.response.to.have.status(400);",
+              "});",
+              "",
+              "pm.test('Success false', function () {",
+              "    pm.expect(pm.response.json().success).to.eql(false);",
+              "});",
+              "",
+              "pm.test('Correct error message', function () {",
+              "    pm.expect(pm.response.json().error).to.eql('Tên cá không được để trống!');",
+              "});"
+            ],
+            "type": "text/javascript",
+            "packages": {},
+            "requests": {}
+          }
+        }
+      ],
+      "request": {
+        "method": "POST",
+        "header": [],
+        "body": {
+          "mode": "formdata",
+          "formdata": [
+            {
+              "key": "PondID",
+              "value": "2",
+              "type": "text"
+            },
+            {
+              "key": "Name",
+              "value": "",
+              "type": "text"
+            }
+          ]
+        },
+        "url": {
+          "raw": "{{baseUrl}}/backend/api/customer/kois/add.php",
+          "host": [
+            "{{baseUrl}}"
+          ],
+          "path": [
+            "backend",
+            "api",
+            "customer",
+            "kois",
+            "add.php"
+          ]
+        }
+      },
+      "response": []
+    }
+  ]
+}
