@@ -1,0 +1,68 @@
+# Service-specific .dockerignore for NestJS microservices
+# This works in conjunction with root .dockerignore
+
+# Exclude ALL services directories except the current one
+# (This pattern assumes build is from root context)
+services/*
+!services/THIS_SERVICE_NAME/
+
+# Exclude frontend (not needed for backend services)
+frontend/
+
+# Exclude api-gateway (only needed for api-gateway build)
+api-gateway/
+
+# Exclude other root-level directories
+scripts/
+docs/
+.shared/
+mobile/
+
+# node_modules will be installed fresh
+node_modules/
+**/node_modules/
+
+# Build outputs (will be generated)
+dist/
+**/dist/
+coverage/
+
+# Test files (not needed in production)
+**/*.test.ts
+**/*.spec.ts
+**/test/
+**/__tests__/
+
+# Development files
+src/**/*.spec.ts
+src/**/*.test.ts
+*.md
+!README.md
+
+# Environment files
+.env*
+!.env.example
+
+# IDE
+.vscode/
+.idea/
+
+# Logs
+*.log
+logs/
+
+# Temp files
+tmp/
+*.tmp
+
+# Git
+.git/
+.gitignore
+
+# Docker
+Dockerfile*
+.dockerignore
+docker-compose*.yml
+
+# ALLOW shared directory (needed for builds)
+!shared/

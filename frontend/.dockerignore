@@ -1,0 +1,73 @@
+# Frontend .dockerignore
+# Context is ./frontend (not root), so paths are relative to frontend/
+
+# node_modules will be installed in container
+node_modules/
+
+# Build output (will be generated)
+.next/
+out/
+dist/
+build/
+
+# Development files
+*.md
+!README.md
+*.log
+
+# Test files
+**/*.test.ts
+**/*.test.tsx
+**/*.spec.ts
+**/*.spec.tsx
+__tests__/
+**/__tests__/
+coverage/
+.nyc_output/
+
+# Environment files (use build args instead)
+.env.local
+.env.*.local
+.env.development
+.env.test
+
+# IDE files
+.vscode/
+.idea/
+*.swp
+*.swo
+.DS_Store
+
+# Git
+.git/
+.gitignore
+.gitattributes
+
+# Temp/cache
+.cache/
+tmp/
+temp/
+*.tmp
+
+# Docker
+Dockerfile*
+.dockerignore
+docker-compose*.yml
+
+# CI/CD
+.github/
+.gitlab-ci.yml
+
+# Large asset directories (if they exist and shouldn't be in image)
+# Note: public/images/ might be mounted as volume
+# public/images/
+
+# ESLint cache
+.eslintcache
+
+# TypeScript cache
+*.tsbuildinfo
+
+# Storybook
+.storybook/
+storybook-static/

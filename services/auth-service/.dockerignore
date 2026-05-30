@@ -1,0 +1,79 @@
+# Auth Service .dockerignore
+# Build context is root (.), exclude everything except what's needed
+
+# Exclude ALL other services
+services/*
+!services/auth-service/
+
+# Exclude frontend
+frontend/
+
+# Exclude api-gateway
+api-gateway/
+
+# Exclude other root directories
+scripts/
+docs/
+.shared/
+mobile/
+
+# node_modules (will be installed fresh)
+node_modules/
+**/node_modules/
+
+# Build outputs
+dist/
+**/dist/
+coverage/
+.next/
+out/
+
+# Test files
+**/*.test.ts
+**/*.spec.ts
+**/test/
+**/__tests__/
+**/coverage/
+
+# Documentation
+*.md
+!README.md
+
+# Environment files
+.env*
+!.env.example
+
+# IDE
+.vscode/
+.idea/
+.DS_Store
+*.swp
+
+# Logs
+*.log
+logs/
+
+# Temp/cache
+tmp/
+*.tmp
+.cache/
+
+# Git
+.git/
+.gitignore
+
+# Docker files
+Dockerfile*
+.dockerignore
+docker-compose*.yml
+
+# Images/uploads
+images/
+uploads/
+public/images/
+
+# CI/CD
+.github/
+
+# ALLOW shared directory (required for build)
+!shared/

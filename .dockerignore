@@ -1,0 +1,86 @@
+# Exclude node_modules from all locations
+**/node_modules/
+node_modules/
+
+# Exclude build outputs
+**/dist/
+dist/
+**/.next/
+.next/
+**/build/
+build/
+**/out/
+out/
+
+# Exclude Git and version control
+.git/
+.gitignore
+.gitattributes
+**/.git/
+
+# Exclude IDE and editor files
+.vscode/
+.idea/
+*.swp
+*.swo
+*~
+.DS_Store
+
+# Exclude documentation
+*.md
+!README.md
+docs/
+.shared/
+
+# Exclude test files  
+**/*.test.ts
+**/*.test.tsx
+**/*.spec.ts
+**/*.spec.tsx
+**/test/
+**/tests/
+**/__tests__/
+**/coverage/
+
+# Exclude environment files
+.env
+.env.*
+!.env.example
+
+# Exclude logs
+**/*.log
+logs/
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+
+# Exclude temp/cache files
+tmp/
+temp/
+.cache/
+*.tmp
+
+# Exclude CI/CD files
+.github/
+.gitlab-ci.yml
+.travis.yml
+Jenkinsfile
+
+# Exclude Docker files from being copied
+**/Dockerfile*
+**/.dockerignore
+docker-compose*.yml
+
+# Exclude large unnecessary directories
+images/
+uploads/
+public/images/
+
+# DO NOT exclude these - they are needed:
+# !shared/
+# !services/
+# !api-gateway/
+# !frontend/
+
+# Note: Specific services will have their own .dockerignore
+# that further refines what gets included

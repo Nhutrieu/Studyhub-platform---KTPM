@@ -1,0 +1,357 @@
+@import "tailwindcss";
+
+:root {
+  /* 
+   * PREMIUM FURNITURE E-COMMERCE PALETTE
+   * Refined color scheme for luxury furniture retail
+   * Base: Warm, sophisticated neutrals with rich accents
+   * Primary: Deep teal-green for trust and sophistication
+   * Accent: Warm amber for highlights and premium feel
+   */
+
+  /* Backgrounds - Clean and bright for better contrast */
+  --background: #FFFFFF; /* Pure white for maximum contrast */
+  --surface: #FFFFFF;    /* Pure white surface */
+  --surface-hover: #F9FAFB; /* Very light grey hover */
+  --surface-active: #F3F4F6; /* Light grey active state */
+
+  /* Text Colors - High contrast for excellent readability */
+  --foreground: #111827;      /* Almost black - maximum contrast */
+  --text-primary: #111827;    /* Dark grey for primary text */
+  --text-secondary: #374151;  /* Medium grey - still very readable */
+  --text-tertiary: #6B7280;   /* Lighter grey but still readable */
+
+  /* Primary Brand - Refined Teal-Green */
+  --primary: #0D9488;         /* Teal 600 - More sophisticated */
+  --primary-foreground: #FFFFFF;
+  --primary-50: #F0FDFA;
+  --primary-100: #CCFBF1;
+  --primary-500: #14B8A6;
+  --primary-600: #0D9488;
+  --primary-700: #0F766E;
+  --primary-900: #134E4A;     /* Deep teal for depth */
+
+  /* Secondary/Neutral - Clean greys with better contrast */
+  --secondary: #6B7280;
+  --secondary-foreground: #FFFFFF;
+  --secondary-50: #F9FAFB;
+  --secondary-100: #F3F4F6;
+  --secondary-200: #E5E7EB; /* Clear borders */
+  --secondary-300: #D1D5DB;
+  --secondary-500: #6B7280;
+  --secondary-600: #4B5563;
+  --secondary-900: #111827;
+
+  /* Accents - Premium Gold/Amber & Vibrant Yellow */
+  --accent: #D97706;          /* Amber 600 - Luxury accent */
+  --accent-light: #FEF3C7;
+  --accent-50: #FFFBEB;
+  --accent-100: #FEF3C7;
+  --accent-500: #F59E0B;
+  --accent-600: #D97706;
+  /* Vibrant Yellow for Promotions */
+  --yellow-400: #FACC15;       /* Bright yellow */
+  --yellow-500: #EAB308;       /* Vibrant yellow */
+  --yellow-600: #CA8A04;       /* Darker yellow */
+  --yellow-bg: #FEF9C3;        /* Light yellow background */
+  --yellow-promo: #FFEB3B;     /* Promo yellow */
+  
+  /* Semantic - Refined colors */
+  --success: #0D9488;        /* Match primary for consistency */
+  --error: #DC2626;
+  --warning: #D97706;
+  --info: #2563EB;
+
+  /* UI Elements - Clear and defined */
+  --border: #E5E7EB;          /* Clear border color */
+  --divider: #E5E7EB;         /* Visible divider */
+  --ring: #0D9488;            /* Focus ring matches primary */
+}
+
+@theme inline {
+  /* Map CSS Variables to Tailwind Utilities */
+  --color-background: var(--background);
+  --color-surface: var(--surface);
+  --color-surface-hover: var(--surface-hover);
+  --color-foreground: var(--foreground);
+  
+  --color-primary: var(--primary);
+  --color-primary-foreground: var(--primary-foreground);
+  --color-primary-50: var(--primary-50);
+  --color-primary-100: var(--primary-100);
+  --color-primary-600: var(--primary-600);
+  --color-primary-700: var(--primary-700);
+  --color-primary-900: var(--primary-900);
+
+  --color-secondary: var(--secondary);
+  --color-secondary-foreground: var(--secondary-foreground);
+  --color-secondary-50: var(--secondary-50);
+  --color-secondary-100: var(--secondary-100);
+  --color-secondary-200: var(--secondary-200);
+  --color-secondary-600: var(--secondary-600);
+  --color-secondary-900: var(--secondary-900);
+  
+  --color-border: var(--border);
+  --color-error: var(--error);
+
+  /* Shadows - Enhanced depth and elegance */
+  --shadow-xs: 0 1px 2px 0 rgb(0 0 0 / 0.04);
+  --shadow-sm: 0 1px 3px 0 rgb(0 0 0 / 0.08), 0 1px 2px -1px rgb(0 0 0 / 0.08);
+  --shadow-md: 0 4px 6px -1px rgb(0 0 0 / 0.08), 0 2px 4px -2px rgb(0 0 0 / 0.08);
+  --shadow-lg: 0 10px 15px -3px rgb(0 0 0 / 0.1), 0 4px 6px -4px rgb(0 0 0 / 0.08);
+  --shadow-xl: 0 20px 25px -5px rgb(0 0 0 / 0.12), 0 8px 10px -6px rgb(0 0 0 / 0.1);
+  /* Premium Shadows - More refined */
+  --shadow-soft: 0 2px 12px rgba(0, 0, 0, 0.04), 0 1px 3px rgba(0, 0, 0, 0.02);
+  --shadow-medium: 0 6px 24px rgba(0, 0, 0, 0.08), 0 2px 6px rgba(0, 0, 0, 0.04);
+  --shadow-float: 0 12px 48px rgba(0, 0, 0, 0.12), 0 4px 12px rgba(0, 0, 0, 0.06);
+  --shadow-glow: 0 0 20px rgba(13, 148, 136, 0.15); /* Primary glow effect */
+}
+
+html {
+  overflow-x: hidden;
+  width: 100%;
+  scroll-behavior: smooth;
+}
+
+body {
+  background-color: var(--background);
+  color: var(--foreground);
+  font-family: 'Inter', system-ui, -apple-system, sans-serif;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+  line-height: 1.6;
+}
+
+/* 
+ * TYPOGRAPHY UTILITIES 
+ * Refined typography for premium furniture e-commerce
+ */
+h1, h2, h3, h4, h5, h6 {
+  color: var(--foreground);
+  font-weight: 600;
+  letter-spacing: -0.02em; /* Slightly tighter for elegance */
+  line-height: 1.2;
+}
+
+h1 { 
+  font-size: 2.5rem; 
+  line-height: 1.15; 
+  font-weight: 700; /* Bolder for impact */
+}
+h2 { 
+  font-size: 2rem; 
+  line-height: 1.25; 
+  font-weight: 600;
+}
+h3 { 
+  font-size: 1.5rem; 
+  line-height: 1.3;
+  font-weight: 600;
+}
+
+p {
+  color: var(--text-primary); /* Use primary for better contrast */
+  line-height: 1.7; /* More comfortable reading */
+  font-size: 0.9375rem; /* Slightly larger base text */
+  font-weight: 400; /* Normal weight for readability */
+}
+
+/* 
+ * ANIMATION UTILITIES 
+ */
+.transition-all-default {
+  transition-property: all;
+  transition-timing-function: cubic-bezier(0.4, 0, 0.2, 1);
+  transition-duration: 300ms;
+}
+
+/* Hover Lift Effect - Enhanced for premium feel */
+.hover-lift {
+  transition: transform 0.35s cubic-bezier(0.34, 1.56, 0.64, 1), 
+              box-shadow 0.35s cubic-bezier(0.4, 0, 0.2, 1),
+              border-color 0.3s ease;
+}
+.hover-lift:hover {
+  transform: translateY(-6px);
+  box-shadow: var(--shadow-float);
+}
+
+/* Button Press Effect - More refined */
+.active-press:active {
+  transform: scale(0.97);
+  transition: transform 0.1s ease;
+}
+
+/* ============================================
+ * PREMIUM ANIMATIONS - Subtle & Professional
+ * ============================================ */
+
+/* 1. Hero Background Gradient Animation - Very subtle */
+@keyframes gradient-shift {
+  0%, 100% {
+    background-position: 0% 50%;
+  }
+  50% {
+    background-position: 100% 50%;
+  }
+}
+
+.animate-gradient {
+  background-size: 200% 200%;
+  animation: gradient-shift 20s ease-in-out infinite;
+}
+
+/* 2. Fade-in + Slide-up - Professional entrance */
+@keyframes fade-slide-up {
+  from {
+    opacity: 0;
+    transform: translateY(20px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.animate-fade-slide-up {
+  animation: fade-slide-up 0.8s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+  opacity: 0;
+}
+
+/* Stagger delays for sequential appearance */
+.animate-delay-100 { animation-delay: 0.1s; }
+.animate-delay-200 { animation-delay: 0.2s; }
+.animate-delay-300 { animation-delay: 0.3s; }
+.animate-delay-400 { animation-delay: 0.4s; }
+.animate-delay-500 { animation-delay: 0.5s; }
+
+/* 3. Smooth fade-in (existing - keep) */
+@keyframes fade-in {
+  from {
+    opacity: 0;
+    transform: translateY(8px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.animate-fade-in {
+  animation: fade-in 0.6s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+}
+
+/* 4. Card Hover Lift - Subtle elevation */
+@keyframes card-lift {
+  to {
+    transform: translateY(-4px);
+  }
+}
+
+.card-hover-lift {
+  transition: transform 0.3s cubic-bezier(0.4, 0, 0.2, 1),
+              box-shadow 0.3s cubic-bezier(0.4, 0, 0.2, 1),
+              border-color 0.3s ease;
+}
+
+.card-hover-lift:hover {
+  transform: translateY(-4px);
+  box-shadow: 0 12px 32px rgba(0, 0, 0, 0.12), 0 4px 12px rgba(0, 0, 0, 0.08);
+}
+
+/* 5. Button Scale & Glow - Professional interaction */
+.button-hover-scale {
+  transition: transform 0.2s cubic-bezier(0.4, 0, 0.2, 1),
+              box-shadow 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.button-hover-scale:hover {
+  transform: scale(1.02);
+}
+
+.button-hover-scale:active {
+  transform: scale(0.98);
+  transition: transform 0.1s ease;
+}
+
+/* 6. Navbar Underline Animation */
+.nav-link-underline {
+  position: relative;
+}
+
+.nav-link-underline::after {
+  content: '';
+  position: absolute;
+  bottom: 0;
+  left: 0;
+  width: 0;
+  height: 2px;
+  background: currentColor;
+  transition: width 0.35s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.nav-link-underline:hover::after,
+.nav-link-underline.active::after {
+  width: 100%;
+}
+
+/* 7. Glassmorphism Effect - Subtle blur */
+.glass-effect {
+  background: rgba(255, 255, 255, 0.1);
+  backdrop-filter: blur(10px);
+  -webkit-backdrop-filter: blur(10px);
+  border: 1px solid rgba(255, 255, 255, 0.2);
+}
+
+.glass-effect-hover {
+  transition: background 0.3s ease,
+              backdrop-filter 0.3s ease,
+              border-color 0.3s ease,
+              transform 0.3s cubic-bezier(0.4, 0, 0.2, 1),
+              box-shadow 0.3s ease;
+}
+
+.glass-effect-hover:hover {
+  background: rgba(255, 255, 255, 0.15);
+  backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
+  border-color: rgba(255, 255, 255, 0.3);
+  transform: translateY(-2px);
+  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.15);
+}
+
+/* 8. Elegant scale on hover (refined) */
+.hover-scale {
+  transition: transform 0.25s cubic-bezier(0.4, 0, 0.2, 1);
+}
+.hover-scale:hover {
+  transform: scale(1.02);
+}
+
+/* 9. Navbar Scroll Effect */
+.navbar-scrolled {
+  background: rgba(255, 255, 255, 0.98) !important;
+  backdrop-filter: blur(20px);
+  -webkit-backdrop-filter: blur(20px);
+  box-shadow: 0 2px 12px rgba(0, 0, 0, 0.06);
+  transition: background 0.3s ease, box-shadow 0.3s ease;
+}
+
+/* Custom Scrollbar - More refined */
+::-webkit-scrollbar {
+  width: 10px;
+  height: 10px;
+}
+::-webkit-scrollbar-track {
+  background: var(--secondary-50);
+  border-radius: 999px;
+}
+::-webkit-scrollbar-thumb {
+  background: var(--secondary-300);
+  border-radius: 999px;
+  border: 2px solid var(--secondary-50);
+  transition: background 0.2s ease;
+}
+::-webkit-scrollbar-thumb:hover {
+  background: var(--secondary-400);
+}

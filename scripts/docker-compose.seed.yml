@@ -1,0 +1,20 @@
+
+version: '3.8'
+
+services:
+  seed:
+    image: node:20-alpine
+    working_dir: /app
+    volumes:
+      - ./:/app
+      - /app/node_modules
+    environment:
+      MONGODB_URI: mongodb://admin:admin123@furnimart-mongodb:27017/furnimart?authSource=admin
+    command: sh -c "npm install && npm run seed"
+    networks:
+      - furnimart-network
+
+networks:
+  furnimart-network:
+    external: true
+    name: furnimart_furnimart-network

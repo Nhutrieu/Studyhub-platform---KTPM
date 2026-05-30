@@ -1,0 +1,10 @@
+*.md
+*.json
+node_modules/
+.next/
+dist/
+build/
+scripts/
+shared/
+services/
+api-gateway/

@@ -1,0 +1,22 @@
+{
+  "name": "furnimart-seed",
+  "version": "1.0.0",
+  "description": "Seed data script for FurniMart",
+  "main": "seed.ts",
+  "scripts": {
+    "seed": "ts-node seed/index.ts",
+    "clear": "ts-node clear-db.ts",
+    "build": "tsc",
+    "seed:build": "npm run build && node dist/seed.js"
+  },
+  "dependencies": {
+    "mongoose": "^8.0.0",
+    "bcryptjs": "^2.4.3"
+  },
+  "devDependencies": {
+    "typescript": "^5.2.0",
+    "ts-node": "^10.9.0",
+    "@types/node": "^20.0.0",
+    "@types/bcryptjs": "^2.4.6"
+  }
+}
