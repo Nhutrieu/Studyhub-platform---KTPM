@@ -1,10 +1,8 @@
 {
   "compilerOptions": {
     "target": "ES2020",
-    "module": "commonjs",
-    "lib": [
-      "ES2020"
-    ],
+    "module": "commonjs", // Giữ nguyên cho dự án của bạn không bị lỗi cấu trúc cũ
+    "lib": ["ES2020"],
     "declaration": true,
     "outDir": "./dist",
     "rootDir": "./",
@@ -13,16 +11,14 @@
     "skipLibCheck": true,
     "forceConsistentCasingInFileNames": true,
     "resolveJsonModule": true,
-    "moduleResolution": "node",
-    "types": [
-      "node"
-    ]
+    // Xóa bỏ hoàn toàn dòng moduleResolution cũ ở đây để không bị xung đột phiên bản
+    "types": ["node"]
   },
-  "files": [
-    "scripts/seed/index.ts"
+  "include": [
+    "scripts/seed/index.ts",
+    "tests/**/*_test.ts",
+    "steps_file.ts",
+    "steps.d.ts"
   ],
-  "exclude": [
-    "node_modules",
-    "dist"
-  ]
+  "exclude": ["node_modules", "dist"]
 }

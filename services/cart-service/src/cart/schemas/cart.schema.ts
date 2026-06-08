@@ -1,5 +1,5 @@
-import { Prop, Schema, SchemaFactory } from '@nestjs/mongoose';
-import { HydratedDocument, Schema as MongooseSchema } from 'mongoose';
+import { Prop, Schema, SchemaFactory } from "@nestjs/mongoose";
+import { HydratedDocument, Schema as MongooseSchema } from "mongoose";
 
 export type CartDocument = HydratedDocument<Cart>;
 
@@ -23,8 +23,8 @@ export class CartItem {
 
 @Schema({ timestamps: true })
 export class Cart {
-  @Prop({ type: MongooseSchema.Types.ObjectId, required: true, unique: true })
-  userId!: string;
+  // @Prop({ type: MongooseSchema.Types.ObjectId, required: true, unique: true })
+  // userId!: string;
 
   @Prop({ type: [CartItem], default: [] })
   items!: CartItem[];
@@ -34,4 +34,3 @@ export const CartSchema = SchemaFactory.createForClass(Cart);
 
 // Index for faster queries
 CartSchema.index({ userId: 1 });
-

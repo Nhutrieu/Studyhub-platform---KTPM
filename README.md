@@ -257,7 +257,6 @@ npx ts-node index.ts
 Script seed tạo dữ liệu mẫu đầy đủ cho hệ thống:
 
 - **34 Users**:
-
   - 1 Admin
   - 3 Branch Managers
   - 4 Employees
@@ -396,27 +395,23 @@ Ví dụ:
 Hệ thống hỗ trợ 6 vai trò:
 
 - **guest** - Khách chưa đăng nhập
-
   - Xem sản phẩm, danh mục, chi nhánh
   - Không thể đặt hàng hoặc xem đơn hàng
   - Phải đăng nhập để mua hàng
 
 - **customer** - Khách hàng
-
   - Mua sắm, đặt hàng, thanh toán
   - Xem sản phẩm, đánh giá, tạo review
   - Chat với nhân viên, tạo dispute
   - Quản lý địa chỉ giao hàng
 
 - **admin** - Quản trị viên
-
   - Quản lý toàn hệ thống (products, categories, branches, users)
   - Xem dashboard tổng quan và báo cáo
   - Quản lý tất cả chi nhánh
   - **Lưu ý**: Admin chỉ xem inventory, không chỉnh sửa tồn kho
 
 - **branch_manager** - Quản lý chi nhánh
-
   - Quản lý chi nhánh của mình
   - Quản lý nhân viên và shipper
   - Quản lý tồn kho chi nhánh
@@ -424,7 +419,6 @@ Hệ thống hỗ trợ 6 vai trò:
   - Xem dashboard chi nhánh
 
 - **employee** - Nhân viên chi nhánh
-
   - Xử lý đơn hàng được phân công
   - Cập nhật trạng thái: CONFIRMED → PACKING → READY_TO_SHIP
   - Chat hỗ trợ khách hàng
@@ -445,10 +439,10 @@ Sau khi chạy seed, bạn có thể sử dụng các tài khoản sau:
 | Role           | Email                     | Password      |
 | -------------- | ------------------------- | ------------- |
 | Admin          | `admin@furnimart.com`     | `admin123`    |
-| Branch Manager | `manager1@furnimart.com`  | `manager123`  |
-| Employee       | `employee1@furnimart.com` | `employee123` |
-| Shipper        | `shipper1@furnimart.com`  | `shipper123`  |
-| Customer       | `customer1@example.com`   | `customer123` |
+| Branch Manager | `manager1@furnimart.com`  | `password123` |
+| Employee       | `employee1@furnimart.com` | `password123` |
+| Shipper        | `shipper1@furnimart.com`  | `password123` |
+| Customer       | `customer1@gmail.com`     | `password123` |
 
 ## ⚙️ Environment Variables
 
