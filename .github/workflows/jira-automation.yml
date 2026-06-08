@@ -33,7 +33,7 @@ jobs:
         uses: atlassian/gajira-login@v3
         env:
           JIRA_BASE_URL: ${{ secrets.JIRA_BASE_URL }}
-          JIRA_USER_EMAIL: ${{ secrets.JIRA_EMAIL }}
+          JIRA_EMAIL: ${{ secrets.JIRA_EMAIL }}
           JIRA_API_TOKEN: ${{ secrets.JIRA_API_TOKEN }}
 
       # 5. Tự động tạo Bug trên Jira nếu bài test thất bại (Đã sửa Project Key thành "FM")
