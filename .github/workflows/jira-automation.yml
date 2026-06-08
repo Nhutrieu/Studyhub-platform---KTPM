@@ -2,7 +2,7 @@ name: Tự động hóa Newman và Đẩy lên Jira
 
 on:
   push:
-    branches: ["feature-automation"] # Chạy tự động khi bạn push code lên nhánh test
+    branches: ["feature-automation"] # Tự động chạy khi push lên nhánh feature-automation
 
 jobs:
   testing-and-jira:
@@ -10,7 +10,7 @@ jobs:
 
     steps:
       # 1. Lấy code từ repository về máy ảo của GitHub
-      - name: Login
+      - name: Checkout Source Code
         uses: actions/checkout@v4
 
       # 2. Cài đặt NodeJS để chạy Newman
@@ -19,29 +19,29 @@ jobs:
         with:
           node-version: "18"
 
-      # 3. Chạy Newman và xuất file log JUnit XML
-      - name: FurniMart.postman_collection.json
-        id: FurniMart.postman_collection.json
+      # 3. Chạy Newman (Đã sửa ID thành run_newman để hết lỗi)
+      - name: Run Newman Test
+        id: run_newman
         run: |
           npm install -g newman
-          # Nhớ thay đường dẫn thực tế tới file collection của bạn
-          newman run path/to/your/collection.json -r junit --reporter-junit-export report-newman.xml
+          # Hãy chắc chắn file collection của bạn nằm ở thư mục gốc và đúng tên này nhé
+          newman run FurniMart.postman_collection.json -r junit --reporter-junit-export report-newman.xml
         continue-on-error: true # Dù test fail vẫn chạy tiếp bước sau để gửi log lên Jira
 
-      # 4. Đăng nhập vào Jira (Gọi từ Secrets đã cấu hình trên GitHub)
-      - name: FurniMart QA
+      # 4. Đăng nhập vào Jira (Lấy từ Secrets)
+      - name: FurniMart QA Login
         uses: atlassian/gajira-login@v3
         env:
           JIRA_BASE_URL: ${{ secrets.JIRA_BASE_URL }}
           JIRA_USER_EMAIL: ${{ secrets.JIRA_EMAIL }}
           JIRA_API_TOKEN: ${{ secrets.JIRA_API_TOKEN }}
 
-      # 5. Tự động tạo Bug trên Jira nếu bài test thất bại
+      # 5. Tự động tạo Bug trên Jira nếu bài test thất bại (Đã sửa Project Key thành "FM")
       - name: Create Jira Issue on Failure
-        if: steps.FurniMart.postman_collection.json.outcome == 'failure' # Chỉ tạo bug khi bước test số 3 bị Fail
+        if: steps.run_newman.outcome == 'failure' # Chỉ tạo bug khi bước test số 3 bị lỗi
         uses: atlassian/gajira-create@v3
         with:
-          project: "FM" # Điền Key của dự án là FM
+          project: "FM" # Key chuẩn của dự án trên Jira là FM, không phải FM-4 nhé
           issuetype: "Bug"
           summary: "Newman Automation Test Failed"
-          description: "Phát hiện lỗi khi chạy test tự động. Vui lòng kiểm tra lại file log report-newman.xml."
+          description: "Phát hiện lỗi khi chạy test tự động trên nhánh feature-automation. Vui lòng kiểm tra lại file log report-newman.xml."
