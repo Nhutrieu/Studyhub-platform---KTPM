@@ -42,6 +42,6 @@ jobs:
         uses: atlassian/gajira-create@v3
         with:
           project: "FM" # Key chuẩn của dự án trên Jira là FM, không phải FM-4 nhé
-          issuetype: "Bug"
+          issuetype: "Lỗi"
           summary: "Newman Automation Test Failed"
           description: "Phát hiện lỗi khi chạy test tự động trên nhánh feature-automation. Vui lòng kiểm tra lại file log report-newman.xml."
