@@ -1,0 +1,242 @@
+{
+  "info": {
+    "_postman_id": "61dc932e-e5ba-44ee-994f-4e604f30f7d1",
+    "name": "KOI Care API Testing",
+    "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json",
+    "_exporter_id": "55110612",
+    "_collection_link": "https://go.postman.co/collection/55110612-61dc932e-e5ba-44ee-994f-4e604f30f7d1?source=collection_link"
+  },
+  "item": [
+    {
+      "name": "Login API",
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "exec": [
+              "console.log(\"CREATE KOI STATUS:\", pm.response.code);",
+              "console.log(\"CREATE KOI BODY:\", pm.response.text());",
+              "console.log(\"PHPSESSID ENV:\", pm.environment.get(\"PHPSESSID\"));",
+              "",
+              "pm.test(\"Response is not empty\", function () {",
+              "    pm.expect(pm.response.text()).to.not.be.empty;",
+              "});"
+            ],
+            "type": "text/javascript",
+            "packages": {},
+            "requests": {}
+          }
+        },
+        {
+          "listen": "prerequest",
+          "script": {
+            "exec": [
+              ""
+            ],
+            "type": "text/javascript",
+            "packages": {},
+            "requests": {}
+          }
+        }
+      ],
+      "request": {
+        "method": "POST",
+        "header": [],
+        "body": {
+          "mode": "urlencoded",
+          "urlencoded": [
+            {
+              "key": "username",
+              "value": "ngeu",
+              "type": "text"
+            },
+            {
+              "key": "password",
+              "value": "Ngeu@123",
+              "type": "text"
+            },
+            {
+              "key": "csrf_token",
+              "value": "94288b4c2120ab32162a970bb5703f6ea8d28922acb59651989bff78b2ddbb95",
+              "type": "text"
+            }
+          ]
+        },
+        "url": {
+          "raw": "{{baseUrl}}/api/auth/login.php",
+          "host": [
+            "{{baseUrl}}"
+          ],
+          "path": [
+            "api",
+            "auth",
+            "login.php"
+          ]
+        }
+      },
+      "response": []
+    },
+    {
+      "name": "List Koi",
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "exec": [
+              "pm.test(\"Status code is 200\", function () {",
+              "    pm.response.to.have.status(200);",
+              "});",
+              "",
+              "pm.test(\"Response contains data\", function () {",
+              "    pm.expect(pm.response.text()).to.not.be.empty;",
+              "});"
+            ],
+            "type": "text/javascript",
+            "packages": {},
+            "requests": {}
+          }
+        }
+      ],
+      "request": {
+        "method": "GET",
+        "header": [],
+        "url": {
+          "raw": "{{baseUrl}}/api/customer/kois/list.php",
+          "host": [
+            "{{baseUrl}}"
+          ],
+          "path": [
+            "api",
+            "customer",
+            "kois",
+            "list.php"
+          ]
+        }
+      },
+      "response": []
+    },
+    {
+      "name": "Create Koi",
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "exec": [
+              "pm.test(\"Status code is successful\", function () {",
+              "",
+              "    if (pm.response.code !== 200 && pm.response.code !== 201) {",
+              "        console.log(\"Response body:\", pm.response.text());",
+              "    }",
+              "",
+              "    pm.expect(pm.response.code).to.be.oneOf([200, 201]);",
+              "",
+              "});"
+            ],
+            "type": "text/javascript",
+            "packages": {},
+            "requests": {}
+          }
+        }
+      ],
+      "request": {
+        "method": "POST",
+        "header": [
+          {
+            "key": "X-Test-Username",
+            "value": "ngeu",
+            "type": "text"
+          }
+        ],
+        "body": {
+          "mode": "urlencoded",
+          "urlencoded": [
+            {
+              "key": "PondID",
+              "value": "2",
+              "type": "text"
+            },
+            {
+              "key": "Name",
+              "value": "gà",
+              "type": "text"
+            },
+            {
+              "key": "Age",
+              "value": "1",
+              "type": "text"
+            },
+            {
+              "key": "Length",
+              "value": "15",
+              "type": "text"
+            },
+            {
+              "key": "Weight",
+              "value": "1.2",
+              "type": "text"
+            },
+            {
+              "key": "Sex",
+              "value": "Male",
+              "type": "text"
+            },
+            {
+              "key": "Variety",
+              "value": "Kohaku",
+              "type": "text"
+            },
+            {
+              "key": "Breeder",
+              "value": "Koi Farm",
+              "type": "text"
+            },
+            {
+              "key": "PurchasePrice",
+              "value": "10000",
+              "type": "text"
+            }
+          ]
+        },
+        "url": {
+          "raw": "{{baseUrl}}/api/customer/kois/add.php",
+          "host": [
+            "{{baseUrl}}"
+          ],
+          "path": [
+            "api",
+            "customer",
+            "kois",
+            "add.php"
+          ]
+        }
+      },
+      "response": []
+    },
+    {
+      "name": "Delete Koi",
+      "request": {
+        "method": "DELETE",
+        "header": [],
+        "url": {
+          "raw": "{{baseUrl}}/api/customer/kois/delete.php?id=10",
+          "host": [
+            "{{baseUrl}}"
+          ],
+          "path": [
+            "api",
+            "customer",
+            "kois",
+            "delete.php"
+          ],
+          "query": [
+            {
+              "key": "id",
+              "value": "10"
+            }
+          ]
+        }
+      },
+      "response": []
+    }
+  ]
+}

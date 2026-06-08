@@ -1,0 +1,57 @@
+<!doctype html>
+<html>
+
+<head>
+    <meta charset="utf-8">
+    <title>API Test Report</title>
+    <style>
+        body {
+            font-family: sans-serif
+        }
+
+        table {
+            border-collapse: collapse;
+            width: 100%
+        }
+
+        th,
+        td {
+            border: 1px solid #ddd;
+            padding: 8px
+        }
+
+        th {
+            background: #f4f4f4
+        }
+    </style>
+</head>
+
+<body>
+    <h1>API Test Report</h1>
+    <p>Passed: 1 &nbsp; Failed: 1</p>
+    <table>
+        <tr>
+            <th>Method</th>
+            <th>URL</th>
+            <th>Assertion</th>
+            <th>Message</th>
+            <th>Result</th>
+        </tr>
+        <tr>
+            <td>POST</td>
+            <td>http://localhost/HeThongChamSocCaKoi/backend/api/customer/kois/add.php</td>
+            <td>Status code is successful</td>
+            <td>expected [200,201] but got 500</td>
+            <td style="color:red">FAIL</td>
+        </tr>
+        <tr>
+            <td>GET</td>
+            <td>http://localhost/HeThongChamSocCaKoi/backend/api/customer/kois/list.php</td>
+            <td>Status code is 200</td>
+            <td></td>
+            <td>PASS</td>
+        </tr>
+    </table>
+</body>
+
+</html>
