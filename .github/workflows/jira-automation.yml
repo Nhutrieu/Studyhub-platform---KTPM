@@ -19,13 +19,19 @@ jobs:
         with:
           node-version: "18"
 
-      # 3. Chạy Newman (Đã sửa ID thành run_newman để hết lỗi)
+      # 3. Tự động tìm và chạy Newman bất kể file nằm ở thư mục nào
       - name: Run Newman Test
         id: run_newman
         run: |
           npm install -g newman
-          # Hãy chắc chắn file collection của bạn nằm ở thư mục gốc và đúng tên này nhé
-          newman run FurniMart.postman_collection.json -r junit --reporter-junit-export report-newman.xml
+
+          # Lệnh này sẽ tự tìm đường dẫn thực tế của file trên máy ảo
+          FILE_PATH=$(find . -name "FurniMart.postman_collection.json" | head -n 1)
+
+          echo "Đã tìm thấy file tại đường dẫn: $FILE_PATH"
+
+          # Chạy Newman bằng đường dẫn vừa tìm được
+          newman run "$FILE_PATH" -r junit --reporter-junit-export report-newman.xml
         continue-on-error: true # Dù test fail vẫn chạy tiếp bước sau để gửi log lên Jira
 
       # 4. Đăng nhập vào Jira (Lấy từ Secrets)
@@ -36,12 +42,12 @@ jobs:
           JIRA_USER_EMAIL: ${{ secrets.JIRA_USER_EMAIL }}
           JIRA_API_TOKEN: ${{ secrets.JIRA_API_TOKEN }}
 
-      # 5. Tự động tạo Bug trên Jira nếu bài test thất bại (Đã sửa Project Key thành "FM")
+      # 5. Tự động tạo Task trên Jira nếu bài test thất bại
       - name: Create Jira Issue on Failure
         if: steps.run_newman.outcome == 'failure' # Chỉ tạo bug khi bước test số 3 bị lỗi
         uses: atlassian/gajira-create@v3
         with:
-          project: "FM" # Key chuẩn của dự án trên Jira là FM, không phải FM-4 nhé
-          issuetype: "Task"
+          project: "FM"
+          issuetype: "Task" # Đã đổi thành Task để đồng bộ ngôn ngữ hệ thống Jira của bạn
           summary: "Newman Automation Test Failed"
-          description: "Phát hiện lỗi khi chạy test tự động trên nhánh feature-automation. Vui lòng kiểm tra lại file log report-newman.xml."
+          description: "Phát hiện lỗi khi chạy test tự động trên nhánh feature-automation. Vui lòng kiểm tra lại file log."
