@@ -42,12 +42,13 @@ jobs:
               echo "NEWMAN_STATUS=FAIL" >> $GITHUB_ENV
               FAILED_APIS=$(jq -r '.run.executions[] | select(.assertions[].error != null) | "- ❌ API: " + .item.name + " (" + .request.method + ")"' report-newman.json | sort -u)
               PASSED_APIS=$(jq -r '.run.executions[] | select(.assertions[].error == null) | "- ✅ API: " + .item.name + " (" + .request.method + ")"' report-newman.json | sort -u)
+              
               echo "NEWMAN_DETAILS<<EOF" >> $GITHUB_ENV
-              echo "❌ **Phát hiện lỗi API:**" >> $GITHUB_ENV
-              echo "$FAILED_APIS" >> $GITHUB_ENV
-              echo "" >> $GITHUB_ENV
-              echo "✨ **Các API chạy tốt:**" >> $GITHUB_ENV
-              echo "$PASSED_APIS" >> $GITHUB_ENV
+              echo "❌ *Phát hiện lỗi API:*"
+              echo "$FAILED_APIS"
+              echo ""
+              echo "✨ *Các API chạy tốt:*"
+              echo "$PASSED_APIS"
               echo "EOF" >> $GITHUB_ENV
             else
               echo "NEWMAN_STATUS=PASS" >> $GITHUB_ENV
@@ -62,7 +63,6 @@ jobs:
       - name: Run CodeceptJS Test (UI & BVA Detail)
         id: run_codecept
         run: |
-          # Dùng npm install thay vì npm ci để tránh xung đột package-lock trên máy ảo
           npm install --legacy-peer-deps
 
           # Chạy test và ghi đè toàn bộ log màn hình ra file txt để phân tích
@@ -72,16 +72,17 @@ jobs:
           if grep -q "FAIL" codecept_output.txt || grep -q "failed" codecept_output.txt; then
             echo "CODECEPT_STATUS=FAIL" >> $GITHUB_ENV
             UI_ERRORS=$(grep -E "✖|failed|Error:" codecept_output.txt | head -n 10)
+            
             echo "CODECEPT_DETAILS<<EOF" >> $GITHUB_ENV
-            echo "❌ **Chi tiết kịch bản giao diện thất bại:**" >> $GITHUB_ENV
-            echo "$UI_ERRORS" >> $GITHUB_ENV
+            echo "❌ *Chi tiết kịch bản giao diện thất bại:*"
+            echo "$UI_ERRORS"
             echo "EOF" >> $GITHUB_ENV
           else
             echo "CODECEPT_STATUS=PASS" >> $GITHUB_ENV
             echo "CODECEPT_DETAILS=✅ Toàn bộ luồng UI và kịch bản giá trị biên (BVA) đều PASSED." >> $GITHUB_ENV
           fi
 
-      # 5. Đăng nhập vào Jira (Bỏ điều kiện 'if' để luôn luôn đăng nhập)
+      # 5. Đăng nhập vào Jira
       - name: FurniMart QA Login
         uses: atlassian/gajira-login@v3
         env:
@@ -89,30 +90,28 @@ jobs:
           JIRA_USER_EMAIL: ${{ secrets.JIRA_USER_EMAIL }}
           JIRA_API_TOKEN: ${{ secrets.JIRA_API_TOKEN }}
 
-      # 6. Tự động tạo Task trên Jira chứa báo cáo (Luôn chạy bất kể kết quả Đúng hay Sai)
+      # 6. Tự động tạo Task trên Jira chứa báo cáo chuẩn xác
       - name: Create Jira Issue with Deep Details
         id: create_jira
         uses: atlassian/gajira-create@v3
         with:
           project: "FM"
           issuetype: "Task"
-          # Gắn vào Epic chính xác thông qua object JSON parent
           fields: '{"parent": {"key": "FM-2"}}'
-          # Tiêu đề thay đổi động: Ghi nhận THÀNH CÔNG hoặc LỖI dựa trên trạng thái test thực tế
           summary: "${{ (env.NEWMAN_STATUS == 'FAIL' || env.CODECEPT_STATUS == 'FAIL') && '🚨 [Automation] Phát hiện LỖI kiểm thử hệ thống' || '✅ [Automation] Kiểm thử hệ thống THÀNH CÔNG' }}"
           description: |
             Báo cáo kiểm thử tự động được kích hoạt từ nhánh `feature-automation`.
 
-            📋 **CHI TIẾT TRẠNG THÁI TỪNG API (NEWMAN):**
+            📋 **1. CHI TIẾT TRẠNG THÁI TỪNG API (NEWMAN):**
             ${{ env.NEWMAN_DETAILS }}
 
-            📋 **CHI TIẾT KỊCH BẢN GIAO DIỆN & GIÁ TRỊ BIÊN (CODECEPTJS UI/FE):**
+            📋 **2. CHI TIẾT KỊCH BẢN GIAO DIỆN & GIÁ TRỊ BIÊN (CODECEPTJS UI/FE):**
             ${{ env.CODECEPT_DETAILS }}
 
             ---
             *Mã tiến trình chạy:* #${{ github.run_id }}
 
-      # 7. ĐÍNH KÈM TRỰC TIẾP ẢNH LỖI (.png) LÊN TICKET JIRA VỪA TẠO (Chỉ chạy khi UI bị FAIL)
+      # 7. ĐÍNH KÈM TRỰC TIẾP ẢNH LỖI (.png) LÊN TICKET JIRA VỪA TẠO
       - name: Upload Screenshots Directly to Jira Attachment
         if: env.CODECEPT_STATUS == 'FAIL'
         run: |
@@ -120,7 +119,6 @@ jobs:
           ISSUE_KEY="${{ steps.create_jira.outputs.issue }}"
           echo "Đang đính kèm file vào Ticket: $ISSUE_KEY"
 
-          # Duyệt qua toàn bộ file .png trong thư mục output và đẩy trực tiếp lên Jira API
           find output/ -name "*.png" -type f | while read -r file; do
             echo "Đang tải ảnh lên Jira: $file"
             curl --request POST \
