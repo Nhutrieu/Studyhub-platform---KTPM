@@ -97,7 +97,7 @@ jobs:
           project: "FM"
           issuetype: "Task"
           # Gắn vào Epic chính xác thông qua object JSON parent
-          fields: '{"parent": {"key": "FM-1"}}'
+          fields: '{"parent": {"key": "FM-2"}}'
           # Tiêu đề thay đổi động: Ghi nhận THÀNH CÔNG hoặc LỖI dựa trên trạng thái test thực tế
           summary: "${{ (env.NEWMAN_STATUS == 'FAIL' || env.CODECEPT_STATUS == 'FAIL') && '🚨 [Automation] Phát hiện LỖI kiểm thử hệ thống' || '✅ [Automation] Kiểm thử hệ thống THÀNH CÔNG' }}"
           description: |
