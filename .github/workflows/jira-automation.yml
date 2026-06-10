@@ -85,17 +85,18 @@ jobs:
             exit 0
           fi
 
-          FAIL=$(jq '.run.stats.assertions.failed' report-newman.json)
+          FAIL=$(jq -r '.run.stats.assertions.failed // 0' report-newman.json)
 
           PASSED=$(jq -r '
           .run.executions[]
-          | select(.assertions[].error==null)
+          | select(.assertions != null)
+          | select(all(.assertions[]?; .error == null))
           | "- " + .item.name
           ' report-newman.json | sort -u)
 
           FAILED=$(jq -r '
           .run.executions[]
-          | select(.assertions[].error!=null)
+          | select(any(.assertions[]?; .error != null))
           | "- " + .item.name
           ' report-newman.json | sort -u)
 
@@ -217,7 +218,7 @@ jobs:
 
         with:
           project: FM
-          issuetype: Bug
+          issuetype: BUG
           summary: "[Automation][FAIL] FurniMart Testing"
 
           description: |
