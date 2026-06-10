@@ -13,12 +13,15 @@ jobs:
       - name: Checkout Source Code
         uses: actions/checkout@v4
 
-      # 2. Cài đặt NodeJS
-      - name: Setup Node.js
+      # 2. Cài đặt NodeJS và công cụ phân tích JSON (jq)
+      - name: Setup Node.js & Tools
         uses: actions/setup-node@v4
         with:
           node-version: "18"
           cache: "npm"
+
+      - name: Install jq Analyzer
+        run: sudo apt-get update && sudo apt-get install -y jq
 
       # 3. Chạy Newman Test & Trích xuất chi tiết từng kết quả API
       - name: Run Newman Test (API Detail)
@@ -59,7 +62,8 @@ jobs:
       - name: Run CodeceptJS Test (UI & BVA Detail)
         id: run_codecept
         run: |
-          npm ci
+          # Dùng npm install thay vì npm ci để tránh xung đột package-lock trên máy ảo
+          npm install --legacy-peer-deps
 
           # Chạy test và ghi đè toàn bộ log màn hình ra file txt để phân tích
           npx codeceptjs run --steps > codecept_output.txt || true
@@ -86,7 +90,7 @@ jobs:
           JIRA_USER_EMAIL: ${{ secrets.JIRA_USER_EMAIL }}
           JIRA_API_TOKEN: ${{ secrets.JIRA_API_TOKEN }}
 
-      # 6. Tự động tạo Task trên Jira chứa báo cáo cực kỳ chi tiết và tự động gắn vào Epic
+      # 6. Tự động tạo Task trên Jira chứa báo cáo cực kỳ chi tiết và tự động gắn vào Epic qua trường fields
       - name: Create Jira Issue with Deep Details
         if: env.NEWMAN_STATUS == 'FAIL' || env.CODECEPT_STATUS == 'FAIL'
         id: create_jira
@@ -94,7 +98,8 @@ jobs:
         with:
           project: "FM"
           issuetype: "Task"
-          epic: "FM-1" # <--- ĐIỀN CHÍNH XÁC MÃ KEY EPIC CỦA BẠN VÀO ĐÂY (Ví dụ: FM-1, FM-4...)
+          # Gắn vào Epic chính xác thông qua object JSON parent (Thay FM-1 bằng mã Epic của bạn nếu cần)
+          fields: '{"parent": {"key": "FM-1"}}'
           summary: "🚨 [Automation-Log] Phát hiện lỗi kiểm thử API & UI/BVA hệ thống"
           description: |
             Báo cáo kiểm thử tự động được kích hoạt từ nhánh `feature-automation`.
