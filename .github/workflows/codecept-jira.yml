@@ -1,0 +1,119 @@
+name: CodeceptJS UI Test + Jira
+
+on:
+  push:
+    branches:
+      - feature-automation
+
+jobs:
+  ui-testing:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout Source
+        uses: actions/checkout@v4
+
+      - name: Setup Node
+        uses: actions/setup-node@v4
+        with:
+          node-version: 18
+
+      - name: Run CodeceptJS
+        run: |
+          npm install --legacy-peer-deps
+
+          # Chạy test và ghi log ra file txt
+          npx codeceptjs run --steps > codecept_output.txt || true
+
+          # Kiểm tra trạng thái ĐÚNG/SAI
+          if grep -qi "fail" codecept_output.txt; then
+            echo "CODECEPT_STATUS=FAIL" >> $GITHUB_ENV
+          else
+            echo "CODECEPT_STATUS=PASS" >> $GITHUB_ENV
+          fi
+
+          # Lọc log testcase Pass và Fail (Giới hạn tối đa 20 dòng để tránh vỡ text trên Jira)
+          PASS_CASE=$(grep "✔" codecept_output.txt | head -n 20 || true)
+          FAIL_CASE=$(grep -E "✖|failed|Error:" codecept_output.txt | head -n 20 || true)
+
+          # Xuất báo cáo chuỗi nhiều dòng an toàn vào GITHUB_ENV sử dụng EOF nguyên bản
+          echo "CODECEPT_REPORT<<EOF" >> $GITHUB_ENV
+          echo "## UI Automation Testing Report"
+          echo "### Test Description"
+          echo "Thực hiện kiểm thử giao diện tự động bằng CodeceptJS."
+          echo ""
+          echo "### Phạm vi kiểm thử"
+          echo "- Login"
+          echo "- Register"
+          echo "- Product Detail"
+          echo "- Add To Cart"
+          echo "- Update Cart"
+          echo "- Checkout"
+          echo "- Logout"
+          echo "- Form Validation"
+          echo ""
+          echo "### Dataset"
+          echo "- Valid Input / Invalid Input / Empty Input / Boundary Value"
+          echo ""
+          echo "### Kết quả mong đợi"
+          echo "- UI hiển thị chính xác"
+          echo "- Điều hướng đúng luồng nghiệp vụ"
+          echo "- Hiển thị thông báo lỗi phù hợp"
+          echo "- Không phát sinh lỗi JavaScript"
+          echo ""
+          echo "### 📋 Kết quả kịch bản giao diện thất bại (Failures):"
+          if [ -z "$FAIL_CASE" ]; then
+            echo "🎉 Tuyệt vời! Toàn bộ kịch bản giao diện đều PASSED."
+          else
+            echo "$FAIL_CASE"
+          fi
+
+          if [ ! -z "$PASS_CASE" ]; then
+            echo ""
+            echo "### ✨ Kịch bản giao diện thành công (Passed):"
+            echo "$PASS_CASE"
+          fi
+          echo "EOF" >> $GITHUB_ENV
+
+      - name: Jira Login
+        uses: atlassian/gajira-login@v3
+        env:
+          JIRA_BASE_URL: ${{ secrets.JIRA_BASE_URL }}
+          JIRA_USER_EMAIL: ${{ secrets.JIRA_USER_EMAIL }}
+          JIRA_API_TOKEN: ${{ secrets.JIRA_API_TOKEN }}
+
+      - name: Create Jira Bug
+        id: jira
+        if: env.CODECEPT_STATUS == 'FAIL'
+        uses: atlassian/gajira-create@v3
+        with:
+          project: FM
+          issuetype: Task
+          # Gắn trực tiếp vào Epic FM-2 chuẩn chỉnh bằng cấu trúc fields JSON
+          fields: '{"parent": {"key": "FM-2"}}'
+          summary: "🚨 [UI Automation] Tìm thấy lỗi kiểm thử giao diện hệ thống"
+          description: |
+            Báo cáo kiểm thử tự động được kích hoạt từ nhánh `feature-automation`.
+
+            ${{ env.CODECEPT_REPORT }}
+
+            ---
+            *Branch:* `feature-automation`
+            *Run ID:* #${{ github.run_id }}
+
+      - name: Upload Screenshot
+        if: env.CODECEPT_STATUS == 'FAIL'
+        run: |
+          ISSUE=${{ steps.jira.outputs.issue }}
+
+          if [ -d output ]; then
+            find output -name "*.png" -type f | while read file; do
+              echo "Đang đính kèm ảnh lỗi lên Jira: $file"
+              curl \
+                --request POST \
+                --url "${{ secrets.JIRA_BASE_URL }}/rest/api/3/issue/$ISSUE/attachments" \
+                --user "${{ secrets.JIRA_USER_EMAIL }}:${{ secrets.JIRA_API_TOKEN }}" \
+                --header "X-Atlassian-Token: no-check" \
+                --form "file=@$file"
+            done
+          fi

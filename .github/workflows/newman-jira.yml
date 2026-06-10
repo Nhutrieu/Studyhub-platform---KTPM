@@ -1,0 +1,110 @@
+name: Newman API Test + Jira
+
+on:
+  push:
+    branches:
+      - feature-automation
+
+jobs:
+  api-testing:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout Source
+        uses: actions/checkout@v4
+
+      - name: Setup Node
+        uses: actions/setup-node@v4
+        with:
+          node-version: 18
+
+      - name: Install Newman + jq
+        run: |
+          npm install -g newman
+          sudo apt-get update
+          sudo apt-get install -y jq
+
+      - name: Run Newman API Test
+        run: |
+          FILE_PATH=$(find . -name "FurniMart.postman_collection.json" | head -n 1)
+
+          newman run "$FILE_PATH" \
+            -r json \
+            --reporter-json-export report-newman.json || true
+
+          # Lấy tổng số lượng lỗi assertion
+          FAIL=$(jq -r '.run.stats.assertions.failed // 0' report-newman.json)
+
+          # THUẬT TOÁN JQ MỚI: Lọc chuẩn xác tuyệt đối trạng thái của từng API
+          # API chỉ được coi là PASSED khi TẤT CẢ các assertions bên trong nó đều KHÔNG có lỗi (error == null)
+          PASSED=$(jq -r '.run.executions[] | select(.assertions != null and length > 0) | select(all(.assertions[]; .error == null)) | "- ✅ " + .item.name + " (" + .request.method + ")"' report-newman.json | sort -u)
+
+          # API bị coi là FAILED khi có ÍT NHẤT một cuộc kiểm tra bên trong bị dính lỗi (error != null)
+          FAILED=$(jq -r '.run.executions[] | select(.assertions != null and length > 0) | select(any(.assertions[]; .error != null)) | "- ❌ " + .item.name + " (" + .request.method + ")"' report-newman.json | sort -u)
+
+          if [ "$FAIL" != "0" ]; then
+            echo "NEWMAN_STATUS=FAIL" >> $GITHUB_ENV
+          else
+            echo "NEWMAN_STATUS=PASS" >> $GITHUB_ENV
+          fi
+
+          # Xuất báo cáo dạng chuỗi nhiều dòng an toàn vào GITHUB_ENV sử dụng EOF nguyên bản
+          echo "NEWMAN_REPORT<<EOF" >> $GITHUB_ENV
+          echo "## API Automation Testing Report"
+          echo "### Test Description"
+          echo "Thực hiện kiểm thử tự động REST API bằng Newman."
+          echo ""
+          echo "### Phạm vi kiểm thử"
+          echo "- Authentication API"
+          echo "- Product API"
+          echo "- Category API"
+          echo "- Cart API"
+          echo "- Order API"
+          echo ""
+          echo "### Dataset"
+          echo "- Valid Input / Invalid Input / Empty Input / Boundary Value / SQL Injection / XSS Payload"
+          echo ""
+          echo "### Kết quả mong đợi"
+          echo "- API trả về đúng Status Code"
+          echo "- Response đúng Business Rule"
+          echo "- Không phát sinh lỗi hệ thống"
+          echo "- Validation hoạt động chính xác"
+          echo ""
+          echo "### 📋 Danh sách chi tiết API kiểm thử:"
+
+          if [ -z "$FAILED" ]; then
+            echo "🎉 Tuyệt vời! Không phát hiện lỗi API nào."
+          else
+            echo "$FAILED"
+          fi
+
+          if [ ! -z "$PASSED" ]; then
+            echo ""
+            echo "$PASSED"
+          fi
+          echo "EOF" >> $GITHUB_ENV
+
+      - name: Jira Login
+        uses: atlassian/gajira-login@v3
+        env:
+          JIRA_BASE_URL: ${{ secrets.JIRA_BASE_URL }}
+          JIRA_USER_EMAIL: ${{ secrets.JIRA_USER_EMAIL }}
+          JIRA_API_TOKEN: ${{ secrets.JIRA_API_TOKEN }}
+
+      - name: Create Jira Bug
+        if: env.NEWMAN_STATUS == 'FAIL'
+        uses: atlassian/gajira-create@v3
+        with:
+          project: FM
+          issuetype: Task
+          # Tự động gán task lỗi này vào Epic FM-2 của bạn luôn cho gọn gàng
+          fields: '{"parent": {"key": "FM-2"}}'
+          summary: "🚨 [API Automation] Phát hiện lỗi kiểm thử hệ thống"
+          description: |
+            Báo cáo kiểm thử tự động được kích hoạt từ nhánh `feature-automation`.
+
+            ${{ env.NEWMAN_REPORT }}
+
+            ---
+            *Branch:* `feature-automation`
+            *Run ID:* #${{ github.run_id }}
