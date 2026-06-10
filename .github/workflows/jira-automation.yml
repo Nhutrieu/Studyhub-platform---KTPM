@@ -81,26 +81,25 @@ jobs:
             echo "CODECEPT_DETAILS=✅ Toàn bộ luồng UI và kịch bản giá trị biên (BVA) đều PASSED." >> $GITHUB_ENV
           fi
 
-      # 5. Đăng nhập vào Jira
+      # 5. Đăng nhập vào Jira (Bỏ điều kiện 'if' để luôn luôn đăng nhập)
       - name: FurniMart QA Login
-        if: env.NEWMAN_STATUS == 'FAIL' || env.CODECEPT_STATUS == 'FAIL'
         uses: atlassian/gajira-login@v3
         env:
           JIRA_BASE_URL: ${{ secrets.JIRA_BASE_URL }}
           JIRA_USER_EMAIL: ${{ secrets.JIRA_USER_EMAIL }}
           JIRA_API_TOKEN: ${{ secrets.JIRA_API_TOKEN }}
 
-      # 6. Tự động tạo Task trên Jira chứa báo cáo cực kỳ chi tiết và tự động gắn vào Epic qua trường fields
+      # 6. Tự động tạo Task trên Jira chứa báo cáo (Luôn chạy bất kể kết quả Đúng hay Sai)
       - name: Create Jira Issue with Deep Details
-        if: env.NEWMAN_STATUS == 'FAIL' || env.CODECEPT_STATUS == 'FAIL'
         id: create_jira
         uses: atlassian/gajira-create@v3
         with:
           project: "FM"
           issuetype: "Task"
-          # Gắn vào Epic chính xác thông qua object JSON parent (Thay FM-1 bằng mã Epic của bạn nếu cần)
+          # Gắn vào Epic chính xác thông qua object JSON parent
           fields: '{"parent": {"key": "FM-1"}}'
-          summary: "🚨 [Automation-Log] Phát hiện lỗi kiểm thử API & UI/BVA hệ thống"
+          # Tiêu đề thay đổi động: Ghi nhận THÀNH CÔNG hoặc LỖI dựa trên trạng thái test thực tế
+          summary: "${{ (env.NEWMAN_STATUS == 'FAIL' || env.CODECEPT_STATUS == 'FAIL') && '🚨 [Automation] Phát hiện LỖI kiểm thử hệ thống' || '✅ [Automation] Kiểm thử hệ thống THÀNH CÔNG' }}"
           description: |
             Báo cáo kiểm thử tự động được kích hoạt từ nhánh `feature-automation`.
 
@@ -113,7 +112,7 @@ jobs:
             ---
             *Mã tiến trình chạy:* #${{ github.run_id }}
 
-      # 7. ĐÍNH KÈM TRỰC TIẾP ẢNH LỖI (.png) LÊN TICKET JIRA VỪA TẠO
+      # 7. ĐÍNH KÈM TRỰC TIẾP ẢNH LỖI (.png) LÊN TICKET JIRA VỪA TẠO (Chỉ chạy khi UI bị FAIL)
       - name: Upload Screenshots Directly to Jira Attachment
         if: env.CODECEPT_STATUS == 'FAIL'
         run: |
