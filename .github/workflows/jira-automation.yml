@@ -1,53 +1,128 @@
-name: Tự động hóa Newman và Đẩy lên Jira
+name: Tự động hóa Test Chi Tiết và Đẩy Báo Cáo + Ảnh lên Jira
 
 on:
   push:
-    branches: ["feature-automation"] # Tự động chạy khi push lên nhánh feature-automation
+    branches: ["feature-automation"]
 
 jobs:
   testing-and-jira:
     runs-on: ubuntu-latest
 
     steps:
-      # 1. Lấy code từ repository về máy ảo của GitHub
+      # 1. Lấy code từ repository về máy ảo
       - name: Checkout Source Code
         uses: actions/checkout@v4
 
-      # 2. Cài đặt NodeJS để chạy Newman
+      # 2. Cài đặt NodeJS
       - name: Setup Node.js
         uses: actions/setup-node@v4
         with:
           node-version: "18"
+          cache: "npm"
 
-      # 3. Tự động tìm và chạy Newman bất kể file nằm ở thư mục nào
-      - name: Run Newman Test
+      # 3. Chạy Newman Test & Trích xuất chi tiết từng kết quả API
+      - name: Run Newman Test (API Detail)
         id: run_newman
         run: |
           npm install -g newman
-
-          # Lệnh này sẽ tự tìm đường dẫn thực tế của file trên máy ảo
           FILE_PATH=$(find . -name "FurniMart.postman_collection.json" | head -n 1)
-
           echo "Đã tìm thấy file tại đường dẫn: $FILE_PATH"
 
-          # Chạy Newman bằng đường dẫn vừa tìm được
-          newman run "$FILE_PATH" -r junit --reporter-junit-export report-newman.xml
-        continue-on-error: true # Dù test fail vẫn chạy tiếp bước sau để gửi log lên Jira
+          # Chạy xuất ra file report JSON để phân tích chi tiết từng API
+          newman run "$FILE_PATH" -r json --reporter-json-export report-newman.json || true
 
-      # 4. Đăng nhập vào Jira (Lấy từ Secrets)
+          # Đọc file JSON để liệt kê chi tiết danh sách API thành công/thất bại
+          echo "=== PHÂN TÍCH KẾT QUẢ API ==="
+          if [ -f "report-newman.json" ]; then
+            TOTAL_FAIL=$(jq '.run.stats.assertions.failed' report-newman.json)
+            if [ "$TOTAL_FAIL" -ne "0" ]; then
+              echo "NEWMAN_STATUS=FAIL" >> $GITHUB_ENV
+              FAILED_APIS=$(jq -r '.run.executions[] | select(.assertions[].error != null) | "- ❌ API: " + .item.name + " (" + .request.method + ")"' report-newman.json | sort -u)
+              PASSED_APIS=$(jq -r '.run.executions[] | select(.assertions[].error == null) | "- ✅ API: " + .item.name + " (" + .request.method + ")"' report-newman.json | sort -u)
+              echo "NEWMAN_DETAILS<<EOF" >> $GITHUB_ENV
+              echo "❌ **Phát hiện lỗi API:**" >> $GITHUB_ENV
+              echo "$FAILED_APIS" >> $GITHUB_ENV
+              echo "" >> $GITHUB_ENV
+              echo "✨ **Các API chạy tốt:**" >> $GITHUB_ENV
+              echo "$PASSED_APIS" >> $GITHUB_ENV
+              echo "EOF" >> $GITHUB_ENV
+            else
+              echo "NEWMAN_STATUS=PASS" >> $GITHUB_ENV
+              echo "NEWMAN_DETAILS=✅ Toàn bộ các API hoạt động đúng đặc tả." >> $GITHUB_ENV
+            fi
+          else
+            echo "NEWMAN_STATUS=FAIL" >> $GITHUB_ENV
+            echo "NEWMAN_DETAILS=❌ Không tìm thấy hoặc lỗi định dạng file report-newman.json." >> $GITHUB_ENV
+          fi
+
+      # 4. Chạy CodeceptJS Test & Trích xuất chi tiết kịch bản UI / BVA
+      - name: Run CodeceptJS Test (UI & BVA Detail)
+        id: run_codecept
+        run: |
+          npm ci
+
+          # Chạy test và ghi đè toàn bộ log màn hình ra file txt để phân tích
+          npx codeceptjs run --steps > codecept_output.txt || true
+
+          # Phân tích xem các kịch bản Đăng ký/Đăng nhập/BVA đúng hay sai
+          if grep -q "FAIL" codecept_output.txt || grep -q "failed" codecept_output.txt; then
+            echo "CODECEPT_STATUS=FAIL" >> $GITHUB_ENV
+            UI_ERRORS=$(grep -E "✖|failed|Error:" codecept_output.txt | head -n 10)
+            echo "CODECEPT_DETAILS<<EOF" >> $GITHUB_ENV
+            echo "❌ **Chi tiết kịch bản giao diện thất bại:**" >> $GITHUB_ENV
+            echo "$UI_ERRORS" >> $GITHUB_ENV
+            echo "EOF" >> $GITHUB_ENV
+          else
+            echo "CODECEPT_STATUS=PASS" >> $GITHUB_ENV
+            echo "CODECEPT_DETAILS=✅ Toàn bộ luồng UI và kịch bản giá trị biên (BVA) đều PASSED." >> $GITHUB_ENV
+          fi
+
+      # 5. Đăng nhập vào Jira
       - name: FurniMart QA Login
+        if: env.NEWMAN_STATUS == 'FAIL' || env.CODECEPT_STATUS == 'FAIL'
         uses: atlassian/gajira-login@v3
         env:
           JIRA_BASE_URL: ${{ secrets.JIRA_BASE_URL }}
           JIRA_USER_EMAIL: ${{ secrets.JIRA_USER_EMAIL }}
           JIRA_API_TOKEN: ${{ secrets.JIRA_API_TOKEN }}
 
-      # 5. Tự động tạo Task trên Jira nếu bài test thất bại
-      - name: Create Jira Issue on Failure
-        if: steps.run_newman.outcome == 'failure' # Chỉ tạo bug khi bước test số 3 bị lỗi
+      # 6. Tự động tạo Task trên Jira chứa báo cáo cực kỳ chi tiết và tự động gắn vào Epic
+      - name: Create Jira Issue with Deep Details
+        if: env.NEWMAN_STATUS == 'FAIL' || env.CODECEPT_STATUS == 'FAIL'
+        id: create_jira
         uses: atlassian/gajira-create@v3
         with:
           project: "FM"
-          issuetype: "Task" # Đã đổi thành Task để đồng bộ ngôn ngữ hệ thống Jira của bạn
-          summary: "Newman Automation Test Failed"
-          description: "Phát hiện lỗi khi chạy test tự động trên nhánh feature-automation. Vui lòng kiểm tra lại file log."
+          issuetype: "Task"
+          epic: "FM-1" # <--- ĐIỀN CHÍNH XÁC MÃ KEY EPIC CỦA BẠN VÀO ĐÂY (Ví dụ: FM-1, FM-4...)
+          summary: "🚨 [Automation-Log] Phát hiện lỗi kiểm thử API & UI/BVA hệ thống"
+          description: |
+            Báo cáo kiểm thử tự động được kích hoạt từ nhánh `feature-automation`.
+
+            📋 **CHI TIẾT TRẠNG THÁI TỪNG API (NEWMAN):**
+            ${{ env.NEWMAN_DETAILS }}
+
+            📋 **CHI TIẾT KỊCH BẢN GIAO DIỆN & GIÁ TRỊ BIÊN (CODECEPTJS UI/FE):**
+            ${{ env.CODECEPT_DETAILS }}
+
+            ---
+            *Mã tiến trình chạy:* #${{ github.run_id }}
+
+      # 7. ĐÍNH KÈM TRỰC TIẾP ẢNH LỖI (.png) LÊN TICKET JIRA VỪA TẠO
+      - name: Upload Screenshots Directly to Jira Attachment
+        if: env.CODECEPT_STATUS == 'FAIL'
+        run: |
+          echo "Tiến hành quét thư mục output để tìm ảnh lỗi..."
+          ISSUE_KEY="${{ steps.create_jira.outputs.issue }}"
+          echo "Đang đính kèm file vào Ticket: $ISSUE_KEY"
+
+          # Duyệt qua toàn bộ file .png trong thư mục output và đẩy trực tiếp lên Jira API
+          find output/ -name "*.png" -type f | while read -r file; do
+            echo "Đang tải ảnh lên Jira: $file"
+            curl --request POST \
+              --url "${{ secrets.JIRA_BASE_URL }}/rest/api/3/issue/$ISSUE_KEY/attachments" \
+              --user "${{ secrets.JIRA_USER_EMAIL }}:${{ secrets.JIRA_API_TOKEN }}" \
+              --header 'Accept: application/json' \
+              --header 'X-Atlassian-Token: no-check' \
+              --form "file=@$file"
+          done
