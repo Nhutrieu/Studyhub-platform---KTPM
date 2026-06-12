@@ -3,7 +3,7 @@ name: Newman API Test + Jira
 on:
   push:
     branches:
-      - feature-automation
+      - '**'
 
 jobs:
   api-testing:
@@ -13,18 +13,34 @@ jobs:
       - name: Checkout Source
         uses: actions/checkout@v4
 
+      - name: Extract Jira Key from Commit Message
+        run: |
+          COMMIT_MSG=$(git log -1 --pretty=%B || true)
+          JIRA_KEY=$(echo "$COMMIT_MSG" | grep -oE "[A-Z]+-[0-9]+" | head -n 1 || true)
+          if [ -z "$JIRA_KEY" ]; then
+            echo "No Jira ID found in commit message. Skipping tests."
+            echo "HAS_KEY=false" >> $GITHUB_ENV
+          else
+            echo "JIRA_KEY=$JIRA_KEY" >> $GITHUB_ENV
+            echo "HAS_KEY=true" >> $GITHUB_ENV
+            echo "Extracted Jira Key: $JIRA_KEY"
+          fi
+
       - name: Setup Node
+        if: env.HAS_KEY == 'true'
         uses: actions/setup-node@v4
         with:
           node-version: 18
 
       - name: Install Newman + jq
+        if: env.HAS_KEY == 'true'
         run: |
           npm install -g newman
           sudo apt-get update
           sudo apt-get install -y jq
 
       - name: Run Newman API Test
+        if: env.HAS_KEY == 'true'
         run: |
           FILE_PATH=$(find . -name "FurniMart.postman_collection.json" | head -n 1)
 
@@ -35,7 +51,6 @@ jobs:
           # Lấy tổng số lượng lỗi assertion
           FAIL=$(jq -r '.run.stats.assertions.failed // 0' report-newman.json)
 
-          # THUẬT TOÁN JQ MỚI: Lọc chuẩn xác tuyệt đối trạng thái của từng API
           # API chỉ được coi là PASSED khi TẤT CẢ các assertions bên trong nó đều KHÔNG có lỗi (error == null)
           PASSED=$(jq -r '.run.executions[] | select(.assertions != null and length > 0) | select(all(.assertions[]; .error == null)) | "- ✅ " + .item.name + " (" + .request.method + ")"' report-newman.json | sort -u)
 
@@ -71,6 +86,7 @@ jobs:
           echo "- Validation hoạt động chính xác"
           echo ""
           echo "### 📋 Danh sách chi tiết API kiểm thử:"
+          echo ""
 
           if [ -z "$FAILED" ]; then
             echo "🎉 Tuyệt vời! Không phát hiện lỗi API nào."
@@ -85,26 +101,52 @@ jobs:
           echo "EOF" >> $GITHUB_ENV
 
       - name: Jira Login
+        if: env.HAS_KEY == 'true'
         uses: atlassian/gajira-login@v3
         env:
           JIRA_BASE_URL: ${{ secrets.JIRA_BASE_URL }}
-          JIRA_USER_EMAIL: ${{ secrets.JIRA_USER_EMAIL }}
+          JIRA_USER_EMAIL: ${{ secrets.JIRA_EMAIL }}
           JIRA_API_TOKEN: ${{ secrets.JIRA_API_TOKEN }}
 
       - name: Create Jira Bug
-        if: env.NEWMAN_STATUS == 'FAIL'
+        if: env.HAS_KEY == 'true' && env.NEWMAN_STATUS == 'FAIL'
         uses: atlassian/gajira-create@v3
         with:
-          project: FM
+          project: ${{ secrets.JIRA_PROJECT_KEY || 'FM' }}
           issuetype: Task
-          # Tự động gán task lỗi này vào Epic FM-2 của bạn luôn cho gọn gàng
-          fields: '{"parent": {"key": "FM-2"}}'
+          fields: '{"parent": {"key": "${{ env.JIRA_KEY }}"}}'
           summary: "🚨 [API Automation] Phát hiện lỗi kiểm thử hệ thống"
           description: |
-            Báo cáo kiểm thử tự động được kích hoạt từ nhánh `feature-automation`.
+            Báo cáo kiểm thử tự động được kích hoạt từ nhánh `${{ github.ref_name }}`.
 
             ${{ env.NEWMAN_REPORT }}
 
             ---
-            *Branch:* `feature-automation`
+            *Branch:* `${{ github.ref_name }}`
             *Run ID:* #${{ github.run_id }}
+
+      - name: Transition Issue to Done
+        if: env.HAS_KEY == 'true' && env.NEWMAN_STATUS == 'PASS'
+        run: |
+          curl --request POST \
+            --url "${{ secrets.JIRA_BASE_URL }}/rest/api/3/issue/${{ env.JIRA_KEY }}/transitions" \
+            --user "${{ secrets.JIRA_EMAIL }}:${{ secrets.JIRA_API_TOKEN }}" \
+            --header "Accept: application/json" \
+            --header "Content-Type: application/json" \
+            --data '{"transition": {"id": "${{ secrets.JIRA_TRANSITION_DONE_ID || '31' }}"}}'
+
+      - name: Add Success Comment
+        if: env.HAS_KEY == 'true' && env.NEWMAN_STATUS == 'PASS'
+        run: |
+          jq -n \
+            --arg report "${{ env.NEWMAN_REPORT }}" \
+            --arg run_id "${{ github.run_id }}" \
+            '{body: {type: "doc", version: 1, content: [{type: "paragraph", content: [{type: "text", text: "✅ [API Automation] Testing Completed Successfully. Run ID: #\($run_id)\n\n\($report)"}]}]}}' \
+            > comment_payload.json
+
+          curl --request POST \
+            --url "${{ secrets.JIRA_BASE_URL }}/rest/api/3/issue/${{ env.JIRA_KEY }}/comment" \
+            --user "${{ secrets.JIRA_EMAIL }}:${{ secrets.JIRA_API_TOKEN }}" \
+            --header "Accept: application/json" \
+            --header "Content-Type: application/json" \
+            --data @comment_payload.json

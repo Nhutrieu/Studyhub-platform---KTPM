@@ -4,6 +4,8 @@ on:
   push:
     branches:
       - main
+  schedule:
+    - cron: '0 2 * * *'
 
 jobs:
   jira-api-test:
@@ -50,17 +52,6 @@ jobs:
         run: |
           echo "Running Jira API testing..."
           python run_tests.py
-        working-directory: Tool
-
-      - name: Run Postman collection with Newman (optional)
-        continue-on-error: true
-        run: |
-          if [ -f postman/jira-api-collection.json ]; then
-            echo 'Running Newman collection...'
-            newman run postman/jira-api-collection.json -e postman/jira-environment.json --suppress-exit-code
-          else
-            echo 'No Postman collection found; skipping Newman.'
-          fi
         working-directory: Tool
 
       - name: Upload test report

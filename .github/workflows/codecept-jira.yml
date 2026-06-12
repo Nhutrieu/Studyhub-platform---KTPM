@@ -3,7 +3,7 @@ name: CodeceptJS UI Test + Jira
 on:
   push:
     branches:
-      - feature-automation
+      - '**'
 
 jobs:
   ui-testing:
@@ -13,12 +13,27 @@ jobs:
       - name: Checkout Source
         uses: actions/checkout@v4
 
+      - name: Extract Jira Key from Commit Message
+        run: |
+          COMMIT_MSG=$(git log -1 --pretty=%B || true)
+          JIRA_KEY=$(echo "$COMMIT_MSG" | grep -oE "[A-Z]+-[0-9]+" | head -n 1 || true)
+          if [ -z "$JIRA_KEY" ]; then
+            echo "No Jira ID found in commit message. Skipping tests."
+            echo "HAS_KEY=false" >> $GITHUB_ENV
+          else
+            echo "JIRA_KEY=$JIRA_KEY" >> $GITHUB_ENV
+            echo "HAS_KEY=true" >> $GITHUB_ENV
+            echo "Extracted Jira Key: $JIRA_KEY"
+          fi
+
       - name: Setup Node
+        if: env.HAS_KEY == 'true'
         uses: actions/setup-node@v4
         with:
           node-version: 18
 
       - name: Run CodeceptJS
+        if: env.HAS_KEY == 'true'
         run: |
           npm install --legacy-peer-deps
 
@@ -76,33 +91,33 @@ jobs:
           echo "EOF" >> $GITHUB_ENV
 
       - name: Jira Login
+        if: env.HAS_KEY == 'true'
         uses: atlassian/gajira-login@v3
         env:
           JIRA_BASE_URL: ${{ secrets.JIRA_BASE_URL }}
-          JIRA_USER_EMAIL: ${{ secrets.JIRA_USER_EMAIL }}
+          JIRA_USER_EMAIL: ${{ secrets.JIRA_EMAIL }}
           JIRA_API_TOKEN: ${{ secrets.JIRA_API_TOKEN }}
 
       - name: Create Jira Bug
         id: jira
-        if: env.CODECEPT_STATUS == 'FAIL'
+        if: env.HAS_KEY == 'true' && env.CODECEPT_STATUS == 'FAIL'
         uses: atlassian/gajira-create@v3
         with:
-          project: FM
+          project: ${{ secrets.JIRA_PROJECT_KEY || 'FM' }}
           issuetype: Task
-          # Gắn trực tiếp vào Epic FM-2 chuẩn chỉnh bằng cấu trúc fields JSON
-          fields: '{"parent": {"key": "FM-2"}}'
+          fields: '{"parent": {"key": "${{ env.JIRA_KEY }}"}}'
           summary: "🚨 [UI Automation] Tìm thấy lỗi kiểm thử giao diện hệ thống"
           description: |
-            Báo cáo kiểm thử tự động được kích hoạt từ nhánh `feature-automation`.
+            Báo cáo kiểm thử tự động được kích hoạt từ nhánh `${{ github.ref_name }}`.
 
             ${{ env.CODECEPT_REPORT }}
 
             ---
-            *Branch:* `feature-automation`
+            *Branch:* `${{ github.ref_name }}`
             *Run ID:* #${{ github.run_id }}
 
       - name: Upload Screenshot
-        if: env.CODECEPT_STATUS == 'FAIL'
+        if: env.HAS_KEY == 'true' && env.CODECEPT_STATUS == 'FAIL'
         run: |
           ISSUE=${{ steps.jira.outputs.issue }}
 
@@ -112,8 +127,40 @@ jobs:
               curl \
                 --request POST \
                 --url "${{ secrets.JIRA_BASE_URL }}/rest/api/3/issue/$ISSUE/attachments" \
-                --user "${{ secrets.JIRA_USER_EMAIL }}:${{ secrets.JIRA_API_TOKEN }}" \
+                --user "${{ secrets.JIRA_EMAIL }}:${{ secrets.JIRA_API_TOKEN }}" \
                 --header "X-Atlassian-Token: no-check" \
                 --form "file=@$file"
             done
           fi
+
+      - name: Transition Issue to Done
+        if: env.HAS_KEY == 'true' && env.CODECEPT_STATUS == 'PASS'
+        run: |
+          curl --request POST \
+            --url "${{ secrets.JIRA_BASE_URL }}/rest/api/3/issue/${{ env.JIRA_KEY }}/transitions" \
+            --user "${{ secrets.JIRA_EMAIL }}:${{ secrets.JIRA_API_TOKEN }}" \
+            --header "Accept: application/json" \
+            --header "Content-Type: application/json" \
+            --data '{"transition": {"id": "${{ secrets.JIRA_TRANSITION_DONE_ID || '31' }}"}}'
+
+      - name: Install jq
+        if: env.HAS_KEY == 'true' && env.CODECEPT_STATUS == 'PASS'
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y jq
+
+      - name: Add Success Comment
+        if: env.HAS_KEY == 'true' && env.CODECEPT_STATUS == 'PASS'
+        run: |
+          jq -n \
+            --arg report "${{ env.CODECEPT_REPORT }}" \
+            --arg run_id "${{ github.run_id }}" \
+            '{body: {type: "doc", version: 1, content: [{type: "paragraph", content: [{type: "text", text: "✅ [UI Automation] Testing Completed Successfully. Run ID: #\($run_id)\n\n\($report)"}]}]}}' \
+            > comment_payload.json
+
+          curl --request POST \
+            --url "${{ secrets.JIRA_BASE_URL }}/rest/api/3/issue/${{ env.JIRA_KEY }}/comment" \
+            --user "${{ secrets.JIRA_EMAIL }}:${{ secrets.JIRA_API_TOKEN }}" \
+            --header "Accept: application/json" \
+            --header "Content-Type: application/json" \
+            --data @comment_payload.json

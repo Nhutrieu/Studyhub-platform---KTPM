@@ -1,3 +1,4 @@
+import argparse
 import os
 import json
 import shutil
@@ -37,23 +38,23 @@ REPORT_XLSX = os.path.join(REPORT_DIR, "report.xlsx")
 os.makedirs(REPORT_DIR, exist_ok=True)
 
 
-def run_newman():
+def run_newman(collection_path, base_url):
     newman = shutil.which("newman")
 
     if not newman:
         print("Không tìm thấy Newman. Chạy: npm install -g newman")
         return False
 
-    if not os.path.exists(COLLECTION):
-        print(f"Không tìm thấy file Postman Collection tại: {COLLECTION}")
+    if not os.path.exists(collection_path):
+        print(f"Không tìm thấy file Postman Collection tại: {collection_path}")
         return False
 
     cmd = [
         newman,
         "run",
-        COLLECTION,
+        collection_path,
         "--env-var",
-        f"baseUrl={BASE_URL}",
+        f"baseUrl={base_url}",
         "--reporters",
         "cli,json",
         "--reporter-json-export",
@@ -335,7 +336,18 @@ def create_jira_issue(failure):
 
 
 def main():
-    if not run_newman():
+    parser = argparse.ArgumentParser()
+    parser.add_argument("--collection", default=os.getenv("POSTMAN_COLLECTION_PATH", "postman/furnimart_collection.json"), help="Path to Postman collection JSON")
+    parser.add_argument("--base-url", default=os.getenv("BASE_URL", "http://localhost:3000"), help="Base URL of the API under test")
+    args = parser.parse_args()
+
+    # Resolve collection path (relative to BASE_DIR if not absolute)
+    if os.path.isabs(args.collection):
+        collection_path = args.collection
+    else:
+        collection_path = os.path.join(BASE_DIR, args.collection)
+
+    if not run_newman(collection_path, args.base_url):
         print("Không tạo được report.json")
         return
 
