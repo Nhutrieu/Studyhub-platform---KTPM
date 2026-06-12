@@ -4,6 +4,10 @@ on:
   push:
     branches:
       - '**'
+    pull_request:
+    branches:
+      - dev   # Chạy test khi tạo PR gộp vào nhánh dev
+      - main  # Chạy test khi tạo PR gộp vào nhánh main
 
 jobs:
   api-testing:
