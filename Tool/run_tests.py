@@ -15,14 +15,19 @@ load_dotenv()
 BASE_DIR = os.path.dirname(__file__)
 
 BASE_URL = os.getenv("BASE_URL", "http://localhost:3000")
+PROJECT_NAME = os.getenv("PROJECT_NAME", "Furnimart")
 
 JIRA_BASE_URL = os.getenv("JIRA_BASE_URL")
 JIRA_EMAIL = os.getenv("JIRA_EMAIL")
 JIRA_API_TOKEN = os.getenv("JIRA_API_TOKEN")
 JIRA_PROJECT_KEY = os.getenv("JIRA_PROJECT_KEY", "FM")
-JIRA_ISSUE_TYPE = os.getenv("JIRA_ISSUE_TYPE", "Task")
+JIRA_ISSUE_TYPE = os.getenv("JIRA_ISSUE_TYPE", "Bug")
 
-COLLECTION = os.path.join(BASE_DIR, "postman", "furnimart_collection.json")
+COLLECTION_PATH = os.getenv("POSTMAN_COLLECTION_PATH", "postman/furnimart_collection.json")
+if os.path.isabs(COLLECTION_PATH):
+    COLLECTION = COLLECTION_PATH
+else:
+    COLLECTION = os.path.join(BASE_DIR, COLLECTION_PATH)
 
 REPORT_DIR = os.path.join(BASE_DIR, "report")
 REPORT_JSON = os.path.join(REPORT_DIR, "report.json")
@@ -37,6 +42,10 @@ def run_newman():
 
     if not newman:
         print("Không tìm thấy Newman. Chạy: npm install -g newman")
+        return False
+
+    if not os.path.exists(COLLECTION):
+        print(f"Không tìm thấy file Postman Collection tại: {COLLECTION}")
         return False
 
     cmd = [
@@ -112,7 +121,7 @@ def write_markdown(results, failures, created_issues):
     now = datetime.now(timezone.utc).isoformat()
 
     lines = [
-        "# Furnimart API Testing Report",
+        f"# {PROJECT_NAME} API Testing Report",
         "",
         f"Generated: {now}",
         "",
@@ -254,25 +263,37 @@ def create_jira_issue(failure):
 
     url = f"{JIRA_BASE_URL.rstrip('/')}/rest/api/3/issue"
 
-    description_text = (
-        f"Furnimart API test failed.\n\n"
-        f"Test Case: {failure['name']}\n"
-        f"Method: {failure['method']}\n"
-        f"Endpoint: {failure['url']}\n"
-        f"Status Code: {failure['status']}\n"
-        f"Error: {failure['message']}\n\n"
-        f"Report files:\n"
-        f"- report/result.md\n"
-        f"- report/report.xlsx\n"
-        f"- report/report.json"
-    )
+    if JIRA_ISSUE_TYPE.lower() == "task":
+        description_text = (
+            f"Mô tả\n"
+            f"API test case [{failure['name']}] thất bại khi chạy kiểm thử tự động.\n"
+            f"- HTTP Method: {failure['method']}\n"
+            f"- Endpoint: {failure['url']}\n\n"
+            f"Phạm vi Kiểm thử\n"
+            f"- Endpoint: {failure['url']}\n\n"
+            f"Kết quả Kỳ vọng\n"
+            f"- API hoạt động chính xác và phản hồi mã thành công (200 hoặc 201)."
+        )
+    else:  # Defaults to Bug format
+        description_text = (
+            f"Mô tả lỗi\n"
+            f"Phát hiện lỗi tự động khi chạy kiểm thử API [{failure['name']}].\n\n"
+            f"Các bước tái hiện\n"
+            f"1. Thực hiện gọi API {failure['method']} tại URL: {failure['url']}\n"
+            f"2. Kiểm tra kết quả phản hồi của API.\n\n"
+            f"Kết quả mong đợi\n"
+            f"- API thực hiện thành công, trả về dữ liệu hợp lệ và đáp ứng các điều kiện Assertions.\n\n"
+            f"Kết quả thực tế\n"
+            f"- API trả về mã trạng thái (Status Code): {failure['status']}\n"
+            f"- Chi tiết lỗi phản hồi: {failure['message'] if failure['message'] else 'Không có thông điệp lỗi chi tiết.'}"
+        )
 
     payload = {
         "fields": {
             "project": {
                 "key": JIRA_PROJECT_KEY
             },
-            "summary": f"[API TEST FAILED] {failure['name']}",
+            "summary": f"[{PROJECT_NAME.upper()} API TEST FAILED] {failure['name']}",
             "description": {
                 "type": "doc",
                 "version": 1,

@@ -46,7 +46,7 @@ def save_error_log(path, data):
         json.dump(data, f, indent=2)
 
 
-def create_jira_issue(base_url, auth_tuple, project_key, summary, description, labels=None):
+def create_jira_issue(base_url, auth_tuple, project_key, issue_type, summary, description, labels=None):
     url = f"{base_url.rstrip('/')}/rest/api/3/issue"
     payload = {
         "fields": {
@@ -54,7 +54,7 @@ def create_jira_issue(base_url, auth_tuple, project_key, summary, description, l
             "summary": summary,
             "description": description,
             "labels": labels or ["api-test-failure"],
-            "issuetype": {"name": "Bug"},
+            "issuetype": {"name": issue_type},
         }
     }
     r = requests.post(url, json=payload, auth=auth_tuple)
@@ -86,15 +86,20 @@ def attach_file_to_issue(base_url, auth_tuple, issue_key, file_path):
 
 
 def main():
+    load_dotenv()
+
+    default_project = os.environ.get("JIRA_PROJECT_KEY") or os.environ.get("JIRA_PROJECT", "FM")
+    default_issuetype = os.environ.get("JIRA_ISSUE_TYPE", "Bug")
+    project_name = os.environ.get("PROJECT_NAME", "Furnimart")
+
     parser = argparse.ArgumentParser()
     parser.add_argument("--report", default="report/report.json")
-    parser.add_argument("--project", default="TJ", help="Jira project key to file issues into")
+    parser.add_argument("--project", default=default_project, help="Jira project key to file issues into")
+    parser.add_argument("--issuetype", default=default_issuetype, help="Jira issue type (e.g. Bug, Task)")
     parser.add_argument("--dry-run", action="store_true", help="Do not call Jira API; just print issues")
     parser.add_argument("--attach-report", action="store_true", help="Attach report/report.html to created issues")
     parser.add_argument("--ttl-days", type=int, default=7, help="Dedupe time window in days to avoid duplicate issues")
     args = parser.parse_args()
-
-    load_dotenv()
 
     report = load_report(args.report)
     if not report:
@@ -129,6 +134,8 @@ def main():
     for ex in executions:
         request_info = ex.get("request", {})
         uri = request_info.get("url") or request_info.get("uri") or ""
+        if isinstance(uri, dict):
+            uri = uri.get("raw", "")
         method = request_info.get("method", "")
         assertions = ex.get("assertions", [])
         for a in assertions:
@@ -165,7 +172,33 @@ def main():
             print(f"Duplicate failure within TTL (skipping): {signature}")
             continue
 
-        summary = f"[API TEST FAILED] {f['method']} {f['url']} - {f['assertion']}"
+        summary = f"[{project_name.upper()} API TEST FAILED] {f['method']} {f['url']} - {f['assertion']}"
+        
+        if args.issuetype.lower() == "task":
+            description_text = (
+                f"Mô tả\n"
+                f"API test case thất bại khi chạy kiểm thử tự động.\n"
+                f"- HTTP Method: {f['method']}\n"
+                f"- Endpoint: {f['url']}\n\n"
+                f"Phạm vi Kiểm thử\n"
+                f"- Endpoint: {f['url']}\n\n"
+                f"Kết quả Kỳ vọng\n"
+                f"- API hoạt động chính xác và phản hồi mã thành công (200 hoặc 201)."
+            )
+        else:  # Defaults to Bug format
+            description_text = (
+                f"Mô tả lỗi\n"
+                f"Phát hiện lỗi tự động khi chạy kiểm thử API.\n\n"
+                f"Các bước tái hiện\n"
+                f"1. Thực hiện gọi API {f['method']} tại URL: {f['url']}\n"
+                f"2. Kiểm tra điều kiện ràng buộc: {f['assertion']}\n\n"
+                f"Kết quả mong đợi\n"
+                f"- API thực hiện thành công, trả về dữ liệu hợp lệ và đáp ứng các điều kiện Assertions.\n\n"
+                f"Kết quả thực tế\n"
+                f"- API lỗi điều kiện assertion: {f['assertion']}\n"
+                f"- Chi tiết lỗi phản hồi: {f.get('message') if f.get('message') else 'Không có thông điệp lỗi chi tiết.'}"
+            )
+
         description = {
             "type": "doc",
             "version": 1,
@@ -173,9 +206,7 @@ def main():
                 {
                     "type": "paragraph",
                     "content": [
-                        {"type": "text", "text": f"Assertion: {f['assertion']}"},
-                        {"type": "text", "text": "\n"},
-                        {"type": "text", "text": f"Message: {f.get('message')}"},
+                        {"type": "text", "text": description_text}
                     ],
                 }
             ],
@@ -188,7 +219,7 @@ def main():
             print("DRY-RUN: payload description:\n", json.dumps(description, ensure_ascii=False, indent=2))
             new_signatures.append({'signature': signature, 'timestamp': now.isoformat()})
         else:
-            issue_key = create_jira_issue(jira_base, auth, args.project, summary, description)
+            issue_key = create_jira_issue(jira_base, auth, args.project, args.issuetype, summary, description)
             if issue_key:
                 if args.attach_report:
                     report_html = 'report/report.html'
