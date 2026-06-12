@@ -38,36 +38,62 @@ REPORT_XLSX = os.path.join(REPORT_DIR, "report.xlsx")
 os.makedirs(REPORT_DIR, exist_ok=True)
 
 
-def run_newman(collection_path, base_url):
+def run_newman_for_collections(collections, base_url):
     newman = shutil.which("newman")
 
     if not newman:
         print("Không tìm thấy Newman. Chạy: npm install -g newman")
         return False
 
-    if not os.path.exists(collection_path):
-        print(f"Không tìm thấy file Postman Collection tại: {collection_path}")
-        return False
+    consolidated_data = {
+        "run": {
+            "executions": []
+        }
+    }
 
-    cmd = [
-        newman,
-        "run",
-        collection_path,
-        "--env-var",
-        f"baseUrl={base_url}",
-        "--reporters",
-        "cli,json",
-        "--reporter-json-export",
-        REPORT_JSON
-    ]
+    # Temporary folder for individual reports
+    temp_dir = os.path.join(REPORT_DIR, "temp")
+    os.makedirs(temp_dir, exist_ok=True)
 
-    print("Running Newman...")
-    result = subprocess.run(cmd)
+    success = False
+    for idx, coll in enumerate(collections):
+        temp_report_json = os.path.join(temp_dir, f"report_{idx}.json")
+        cmd = [
+            newman,
+            "run",
+            coll,
+            "--env-var",
+            f"baseUrl={base_url}",
+            "--reporters",
+            "cli,json",
+            "--reporter-json-export",
+            temp_report_json
+        ]
+        print(f"Running Newman for: {os.path.basename(coll)} ...")
+        result = subprocess.run(cmd)
 
-    if result.returncode != 0:
-        print("Newman có test FAIL. Vẫn tiếp tục tạo report và gửi Jira...")
+        if os.path.exists(temp_report_json):
+            success = True
+            try:
+                with open(temp_report_json, "r", encoding="utf-8") as f:
+                    rep_data = json.load(f)
+                    executions = rep_data.get("run", {}).get("executions", [])
+                    consolidated_data["run"]["executions"].extend(executions)
+            except Exception as e:
+                print(f"Lỗi khi đọc file báo cáo tạm: {e}")
 
-    return os.path.exists(REPORT_JSON)
+    # Clean up temp directory
+    try:
+        shutil.rmtree(temp_dir, ignore_errors=True)
+    except Exception:
+        pass
+
+    if success:
+        with open(REPORT_JSON, "w", encoding="utf-8") as f:
+            json.dump(consolidated_data, f, indent=2, ensure_ascii=False)
+        return True
+
+    return False
 
 
 def parse_report():
@@ -337,7 +363,7 @@ def create_jira_issue(failure):
 
 def main():
     parser = argparse.ArgumentParser()
-    parser.add_argument("--collection", default=os.getenv("POSTMAN_COLLECTION_PATH", "postman/furnimart_collection.json"), help="Path to Postman collection JSON")
+    parser.add_argument("--collection", default=os.getenv("POSTMAN_COLLECTION_PATH", "postman/furnimart_collection.json"), help="Path to Postman collection JSON or folder")
     parser.add_argument("--base-url", default=os.getenv("BASE_URL", "http://localhost:3000"), help="Base URL of the API under test")
     args = parser.parse_args()
 
@@ -347,7 +373,24 @@ def main():
     else:
         collection_path = os.path.join(BASE_DIR, args.collection)
 
-    if not run_newman(collection_path, args.base_url):
+    collections = []
+    if os.path.isdir(collection_path):
+        print(f"Đang tìm các file collection trong thư mục: {collection_path}")
+        for root, dirs, files in os.walk(collection_path):
+            for file in files:
+                if file.endswith(".json") and "environment" not in file.lower() and "global" not in file.lower():
+                    collections.append(os.path.join(root, file))
+    else:
+        if os.path.exists(collection_path):
+            collections.append(collection_path)
+
+    if not collections:
+        print(f"Không tìm thấy file collection nào tại: {collection_path}")
+        return
+
+    print(f"Tìm thấy {len(collections)} collections để chạy kiểm thử.")
+
+    if not run_newman_for_collections(collections, args.base_url):
         print("Không tạo được report.json")
         return
 
