@@ -1,0 +1,70 @@
+name: Jira API Testing Pipeline
+
+on:
+  push:
+    branches:
+      - main
+
+jobs:
+  jira-api-test:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout source code
+        uses: actions/checkout@v4
+
+      - name: Set up Python
+        uses: actions/setup-python@v4
+        with:
+          python-version: '3.11'
+
+      - name: Install dependencies
+        run: |
+          python -m pip install --upgrade pip
+          pip install -r requirements.txt
+        working-directory: Tool
+
+      - name: Set up Node.js for Newman (optional)
+        uses: actions/setup-node@v4
+        with:
+          node-version: '18'
+
+      - name: Install Newman (optional)
+        run: |
+          npm install -g newman
+
+      - name: Create .env from GitHub Secrets
+        env:
+          JIRA_BASE_URL: ${{ secrets.JIRA_BASE_URL }}
+          JIRA_EMAIL: ${{ secrets.JIRA_EMAIL }}
+          JIRA_API_TOKEN: ${{ secrets.JIRA_API_TOKEN }}
+          JIRA_PROJECT_KEY: ${{ secrets.JIRA_PROJECT_KEY }}
+        run: |
+          echo "JIRA_BASE_URL=${JIRA_BASE_URL}" > .env
+          echo "JIRA_EMAIL=${JIRA_EMAIL}" >> .env
+          echo "JIRA_API_TOKEN=${JIRA_API_TOKEN}" >> .env
+          echo "JIRA_PROJECT_KEY=${JIRA_PROJECT_KEY}" >> .env
+        working-directory: Tool
+
+      - name: Run Jira API Testing Pipeline
+        run: |
+          echo "Running Jira API testing..."
+          python run_tests.py
+        working-directory: Tool
+
+      - name: Run Postman collection with Newman (optional)
+        continue-on-error: true
+        run: |
+          if [ -f postman/jira-api-collection.json ]; then
+            echo 'Running Newman collection...'
+            newman run postman/jira-api-collection.json -e postman/jira-environment.json --suppress-exit-code
+          else
+            echo 'No Postman collection found; skipping Newman.'
+          fi
+        working-directory: Tool
+
+      - name: Upload test report
+        uses: actions/upload-artifact@v3
+        with:
+          name: jira-api-test-report
+          path: Tool/report
