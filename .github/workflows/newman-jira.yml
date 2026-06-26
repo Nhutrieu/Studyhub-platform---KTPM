@@ -48,7 +48,7 @@ jobs:
         if: env.HAS_KEY == 'true'
         run: |
           # Tìm các file collection .json bị thay đổi trong commit
-          CHANGED_FILES=$(git diff --name-only HEAD~1 HEAD | grep -E "Tool/postman/.*\.postman_collection\.json$" || true)
+          CHANGED_FILES=$(git diff --name-only HEAD~1 HEAD | grep -E "Tool/postman/.*\.json$" | grep -v "package.json" || true)
 
           if [ -z "$CHANGED_FILES" ]; then
             echo "NEWMAN_STATUS=PASS" >> $GITHUB_ENV
@@ -68,7 +68,7 @@ jobs:
           for file in $CHANGED_FILES; do
             if [ -f "$file" ]; then
               # Chạy Newman trỏ về link Staging trong secret
-              newman run "$file" --env-var "baseUrl=${{ secrets.API_BASE_URL }}" -r json --reporter-json-export report-temp.json || ANY_FAIL=true
+              newman run "$file" --env-var "gatewayUrl=${{ secrets.API_BASE_URL }}" -r json --reporter-json-export report-temp.json || ANY_FAIL=true
             fi
           done
           IFS=$OLD_IFS
