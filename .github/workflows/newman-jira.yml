@@ -56,7 +56,7 @@ jobs:
         if: env.HAS_KEY == 'true'
         run: |
           cd deployment/docker
-          docker-compose up -d --build
+          docker compose up -d --build
           echo "Waiting for backend services to boot..."
           sleep 45
 
