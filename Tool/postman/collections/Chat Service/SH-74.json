@@ -1,7 +1,7 @@
 {
   "info": {
-    "name": "SH-74 - Kiem thu chuc nang xem chi tiet cuoc hoi thoai",
-    "description": "Kiem tra xem chi tiet cuoc hoi thoai hop le, khong ton tai va truong hop nguoi dung khong phai thanh vien.",
+    "name": "SH-74 - Kiểm thử chức năng xem chi tiết cuộc hội thoại",
+    "description": "Kiểm tra xem chi tiết cuộc hội thoại hợp lệ, không tồn tại và trường hợp người dùng không phải thành viên.",
     "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
   },
   "item": [

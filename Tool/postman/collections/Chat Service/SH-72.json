@@ -1,7 +1,7 @@
 {
   "info": {
-    "name": "SH-72 - Kiem thu chuc nang tao/lay cuoc hoi thoai truc tiep",
-    "description": "Kiem tra tao cuoc hoi thoai truc tiep, lay lai cuoc hoi thoai da co va cac truong hop loi validate.",
+    "name": "SH-72 - Kiểm thử chức năng tạo/lấy cuộc hội thoại trực tiếp",
+    "description": "Kiểm tra tạo cuộc hội thoại trực tiếp, lấy lại cuộc hội thoại đã có và các trường hợp lỗi validate.",
     "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
   },
   "item": [

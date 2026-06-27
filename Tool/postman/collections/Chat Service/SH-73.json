@@ -1,7 +1,7 @@
 {
   "info": {
-    "name": "SH-73 - Kiem thu chuc nang tao/lay cuoc hoi thoai nhom",
-    "description": "Kiem tra tao cuoc hoi thoai nhom, lay thong tin nhom va cac truong hop loi validate.",
+    "name": "SH-73 - Kiểm thử chức năng tạo/lấy cuộc hội thoại nhóm",
+    "description": "Kiểm tra tạo cuộc hội thoại nhóm, lấy thông tin nhóm và các trường hợp lỗi validate.",
     "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
   },
   "item": [

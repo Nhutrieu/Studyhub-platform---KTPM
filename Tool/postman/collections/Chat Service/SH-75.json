@@ -1,7 +1,7 @@
 {
   "info": {
-    "name": "SH-75 - Kiem thu chuc nang lay lich su tin nhan",
-    "description": "Kiem tra lay lich su tin nhan, phan trang bang cursor va chan nguoi dung khong phai thanh vien.",
+    "name": "SH-75 - Kiểm thử chức năng lấy lịch sử tin nhắn",
+    "description": "Kiểm tra lấy lịch sử tin nhắn, phân trang bằng cursor và chặn người dùng không phải thành viên.",
     "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
   },
   "item": [

@@ -1,7 +1,7 @@
 {
   "info": {
-    "name": "SH-71 - Kiem thu chuc nang lay danh sach cuoc hoi thoai",
-    "description": "Kiem tra nguoi dung da dang nhap co the xem danh sach cuoc hoi thoai va yeu cau khong co token bi tu choi.",
+    "name": "SH-71 - Kiểm thử chức năng lấy danh sách cuộc hội thoại",
+    "description": "Kiểm tra người dùng đã đăng nhập có thể xem danh sách cuộc hội thoại và yêu cầu không có token bị từ chối.",
     "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
   },
   "item": [

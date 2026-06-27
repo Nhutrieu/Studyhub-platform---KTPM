@@ -1,7 +1,7 @@
 {
   "info": {
-    "name": "SH-76 - Kiem thu chuc nang gui tin nhan",
-    "description": "Kiem tra gui tin nhan vao cuoc hoi thoai, gui tin nhan truc tiep va cac truong hop validate/phan quyen.",
+    "name": "SH-76 - Kiểm thử chức năng gửi tin nhắn",
+    "description": "Kiểm tra gửi tin nhắn vào cuộc hội thoại, gửi tin nhắn trực tiếp và các trường hợp validate/phân quyền.",
     "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
   },
   "item": [
