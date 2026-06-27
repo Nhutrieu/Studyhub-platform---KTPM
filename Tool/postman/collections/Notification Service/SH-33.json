@@ -166,27 +166,27 @@
   "variable": [
     {
       "key": "authBaseUrl",
-      "value": "{{gatewayUrl}}/api/v1/auth",
+      "value": "{{gatewayUrl}}/auth",
       "type": "string"
     },
     {
       "key": "userBaseUrl",
-      "value": "{{gatewayUrl}}/api/v1/user",
+      "value": "{{gatewayUrl}}/user",
       "type": "string"
     },
     {
       "key": "groupBaseUrl",
-      "value": "{{gatewayUrl}}/api/v1/group",
+      "value": "{{gatewayUrl}}/group",
       "type": "string"
     },
     {
       "key": "documentBaseUrl",
-      "value": "{{gatewayUrl}}/api/v1/document",
+      "value": "{{gatewayUrl}}/document",
       "type": "string"
     },
     {
       "key": "notificationBaseUrl",
-      "value": "{{gatewayUrl}}/api/v1/notification",
+      "value": "{{gatewayUrl}}/notification",
       "type": "string"
     },
     {
