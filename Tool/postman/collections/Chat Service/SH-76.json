@@ -1,7 +1,7 @@
 {
   "info": {
     "name": "SH-76 - Kiểm thử chức năng gửi tin nhắn",
-    "description": "Verify sending messages to existing conversations and direct users, including validation and authorization cases.",
+    "description": "Verify sending messages to existing conversations and direct users, including validation and authorization cases. CI rerun after workflow fix.",
     "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
   },
   "item": [
