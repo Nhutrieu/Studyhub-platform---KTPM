@@ -1,0 +1,573 @@
+{
+  "info": {
+    "name": "SH-65: Kiểm thử Chức năng Cập nhật & Xóa Tài liệu",
+    "description": "StudyHub Document Service - SH-65: Kiểm thử Chức năng Cập nhật & Xóa Tài liệu",
+    "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+  },
+  "item": [
+    {
+      "name": "📄 [document-service:3003] Document (/)",
+      "item": [
+        {
+          "name": "🔑 Đăng nhập User thường (Lấy accessToken)",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test('Status 200 - Đăng nhập thành công', () => pm.response.to.have.status(200));",
+                  "const json = pm.response.json();",
+                  "const resData = json.data || json;",
+                  "if (resData.access_token) {",
+                  "    pm.collectionVariables.set('accessToken', resData.access_token);",
+                  "    pm.collectionVariables.set('userId', resData.user && resData.user.id);",
+                  "}"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"email\": \"{{userEmail}}\",\n  \"password\": \"{{password}}\"\n}"
+            },
+            "url": {
+              "raw": "{{authBaseUrl}}/login",
+              "host": [
+                "{{authBaseUrl}}"
+              ],
+              "path": [
+                "login"
+              ]
+            }
+          }
+        },
+        {
+          "name": "🔑 Đăng nhập Outsider (Lấy outsiderToken)",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test('Status 200 - Đăng nhập thành công', () => pm.response.to.have.status(200));",
+                  "const json = pm.response.json();",
+                  "const resData = json.data || json;",
+                  "if (resData.access_token) {",
+                  "    pm.collectionVariables.set('outsiderToken', resData.access_token);",
+                  "}"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"email\": \"{{outsiderEmail}}\",\n  \"password\": \"{{password}}\"\n}"
+            },
+            "url": {
+              "raw": "{{authBaseUrl}}/login",
+              "host": [
+                "{{authBaseUrl}}"
+              ],
+              "path": [
+                "login"
+              ]
+            }
+          }
+        },
+        {
+          "name": "✅ [Owner tài liệu] Cập nhật thông tin tài liệu",
+          "request": {
+            "method": "PATCH",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{accessToken}}"
+              },
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "{{documentBaseUrl}}/{{documentId}}",
+              "host": [
+                "{{documentBaseUrl}}"
+              ],
+              "path": [
+                "{{documentId}}"
+              ]
+            },
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"title\": \"Bai giang Giai tich 1 - Chuong 1 (Updated)\",\n  \"description\": \"Cap nhat noi dung\",\n  \"tags\": [\n    \"toan\",\n    \"giai-tich\",\n    \"chuong1\",\n    \"updated\"\n  ]\n}"
+            }
+          },
+          "event": [
+            {
+              "listen": "prerequest",
+              "script": {
+                "exec": [
+                  "// PRE-CONDITION: accessToken = user1, documentId = 1111-0001 (doc của user1)",
+                  "// Nếu 403: kiểm tra API có dùng userId từ JWT để verify owner không"
+                ],
+                "type": "text/javascript"
+              }
+            },
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test('Status 200', () => pm.response.to.have.status(200));"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ]
+        },
+        {
+          "name": "❌ Cập nhật tài liệu của NGƯỜI KHÁC - Bị từ chối",
+          "request": {
+            "method": "PATCH",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{outsiderToken}}"
+              },
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "{{documentBaseUrl}}/{{documentId}}",
+              "host": [
+                "{{documentBaseUrl}}"
+              ],
+              "path": [
+                "{{documentId}}"
+              ]
+            },
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"title\": \"Hacked Title\"\n}"
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test('Status 403', () => pm.response.to.have.status(403));"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "❌ Cập nhật tài liệu không tồn tại",
+          "request": {
+            "method": "PATCH",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{accessToken}}"
+              },
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "{{documentBaseUrl}}/00000000-0000-0000-0000-000000000000",
+              "host": [
+                "{{documentBaseUrl}}"
+              ],
+              "path": [
+                "00000000-0000-0000-0000-000000000000"
+              ]
+            },
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"title\": \"X\"\n}"
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test('Status 403 hoặc 404', () => pm.expect([403, 404]).to.include(pm.response.code));"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "✅ [Owner tài liệu] Xóa tài liệu",
+          "request": {
+            "method": "DELETE",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{accessToken}}"
+              }
+            ],
+            "url": {
+              "raw": "{{documentBaseUrl}}/{{deletableDocumentId}}",
+              "host": [
+                "{{documentBaseUrl}}"
+              ],
+              "path": [
+                "{{deletableDocumentId}}"
+              ]
+            }
+          },
+          "event": [
+            {
+              "listen": "prerequest",
+              "script": {
+                "exec": [
+                  "// PRE-CONDITION: deletableDocumentId = 1111-0002 (Classical Physics, của user1)",
+                  "// accessToken = user1 → là owner → phải được phép xóa"
+                ],
+                "type": "text/javascript"
+              }
+            },
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test('Status 200', () => pm.response.to.have.status(200));",
+                  "const json = pm.response.json();",
+                  "const res = json.data || json;",
+                  "pm.test('deleted = true', () => pm.expect(res.deleted).to.eql(true));"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ]
+        },
+        {
+          "name": "❌ Xóa tài liệu của NGƯỜI KHÁC - Bị từ chối",
+          "request": {
+            "method": "DELETE",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{outsiderToken}}"
+              }
+            ],
+            "url": {
+              "raw": "{{documentBaseUrl}}/{{documentId}}",
+              "host": [
+                "{{documentBaseUrl}}"
+              ],
+              "path": [
+                "{{documentId}}"
+              ]
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test('Status 403', () => pm.response.to.have.status(403));"
+                ]
+              }
+            }
+          ]
+        }
+      ]
+    }
+  ],
+  "variable": [
+    {
+      "key": "authBaseUrl",
+      "value": "http://localhost:3000/api/v1/auth",
+      "type": "string"
+    },
+    {
+      "key": "userBaseUrl",
+      "value": "http://localhost:3001/api/v1/user",
+      "type": "string"
+    },
+    {
+      "key": "groupBaseUrl",
+      "value": "http://localhost:3002/api/v1/group",
+      "type": "string"
+    },
+    {
+      "key": "documentBaseUrl",
+      "value": "http://localhost:3003/api/v1/document",
+      "type": "string"
+    },
+    {
+      "key": "notificationBaseUrl",
+      "value": "http://localhost:3005/api/v1/notification",
+      "type": "string"
+    },
+    {
+      "key": "chatBaseUrl",
+      "value": "http://localhost:3006/api/v1/chat",
+      "type": "string"
+    },
+    {
+      "key": "accessToken",
+      "value": "",
+      "type": "string"
+    },
+    {
+      "key": "refreshToken",
+      "value": "",
+      "type": "string"
+    },
+    {
+      "key": "revokedRefreshToken",
+      "value": "",
+      "type": "string"
+    },
+    {
+      "key": "adminAccessToken",
+      "value": "{{REPLACE_WITH_REAL_ADMIN_TOKEN}}",
+      "type": "string"
+    },
+    {
+      "key": "verificationToken",
+      "value": "",
+      "type": "string"
+    },
+    {
+      "key": "resetToken",
+      "value": "",
+      "type": "string"
+    },
+    {
+      "key": "secondaryEmailId",
+      "value": "",
+      "type": "string"
+    },
+    {
+      "key": "userId",
+      "value": "",
+      "type": "string"
+    },
+    {
+      "key": "anotherUserId",
+      "value": "11111111-2222-4222-8222-111111111113",
+      "type": "string"
+    },
+    {
+      "key": "anotherUserAccessToken",
+      "value": "",
+      "type": "string"
+    },
+    {
+      "key": "outsiderToken",
+      "value": "{{REPLACE_WITH_TOKEN_OF_USER_NOT_IN_ANY_GROUP_DOC}}",
+      "type": "string"
+    },
+    {
+      "key": "deletableUserId",
+      "value": "11111111-2222-4222-8222-111111111121",
+      "type": "string"
+    },
+    {
+      "key": "blockedUserEmail",
+      "value": "user10@example.com",
+      "type": "string"
+    },
+    {
+      "key": "privateUserId",
+      "value": "11111111-2222-4222-8222-111111111119",
+      "type": "string"
+    },
+    {
+      "key": "otherUserSocialLinkId",
+      "value": "{{GET_FROM_USER2_PROFILE_AFTER_ADDING_SOCIAL_LINK}}",
+      "type": "string"
+    },
+    {
+      "key": "socialLinkId",
+      "value": "",
+      "type": "string"
+    },
+    {
+      "key": "groupId",
+      "value": "aaaaaaaa-aaaa-4aaa-8aaa-aaaaaaaaaaa1",
+      "type": "string"
+    },
+    {
+      "key": "privateGroupId",
+      "value": "aaaaaaaa-aaaa-4aaa-8aaa-aaaaaaaaaaa2",
+      "type": "string"
+    },
+    {
+      "key": "emptyGroupId",
+      "value": "{{CREATE_EMPTY_GROUP_VIA_API_THEN_FILL}}",
+      "type": "string"
+    },
+    {
+      "key": "joinRequestId",
+      "value": "",
+      "type": "string"
+    },
+    {
+      "key": "joinRequestId2",
+      "value": "{{SEND_JOIN_REQUEST_VIA_API_THEN_FILL}}",
+      "type": "string"
+    },
+    {
+      "key": "groupOwnerToken",
+      "value": "{{REPLACE_WITH_TOKEN_OF_GROUP_OWNER}}",
+      "type": "string"
+    },
+    {
+      "key": "groupOwnerUserId",
+      "value": "11111111-2222-4222-8222-111111111114",
+      "type": "string"
+    },
+    {
+      "key": "groupManagerNotOwnerToken",
+      "value": "",
+      "type": "string"
+    },
+    {
+      "key": "memberToLeaveToken",
+      "value": "",
+      "type": "string"
+    },
+    {
+      "key": "memberToKickId",
+      "value": "11111111-2222-4222-8222-111111111115",
+      "type": "string"
+    },
+    {
+      "key": "documentId",
+      "value": "1111-0001-4111-8111-aaaaaaaa0001",
+      "type": "string"
+    },
+    {
+      "key": "privateDocumentId",
+      "value": "1112-0002-4111-8111-aaaaaaaa0005",
+      "type": "string"
+    },
+    {
+      "key": "deletableDocumentId",
+      "value": "1111-0002-4111-8111-aaaaaaaa0002",
+      "type": "string"
+    },
+    {
+      "key": "pendingDocumentId",
+      "value": "1119-0003-4111-8111-aaaaaaaa0027",
+      "type": "string"
+    },
+    {
+      "key": "pendingDocumentId2",
+      "value": "1120-0003-4111-8111-aaaaaaaa0030",
+      "type": "string"
+    },
+    {
+      "key": "commentId",
+      "value": "",
+      "type": "string"
+    },
+    {
+      "key": "otherUserCommentId",
+      "value": "c0001-1111-4111-8111-aaaaaaaa001",
+      "type": "string"
+    },
+    {
+      "key": "notificationId",
+      "value": "",
+      "type": "string"
+    },
+    {
+      "key": "otherUserNotificationId",
+      "value": "",
+      "type": "string"
+    },
+    {
+      "key": "deletableNotificationId",
+      "value": "",
+      "type": "string"
+    },
+    {
+      "key": "conversationId",
+      "value": "",
+      "type": "string"
+    },
+    {
+      "key": "groupConversationId",
+      "value": "",
+      "type": "string"
+    },
+    {
+      "key": "messageId",
+      "value": "",
+      "type": "string"
+    },
+    {
+      "key": "otherUserMessageId",
+      "value": "",
+      "type": "string"
+    },
+    {
+      "key": "userEmail",
+      "value": "user1@example.com",
+      "type": "string"
+    },
+    {
+      "key": "adminEmail",
+      "value": "admin@example.com",
+      "type": "string"
+    },
+    {
+      "key": "anotherUserEmail",
+      "value": "user2@example.com",
+      "type": "string"
+    },
+    {
+      "key": "groupOwnerEmail",
+      "value": "user3@example.com",
+      "type": "string"
+    },
+    {
+      "key": "outsiderEmail",
+      "value": "user10@example.com",
+      "type": "string"
+    },
+    {
+      "key": "password",
+      "value": "11111111",
+      "type": "string"
+    },
+    {
+      "key": "groupManagerEmail",
+      "value": "user4@example.com",
+      "type": "string"
+    },
+    {
+      "key": "memberToLeaveEmail",
+      "value": "user5@example.com",
+      "type": "string"
+    }
+  ]
+}
