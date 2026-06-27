@@ -1,7 +1,7 @@
 {
   "info": {
     "name": "SH-74 - Kiểm thử chức năng xem chi tiết cuộc hội thoại",
-    "description": "Verify conversation detail endpoint for valid, not found, and forbidden participant scenarios.",
+    "description": "Verify conversation detail endpoint for valid, not found, and forbidden participant scenarios. CI rerun after workflow fix.",
     "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
   },
   "item": [
