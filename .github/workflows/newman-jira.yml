@@ -43,6 +43,23 @@ jobs:
           npm install -g newman
           sudo apt-get update && sudo apt-get install -y jq
 
+      - name: Setup Backend Environment
+        if: env.HAS_KEY == 'true'
+        run: |
+          for d in backend/*_service; do
+            if [ -f "$d/.env.example" ]; then
+              cp "$d/.env.example" "$d/.env"
+            fi
+          done
+
+      - name: Start Docker Compose
+        if: env.HAS_KEY == 'true'
+        run: |
+          cd deployment/docker
+          docker-compose up -d --build
+          echo "Waiting for backend services to boot..."
+          sleep 45
+
       # 3. Lọc file thay đổi và chạy Newman
       - name: Run Newman Only On Committed Files
         if: env.HAS_KEY == 'true'
@@ -55,11 +72,10 @@ jobs:
             exit 0
           fi
 
-          # TỰ ĐỘNG BỎ QUA KIỂM THỬ TRÊN CI NẾU CHƯA CẤU HÌNH SERVER STAGING
-          if [ -z "${{ secrets.API_BASE_URL }}" ]; then
-            echo "⚠️ CẢNH BÁO: secrets.API_BASE_URL chưa cấu hình. Tạm thời bỏ qua test CI và báo PASS."
-            echo "NEWMAN_STATUS=PASS" >> $GITHUB_ENV
-            exit 0
+          API_URL="${{ secrets.API_BASE_URL }}"
+          if [ -z "$API_URL" ]; then
+            echo "ℹ️ secrets.API_BASE_URL chưa cấu hình. Đang chuyển hướng sang Docker Backend (http://localhost:8000)..."
+            API_URL="http://localhost:8000"
           fi
 
           mkdir -p newman-reports
@@ -68,8 +84,8 @@ jobs:
           IFS=$'\n' # Hỗ trợ xử lý tên file có khoảng trắng
           for file in $CHANGED_FILES; do
             if [ -f "$file" ]; then
-              # Chạy Newman trỏ về link Staging trong secret
-              newman run "$file" --env-var "gatewayUrl=${{ secrets.API_BASE_URL }}" -r json --reporter-json-export "newman-reports/$(basename "$file" .json).json" || ANY_FAIL=true
+              # Chạy Newman trỏ về link Staging hoặc Local Docker
+              newman run "$file" --env-var "gatewayUrl=$API_URL" -r json --reporter-json-export "newman-reports/$(basename "$file" .json).json" || ANY_FAIL=true
             fi
           done
           IFS=$OLD_IFS

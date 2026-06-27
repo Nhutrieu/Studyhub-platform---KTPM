@@ -147,6 +147,10 @@ services:
     container_name: auth-service
     ports: ["3000:3000"]
     env_file: ../../backend/auth_service/.env
+    environment:
+      - DB_HOST=mysql-auth
+      - DB_PASS=root
+      - RABBITMQ_URL=amqp://guest:guest@rabbitmq:5672
     depends_on:
       mysql-auth: { condition: service_healthy }
       rabbitmq: { condition: service_healthy }
@@ -164,6 +168,10 @@ services:
     container_name: user-service
     ports: ["3001:3001"]
     env_file: ../../backend/user_service/.env
+    environment:
+      - DB_HOST=mysql-user
+      - DB_PASS=root
+      - RABBITMQ_URL=amqp://guest:guest@rabbitmq:5672
     depends_on:
       mysql-user: { condition: service_healthy }
       rabbitmq: { condition: service_healthy }
@@ -177,6 +185,10 @@ services:
     container_name: group-service
     ports: ["3002:3002"]
     env_file: ../../backend/group_service/.env
+    environment:
+      - DB_HOST=mysql-group
+      - DB_PASS=root
+      - RABBITMQ_URL=amqp://guest:guest@rabbitmq:5672
     depends_on:
       mysql-group: { condition: service_healthy }
       rabbitmq: { condition: service_healthy }
@@ -190,6 +202,10 @@ services:
     container_name: document-service
     ports: ["3003:3003"]
     env_file: ../../backend/document_service/.env
+    environment:
+      - DB_HOST=mysql-document
+      - DB_PASS=root
+      - RABBITMQ_URL=amqp://guest:guest@rabbitmq:5672
     depends_on:
       mysql-document: { condition: service_healthy }
       rabbitmq: { condition: service_healthy }
@@ -203,6 +219,9 @@ services:
     container_name: notification-service
     ports: ["3005:3005"]
     env_file: ../../backend/notification_service/.env
+    environment:
+      - MONGO_URI=mongodb://mongo-notification:27017/studyhub_notification
+      - RABBITMQ_URL=amqp://guest:guest@rabbitmq:5672
     depends_on:
       mongo-notification: { condition: service_healthy }
       rabbitmq: { condition: service_healthy }
@@ -216,6 +235,9 @@ services:
     container_name: chat-service
     ports: ["3006:3006"]
     env_file: ../../backend/chat_service/.env
+    environment:
+      - MONGO_URI=mongodb://mongo-chat:27017/studyhub_chat
+      - RABBITMQ_URL=amqp://guest:guest@rabbitmq:5672
     depends_on:
       mongo-chat: { condition: service_healthy }
       rabbitmq: { condition: service_healthy }
