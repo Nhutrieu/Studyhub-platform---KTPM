@@ -1,0 +1,257 @@
+{
+  "info": {
+    "name": "SH-78 - Functional Testing for User Registration",
+    "description": "Tach tu StudyHub Auth Service collection - Task SH-78: Functional Testing for User Registration",
+    "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+  },
+  "item": [
+    {
+      "name": "✅ Đăng ký tài khoản mới",
+      "request": {
+        "method": "POST",
+        "header": [
+          {
+            "key": "Content-Type",
+            "value": "application/json"
+          }
+        ],
+        "url": {
+          "raw": "{{authBaseUrl}}/register",
+          "host": [
+            "{{authBaseUrl}}"
+          ],
+          "path": [
+            "register"
+          ]
+        },
+        "body": {
+          "mode": "raw",
+          "raw": "{\n  \"user_name\": \"user_{{rand}}\",\n  \"email\": \"user_{{rand}}@mail.com\",\n  \"password\": \"Password@123\",\n  \"display_name\": \"Nguyen Van A\"\n}"
+        }
+      },
+      "event": [
+        {
+          "listen": "prerequest",
+          "script": {
+            "exec": [
+              "const ts = Date.now();",
+              "pm.collectionVariables.set('rand', ts);"
+            ]
+          }
+        },
+        {
+          "listen": "test",
+          "script": {
+            "exec": [
+              "pm.test('Status 201', () => pm.response.to.have.status(201));",
+              "",
+              "const json = pm.response.json();",
+              "",
+              "pm.test('Có user và verificationToken', () => {",
+              "    pm.expect(json).to.have.property('user');",
+              "    pm.expect(json).to.have.property('verificationToken');",
+              "});",
+              "",
+              "if (json.verificationToken) pm.collectionVariables.set('verificationToken', json.verificationToken);",
+              "if (json.user?.id) pm.collectionVariables.set('userId', json.user.id);",
+              "",
+              "console.log(pm.response.text());"
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "name": "❌ Đăng ký - email đã tồn tại",
+      "request": {
+        "method": "POST",
+        "header": [
+          {
+            "key": "Content-Type",
+            "value": "application/json"
+          }
+        ],
+        "url": {
+          "raw": "{{authBaseUrl}}/register",
+          "host": [
+            "{{authBaseUrl}}"
+          ],
+          "path": [
+            "register"
+          ]
+        },
+        "body": {
+          "mode": "raw",
+          "raw": "{\n  \"user_name\": \"nguyenvana2\",\n  \"email\": \"nguyenvana@example.com\",\n  \"password\": \"Password@123\",\n  \"display_name\": \"Trung\"\n}"
+        }
+      },
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "exec": [
+              "pm.test('Status 400', () => pm.response.to.have.status(400));"
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "name": "❌ Đăng ký - user_name đã tồn tại",
+      "request": {
+        "method": "POST",
+        "header": [
+          {
+            "key": "Content-Type",
+            "value": "application/json"
+          }
+        ],
+        "url": {
+          "raw": "{{authBaseUrl}}/register",
+          "host": [
+            "{{authBaseUrl}}"
+          ],
+          "path": [
+            "register"
+          ]
+        },
+        "body": {
+          "mode": "raw",
+          "raw": "{\n  \"user_name\": \"nguyenvana\",\n  \"email\": \"khac@example.com\",\n  \"password\": \"Password@123\",\n  \"display_name\": \"Khac\"\n}"
+        }
+      },
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "exec": [
+              "pm.test('Status 400', () => pm.response.to.have.status(400));"
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "name": "❌ Đăng ký - thiếu password",
+      "request": {
+        "method": "POST",
+        "header": [
+          {
+            "key": "Content-Type",
+            "value": "application/json"
+          }
+        ],
+        "url": {
+          "raw": "{{authBaseUrl}}/register",
+          "host": [
+            "{{authBaseUrl}}"
+          ],
+          "path": [
+            "register"
+          ]
+        },
+        "body": {
+          "mode": "raw",
+          "raw": "{\n  \"user_name\": \"thieumk\",\n  \"email\": \"thieu@example.com\",\n  \"display_name\": \"Thieu\"\n}"
+        }
+      },
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "exec": [
+              "pm.test('Status 400', () => pm.response.to.have.status(400));"
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "name": "❌ Đăng ký - email sai format",
+      "request": {
+        "method": "POST",
+        "header": [
+          {
+            "key": "Content-Type",
+            "value": "application/json"
+          }
+        ],
+        "url": {
+          "raw": "{{authBaseUrl}}/register",
+          "host": [
+            "{{authBaseUrl}}"
+          ],
+          "path": [
+            "register"
+          ]
+        },
+        "body": {
+          "mode": "raw",
+          "raw": "{\n  \"user_name\": \"emailsai\",\n  \"email\": \"not-an-email\",\n\"password\": \"Password@123\",\n  \"display_name\": \"X\"\n}"
+        }
+      },
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "exec": [
+              "pm.test('Status 400', () => pm.response.to.have.status(400));"
+            ]
+          }
+        }
+      ]
+    }
+  ],
+  "variable": [
+    {
+      "key": "authBaseUrl",
+      "value": "http://localhost:3000/api/v1/auth",
+      "type": "string"
+    },
+    {
+      "key": "userBaseUrl",
+      "value": "http://localhost:3001/api/v1/user",
+      "type": "string"
+    },
+    {
+      "key": "groupBaseUrl",
+      "value": "http://localhost:3002/api/v1/group",
+      "type": "string"
+    },
+    {
+      "key": "documentBaseUrl",
+      "value": "http://localhost:3003/api/v1/document",
+      "type": "string"
+    },
+    {
+      "key": "notificationBaseUrl",
+      "value": "http://localhost:3005/api/v1/notification",
+      "type": "string"
+    },
+    {
+      "key": "chatBaseUrl",
+      "value": "http://localhost:3006/api/v1/chat",
+      "type": "string"
+    },
+    {
+      "key": "accessToken",
+      "value": "",
+      "type": "string"
+    },
+    {
+      "key": "refreshToken",
+      "value": "",
+      "type": "string"
+    },
+    {
+      "key": "verificationToken",
+      "value": "",
+      "type": "string"
+    },
+    {
+      "key": "userId",
+      "value": "",
+      "type": "string"
+    }
+  ]
+}
