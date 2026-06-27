@@ -130,3 +130,9 @@ jobs:
         with:
           issue: ${{ env.JIRA_KEY }}
           transition: "DONE"
+
+      - name: Fail workflow if Newman tests failed
+        if: env.NEWMAN_STATUS == 'FAIL'
+        run: |
+          echo "Newman tests failed. Jira bug has been created or updated."
+          exit 1
