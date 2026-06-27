@@ -85,7 +85,7 @@ jobs:
           for file in $CHANGED_FILES; do
             if [ -f "$file" ]; then
               # Chạy Newman trỏ về link Staging hoặc Local Docker
-              newman run "$file" --env-var "gatewayUrl=$API_URL" -r json --reporter-json-export "newman-reports/$(basename "$file" .json).json" || ANY_FAIL=true
+              newman run "$file" --env-var "gatewayUrl=$API_URL/api/v1" -r json --reporter-json-export "newman-reports/$(basename "$file" .json).json" || ANY_FAIL=true
             fi
           done
           IFS=$OLD_IFS
@@ -112,7 +112,7 @@ jobs:
         uses: atlassian/gajira-create@v3
         with:
           project: ${{ secrets.JIRA_PROJECT_KEY }}
-          issuetype: Sub-task # Đổi sang Sub-task để liên kết được với issue cha
+          issuetype: Subtask # Sửa lại đúng chuẩn Jira của dự án
           fields: '{"parent": {"key": "${{ env.JIRA_KEY }}"}}'
           summary: "${{ env.JIRA_BUG_SUMMARY }}"
           description: "${{ env.JIRA_BUG_DESCRIPTION }}"
