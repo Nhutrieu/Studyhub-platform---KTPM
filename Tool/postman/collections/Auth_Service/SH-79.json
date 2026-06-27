@@ -1,0 +1,224 @@
+{
+  "info": {
+    "name": "SH-79 - Functional Testing for Email Verification",
+    "description": "Fixed full auth flow - StudyHub Auth Service Task SH-79",
+    "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+  },
+  "item": [
+    {
+      "name": "❌ Xác minh email - token sai/không tồn tại",
+      "request": {
+        "method": "POST",
+        "header": [],
+        "url": {
+          "raw": "{{authBaseUrl}}/verify-email?token=invalid_token_xyz",
+          "host": [
+            "{{authBaseUrl}}"
+          ],
+          "path": [
+            "verify-email"
+          ],
+          "query": [
+            {
+              "key": "token",
+              "value": "invalid_token_xyz"
+            }
+          ]
+        }
+      },
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "exec": [
+              "pm.test('Status 400', () => pm.response.to.have.status(400));"
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "name": "❌ Xác minh email - token đã dùng rồi",
+      "request": {
+        "method": "POST",
+        "header": [],
+        "url": {
+          "raw": "{{authBaseUrl}}/verify-email?token={{verificationToken}}",
+          "host": [
+            "{{authBaseUrl}}"
+          ],
+          "path": [
+            "verify-email"
+          ],
+          "query": [
+            {
+              "key": "token",
+              "value": "{{verificationToken}}"
+            }
+          ]
+        }
+      },
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "exec": [
+              "pm.test('Status 400 - token already used', () => pm.response.to.have.status(400));"
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "name": "❌ Xác minh email - thiếu token",
+      "request": {
+        "method": "POST",
+        "header": [],
+        "url": {
+          "raw": "{{authBaseUrl}}/verify-email",
+          "host": [
+            "{{authBaseUrl}}"
+          ],
+          "path": [
+            "verify-email"
+          ]
+        }
+      },
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "exec": [
+              "pm.test('Status 400', () => pm.response.to.have.status(400));"
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "name": "✅ REGISTER (AUTO GENERATE + SAVE TOKEN)",
+      "request": {
+        "method": "POST",
+        "header": [
+          {
+            "key": "Content-Type",
+            "value": "application/json"
+          }
+        ],
+        "url": {
+          "raw": "{{authBaseUrl}}/register",
+          "host": [
+            "{{authBaseUrl}}"
+          ],
+          "path": [
+            "register"
+          ]
+        },
+        "body": {
+          "mode": "raw",
+          "raw": "{\n  \"user_name\": \"user_{{rand}}\",\n  \"email\": \"user_{{rand}}@mail.com\",\n  \"password\": \"Password@123\",\n  \"display_name\": \"Nguyen Van A\"\n}"
+        }
+      },
+      "event": [
+        {
+          "listen": "prerequest",
+          "script": {
+            "exec": [
+              "const ts = Date.now();",
+              "pm.collectionVariables.set('rand', ts);"
+            ]
+          }
+        },
+        {
+          "listen": "test",
+          "script": {
+            "exec": [
+              "pm.test('Status 201', () => pm.response.to.have.status(201));",
+              "",
+              "const json = pm.response.json();",
+              "",
+              "if (json.user?.id) {",
+              "    pm.collectionVariables.set('userId', json.user.id);",
+              "}",
+              "",
+              "if (json.verificationToken) {",
+              "    pm.collectionVariables.set('verificationToken', json.verificationToken);",
+              "} else {",
+              "    console.log('❌ Missing verificationToken:', json);",
+              "}",
+              "",
+              "console.log('REGISTER RESPONSE:', json);"
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "name": "✅ Xác minh email bằng token (FIXED)",
+      "request": {
+        "method": "POST",
+        "header": [],
+        "url": {
+          "raw": "{{authBaseUrl}}/verify-email?token={{verificationToken}}",
+          "host": [
+            "{{authBaseUrl}}"
+          ],
+          "path": [
+            "verify-email"
+          ],
+          "query": [
+            {
+              "key": "token",
+              "value": "{{verificationToken}}"
+            }
+          ]
+        }
+      },
+      "event": [
+        {
+          "listen": "prerequest",
+          "script": {
+            "exec": [
+              "const token = pm.collectionVariables.get('verificationToken');",
+              "if (!token) console.log('❌ No verification token found');"
+            ]
+          }
+        },
+        {
+          "listen": "test",
+          "script": {
+            "exec": [
+              "const token = pm.collectionVariables.get('verificationToken');",
+              "",
+              "pm.test('Token exists', () => {",
+              "    pm.expect(token).to.not.be.undefined;",
+              "    pm.expect(token).to.not.equal('');",
+              "});",
+              "",
+              "pm.test('Status 200', () => pm.response.to.have.status(200));",
+              "",
+              "console.log('VERIFY RESPONSE:', pm.response.text());"
+            ]
+          }
+        }
+      ]
+    }
+  ],
+  "variable": [
+    {
+      "key": "authBaseUrl",
+      "value": "http://localhost:3000/api/v1/auth",
+      "type": "string"
+    },
+    {
+      "key": "verificationToken",
+      "value": "",
+      "type": "string"
+    },
+    {
+      "key": "userId",
+      "value": "",
+      "type": "string"
+    }
+  ]
+}
