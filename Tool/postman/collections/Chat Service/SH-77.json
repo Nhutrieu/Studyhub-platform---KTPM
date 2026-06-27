@@ -1,7 +1,7 @@
 {
   "info": {
     "name": "SH-77 - Kiểm thử chức năng xóa tin nhắn",
-    "description": "Verify message deletion for owner, other-user restriction, not found, and missing token cases.",
+    "description": "Verify message deletion for owner, other-user restriction, not found, and missing token cases. CI rerun after workflow fix.",
     "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
   },
   "item": [
