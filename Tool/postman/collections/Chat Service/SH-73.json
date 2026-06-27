@@ -1,7 +1,7 @@
 {
   "info": {
     "name": "SH-73 - Kiểm thử chức năng tạo/lấy cuộc hội thoại nhóm",
-    "description": "Verify group conversation creation and validation errors.",
+    "description": "Verify group conversation creation and validation errors. CI rerun after workflow fix.",
     "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
   },
   "item": [
