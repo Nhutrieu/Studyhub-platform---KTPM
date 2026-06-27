@@ -1,7 +1,7 @@
 {
   "info": {
     "name": "SH-75 - Kiểm thử chức năng lấy lịch sử tin nhắn",
-    "description": "Verify message history retrieval, cursor pagination, and forbidden participant access.",
+    "description": "Verify message history retrieval, cursor pagination, and forbidden participant access. CI rerun after workflow fix.",
     "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
   },
   "item": [
