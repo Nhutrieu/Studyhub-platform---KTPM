@@ -1,7 +1,7 @@
 {
   "info": {
-    "name": "SH-71 - Kiểm thử chức năng lấy danh sách cuộc hội thoại",
-    "description": "Verify authenticated users can view their conversations and unauthenticated requests are rejected. CI rerun after workflow fix.",
+    "name": "SH-71 - Kiem thu chuc nang lay danh sach cuoc hoi thoai",
+    "description": "Kiem tra nguoi dung da dang nhap co the xem danh sach cuoc hoi thoai va yeu cau khong co token bi tu choi.",
     "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
   },
   "item": [

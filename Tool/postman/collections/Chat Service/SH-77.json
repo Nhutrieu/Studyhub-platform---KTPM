@@ -1,7 +1,7 @@
 {
   "info": {
-    "name": "SH-77 - Kiểm thử chức năng xóa tin nhắn",
-    "description": "Verify message deletion for owner, other-user restriction, not found, and missing token cases. CI rerun after workflow fix.",
+    "name": "SH-77 - Kiem thu chuc nang xoa tin nhan",
+    "description": "Kiem tra xoa tin nhan cua chinh minh, chan nguoi dung khac xoa, truong hop khong tim thay va thieu token.",
     "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
   },
   "item": [
