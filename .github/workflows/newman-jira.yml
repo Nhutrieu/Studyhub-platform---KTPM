@@ -1,11 +1,11 @@
-name: Newman API Test + Jira Integration
+﻿name: Newman API Test + Jira Integration
 
 on:
   push:
     branches:
       - '**'
     paths:
-      - 'Tool/postman/**' # Thay thế bằng đường dẫn chứa file Postman của dự án mới
+      - 'Tool/postman/**' # Thay tháº¿ báº±ng Ä‘Æ°á»ng dáº«n chá»©a file Postman cá»§a dá»± Ã¡n má»›i
 
 jobs:
   api-testing:
@@ -17,7 +17,7 @@ jobs:
         with:
           fetch-depth: 2
 
-      # 1. Trích xuất mã ticket Jira từ commit message (ví dụ: FM-57)
+      # 1. TrÃ­ch xuáº¥t mÃ£ ticket Jira tá»« commit message (vÃ­ dá»¥: FM-57)
       - name: Extract Jira Key from Commit
         run: |
           COMMIT_MSG=$(git log -1 --pretty=%B || true)
@@ -30,7 +30,7 @@ jobs:
             echo "HAS_KEY=true" >> $GITHUB_ENV
           fi
 
-      # 2. Cài đặt Newman & jq
+      # 2. CÃ i Ä‘áº·t Newman & jq
       - name: Setup Node
         if: env.HAS_KEY == 'true'
         uses: actions/setup-node@v4
@@ -60,11 +60,11 @@ jobs:
           echo "Waiting for backend services to boot..."
           sleep 45
 
-      # 3. Lọc file thay đổi và chạy Newman
+      # 3. Lá»c file thay Ä‘á»•i vÃ  cháº¡y Newman
       - name: Run Newman Only On Committed Files
         if: env.HAS_KEY == 'true'
         run: |
-          # Tìm các file collection .json bị thay đổi trong commit
+          # TÃ¬m cÃ¡c file collection .json bá»‹ thay Ä‘á»•i trong commit
           CHANGED_FILES=$(git diff --name-only HEAD~1 HEAD | grep -E "Tool/postman/.*\.json$" | grep -v "package.json" || true)
 
           if [ -z "$CHANGED_FILES" ]; then
@@ -74,18 +74,25 @@ jobs:
 
           API_URL="${{ secrets.API_BASE_URL }}"
           if [ -z "$API_URL" ]; then
-            echo "ℹ️ secrets.API_BASE_URL chưa cấu hình. Đang chuyển hướng sang Docker Backend (http://localhost:8000)..."
+            echo "â„¹ï¸ secrets.API_BASE_URL chÆ°a cáº¥u hÃ¬nh. Äang chuyá»ƒn hÆ°á»›ng sang Docker Backend (http://localhost:8000)..."
             API_URL="http://localhost:8000"
           fi
 
           mkdir -p newman-reports
           ANY_FAIL=false
           OLD_IFS=$IFS
-          IFS=$'\n' # Hỗ trợ xử lý tên file có khoảng trắng
+          IFS=$'\n' # Há»— trá»£ xá»­ lÃ½ tÃªn file cÃ³ khoáº£ng tráº¯ng
           for file in $CHANGED_FILES; do
             if [ -f "$file" ]; then
-              # Chạy Newman trỏ về link Staging hoặc Local Docker
-              newman run "$file" --env-var "gatewayUrl=$API_URL/api/v1" -r json --reporter-json-export "newman-reports/$(basename "$file" .json).json" || ANY_FAIL=true
+              # Cháº¡y Newman trá» vá» link Staging hoáº·c Local Docker
+              newman run "$file" \
+                --env-var "gatewayUrl=$API_URL/api/v1" \
+                --env-var "authBaseUrl=$API_URL/api/v1/auth" \
+                --env-var "chatBaseUrl=$API_URL/api/v1/chat" \
+                --env-var "notificationBaseUrl=$API_URL/api/v1/notification" \
+                --env-var "userEmail=admin@example.com" \
+                --env-var "password=11111111" \
+                -r json --reporter-json-export "newman-reports/$(basename "$file" .json).json" || ANY_FAIL=true
             fi
           done
           IFS=$OLD_IFS
@@ -98,7 +105,7 @@ jobs:
             python Tool/postman/parse_newman_report.py --status PASS
           fi
 
-      # 4. Đăng nhập Jira & Hành động chuyển trạng thái/báo lỗi
+      # 4. ÄÄƒng nháº­p Jira & HÃ nh Ä‘á»™ng chuyá»ƒn tráº¡ng thÃ¡i/bÃ¡o lá»—i
       - name: Jira Login
         if: env.HAS_KEY == 'true'
         uses: atlassian/gajira-login@v3
@@ -112,7 +119,7 @@ jobs:
         uses: atlassian/gajira-create@v3
         with:
           project: ${{ secrets.JIRA_PROJECT_KEY }}
-          issuetype: Subtask # Sửa lại đúng chuẩn Jira của dự án
+          issuetype: Subtask # Sá»­a láº¡i Ä‘Ãºng chuáº©n Jira cá»§a dá»± Ã¡n
           fields: '{"parent": {"key": "${{ env.JIRA_KEY }}"}}'
           summary: "${{ env.JIRA_BUG_SUMMARY }}"
           description: "${{ env.JIRA_BUG_DESCRIPTION }}"
@@ -130,9 +137,8 @@ jobs:
         with:
           issue: ${{ env.JIRA_KEY }}
           transition: "DONE"
-
-      - name: Fail workflow if Newman tests failed
-        if: env.NEWMAN_STATUS == 'FAIL'
+      - name: Fail workflow when Newman fails
+        if: env.HAS_KEY == 'true' && env.NEWMAN_STATUS == 'FAIL'
         run: |
-          echo "Newman tests failed. Jira bug has been created or updated."
+          echo "Newman failed. Jira bug/sub-task has been created above, now failing the CI job for visibility."
           exit 1
