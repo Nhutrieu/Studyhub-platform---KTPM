@@ -1,0 +1,418 @@
+{
+  "info": {
+    "name": "StudyHub - SH-33 - Kiểm thử chức năng lấy danh sách thông báo",
+    "description": "Postman collection for task SH-33: Kiểm thử chức năng lấy danh sách thông báo",
+    "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+  },
+  "item": [
+    {
+      "name": "🔔 [notification-service:3005] Notification (/)",
+      "item": [
+        {
+          "name": "🔑 Đăng nhập User thường (Lấy Access Token)",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test('Status 200 - Đăng nhập User thành công', () => pm.response.to.have.status(200));",
+                  "const json = pm.response.json();",
+                  "const resData = json.data || json;",
+                  "if (resData.access_token) {",
+                  "    pm.collectionVariables.set('accessToken', resData.access_token);",
+                  "    pm.collectionVariables.set('userId', resData.user && resData.user.id);",
+                  "}"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"email\": \"{{userEmail}}\",\n  \"password\": \"{{password}}\"\n}"
+            },
+            "url": {
+              "raw": "{{authBaseUrl}}/login",
+              "host": [
+                "{{authBaseUrl}}"
+              ],
+              "path": [
+                "login"
+              ]
+            }
+          }
+        },
+        {
+          "name": "✅ Lấy danh sách thông báo của tôi",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{accessToken}}"
+              }
+            ],
+            "url": {
+              "raw": "{{notificationBaseUrl}}/?limit=50&offset=0",
+              "host": [
+                "{{notificationBaseUrl}}"
+              ],
+              "path": [
+                ""
+              ],
+              "query": [
+                {
+                  "key": "limit",
+                  "value": "50"
+                },
+                {
+                  "key": "offset",
+                  "value": "0"
+                }
+              ]
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test('Status 200', () => pm.response.to.have.status(200));",
+                  "const json = pm.response.json();",
+                  "pm.test('Có field success và data', () => { pm.expect(json).to.have.property('success'); pm.expect(json).to.have.property('data'); });"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "✅ Lọc thông báo theo status (unread)",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{accessToken}}"
+              }
+            ],
+            "url": {
+              "raw": "{{notificationBaseUrl}}/?status=unread&limit=20",
+              "host": [
+                "{{notificationBaseUrl}}"
+              ],
+              "path": [
+                ""
+              ],
+              "query": [
+                {
+                  "key": "status",
+                  "value": "unread"
+                },
+                {
+                  "key": "limit",
+                  "value": "20"
+                }
+              ]
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test('Status 200', () => pm.response.to.have.status(200));"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "❌ Lấy danh sách thông báo - không có token",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{notificationBaseUrl}}/",
+              "host": [
+                "{{notificationBaseUrl}}"
+              ],
+              "path": [
+                ""
+              ]
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test('Status 401', () => pm.response.to.have.status(401));"
+                ]
+              }
+            }
+          ]
+        }
+      ]
+    }
+  ],
+  "variable": [
+    {
+      "key": "authBaseUrl",
+      "value": "{{gatewayUrl}}/auth",
+      "type": "string"
+    },
+    {
+      "key": "userBaseUrl",
+      "value": "{{gatewayUrl}}/user",
+      "type": "string"
+    },
+    {
+      "key": "groupBaseUrl",
+      "value": "{{gatewayUrl}}/group",
+      "type": "string"
+    },
+    {
+      "key": "documentBaseUrl",
+      "value": "{{gatewayUrl}}/document",
+      "type": "string"
+    },
+    {
+      "key": "notificationBaseUrl",
+      "value": "{{gatewayUrl}}/notification",
+      "type": "string"
+    },
+    {
+      "key": "chatBaseUrl",
+      "value": "{{gatewayUrl}}/chat",
+      "type": "string"
+    },
+    {
+      "key": "accessToken",
+      "value": "",
+      "type": "string"
+    },
+    {
+      "key": "refreshToken",
+      "value": "",
+      "type": "string"
+    },
+    {
+      "key": "revokedRefreshToken",
+      "value": "",
+      "type": "string"
+    },
+    {
+      "key": "adminAccessToken",
+      "value": "{{REPLACE_WITH_REAL_ADMIN_TOKEN}}",
+      "type": "string"
+    },
+    {
+      "key": "verificationToken",
+      "value": "",
+      "type": "string"
+    },
+    {
+      "key": "resetToken",
+      "value": "",
+      "type": "string"
+    },
+    {
+      "key": "secondaryEmailId",
+      "value": "",
+      "type": "string"
+    },
+    {
+      "key": "userId",
+      "value": "",
+      "type": "string"
+    },
+    {
+      "key": "anotherUserId",
+      "value": "{{REPLACE_WITH_REAL_USER_ID}}",
+      "type": "string"
+    },
+    {
+      "key": "anotherUserAccessToken",
+      "value": "{{REPLACE_WITH_REAL_TOKEN_OF_anotherUserId}}",
+      "type": "string"
+    },
+    {
+      "key": "outsiderToken",
+      "value": "{{REPLACE_WITH_TOKEN_OF_USER_NOT_IN_ANY_GROUP_DOC}}",
+      "type": "string"
+    },
+    {
+      "key": "deletableUserId",
+      "value": "{{REPLACE_WITH_A_USER_ID_SAFE_TO_DELETE}}",
+      "type": "string"
+    },
+    {
+      "key": "blockedUserEmail",
+      "value": "{{REPLACE_WITH_EMAIL_OF_AN_ALREADY_BLOCKED_USER}}",
+      "type": "string"
+    },
+    {
+      "key": "privateUserId",
+      "value": "{{REPLACE_WITH_USER_ID_WHOSE_PROFILE_IS_PRIVATE}}",
+      "type": "string"
+    },
+    {
+      "key": "otherUserSocialLinkId",
+      "value": "{{REPLACE_WITH_SOCIAL_LINK_ID_OF_ANOTHER_USER}}",
+      "type": "string"
+    },
+    {
+      "key": "socialLinkId",
+      "value": "",
+      "type": "string"
+    },
+    {
+      "key": "groupId",
+      "value": "{{REPLACE_WITH_REAL_PUBLIC_GROUP_ID}}",
+      "type": "string"
+    },
+    {
+      "key": "privateGroupId",
+      "value": "{{REPLACE_WITH_REAL_PRIVATE_GROUP_ID}}",
+      "type": "string"
+    },
+    {
+      "key": "emptyGroupId",
+      "value": "{{REPLACE_WITH_GROUP_ID_SAFE_TO_DELETE}}",
+      "type": "string"
+    },
+    {
+      "key": "joinRequestId",
+      "value": "",
+      "type": "string"
+    },
+    {
+      "key": "joinRequestId2",
+      "value": "{{REPLACE_WITH_ANOTHER_PENDING_JOIN_REQUEST_ID}}",
+      "type": "string"
+    },
+    {
+      "key": "groupOwnerToken",
+      "value": "{{REPLACE_WITH_TOKEN_OF_GROUP_OWNER}}",
+      "type": "string"
+    },
+    {
+      "key": "groupOwnerUserId",
+      "value": "{{REPLACE_WITH_USER_ID_OF_GROUP_OWNER}}",
+      "type": "string"
+    },
+    {
+      "key": "groupManagerNotOwnerToken",
+      "value": "{{REPLACE_WITH_TOKEN_OF_A_MANAGER_WHO_IS_NOT_OWNER}}",
+      "type": "string"
+    },
+    {
+      "key": "memberToLeaveToken",
+      "value": "{{REPLACE_WITH_TOKEN_OF_A_REGULAR_MEMBER_TO_TEST_LEAVE}}",
+      "type": "string"
+    },
+    {
+      "key": "memberToKickId",
+      "value": "{{REPLACE_WITH_USER_ID_OF_A_MEMBER_TO_KICK}}",
+      "type": "string"
+    },
+    {
+      "key": "documentId",
+      "value": "",
+      "type": "string"
+    },
+    {
+      "key": "privateDocumentId",
+      "value": "{{REPLACE_WITH_REAL_PRIVATE_DOCUMENT_ID}}",
+      "type": "string"
+    },
+    {
+      "key": "deletableDocumentId",
+      "value": "{{REPLACE_WITH_DOCUMENT_ID_SAFE_TO_DELETE}}",
+      "type": "string"
+    },
+    {
+      "key": "pendingDocumentId",
+      "value": "{{REPLACE_WITH_DOCUMENT_ID_PENDING_APPROVAL}}",
+      "type": "string"
+    },
+    {
+      "key": "pendingDocumentId2",
+      "value": "{{REPLACE_WITH_ANOTHER_DOCUMENT_ID_PENDING_APPROVAL}}",
+      "type": "string"
+    },
+    {
+      "key": "commentId",
+      "value": "",
+      "type": "string"
+    },
+    {
+      "key": "otherUserCommentId",
+      "value": "{{REPLACE_WITH_COMMENT_ID_OF_ANOTHER_USER}}",
+      "type": "string"
+    },
+    {
+      "key": "notificationId",
+      "value": "",
+      "type": "string"
+    },
+    {
+      "key": "otherUserNotificationId",
+      "value": "{{REPLACE_WITH_NOTIFICATION_ID_OF_ANOTHER_USER}}",
+      "type": "string"
+    },
+    {
+      "key": "deletableNotificationId",
+      "value": "{{REPLACE_WITH_NOTIFICATION_ID_SAFE_TO_DELETE}}",
+      "type": "string"
+    },
+    {
+      "key": "conversationId",
+      "value": "",
+      "type": "string"
+    },
+    {
+      "key": "groupConversationId",
+      "value": "",
+      "type": "string"
+    },
+    {
+      "key": "messageId",
+      "value": "",
+      "type": "string"
+    },
+    {
+      "key": "otherUserMessageId",
+      "value": "{{REPLACE_WITH_MESSAGE_ID_OF_ANOTHER_USER}}",
+      "type": "string"
+    },
+    {
+      "key": "userEmail",
+      "value": "user1@example.com",
+      "type": "string"
+    },
+    {
+      "key": "adminEmail",
+      "value": "admin@example.com",
+      "type": "string"
+    },
+    {
+      "key": "password",
+      "value": "11111111",
+      "type": "string"
+    },
+    {
+      "key": "gatewayUrl",
+      "value": "http://localhost:8000/api/v1",
+      "type": "string"
+    }
+  ]
+}
