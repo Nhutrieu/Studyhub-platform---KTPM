@@ -155,7 +155,7 @@
                 {
                   "key": "file",
                   "type": "file",
-                  "src": "/Users/huynhngocbinh/Downloads/Chuong 4 - Cac Ky Thuat Thiet Ke Test.pdf"
+                  "src": "/path/Lab 1-De quy va chien luoc quay lui.pdf"
                 }
               ]
             }
@@ -166,7 +166,7 @@
               "script": {
                 "exec": [
                   "// ⚠️ TEST CASE NÀY CẦN FILE THẬT.",
-                  "// Thay '/path/to/document.pdf' bằng đường dẫn tuyệt đối đến file PDF/PPTX/DOCX trên máy.",
+                  "// Thay '../path/to/document.pdf' bằng đường dẫn tuyệt đối đến file PDF/PPTX/DOCX trên máy.",
                   "// Ví dụ macOS: /Users/huynhngocbinh/Downloads/sample.pdf",
                   "// Nếu không có file → Newman sẽ trả 400 → bỏ qua assertion này khi chạy tự động."
                 ],
