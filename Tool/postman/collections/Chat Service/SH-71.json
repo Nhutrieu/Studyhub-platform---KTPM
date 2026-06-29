@@ -342,6 +342,16 @@
                   ],
                   "path": [
                     "conversations"
+                  ],
+                  "query": [
+                    {
+                      "key": "limit",
+                      "value": "1"
+                    },
+                    {
+                      "key": "offset",
+                      "value": "0"
+                    }
                   ]
                 }
               },
@@ -374,6 +384,16 @@
                   ],
                   "path": [
                     "conversations"
+                  ],
+                  "query": [
+                    {
+                      "key": "limit",
+                      "value": "0"
+                    },
+                    {
+                      "key": "offset",
+                      "value": "0"
+                    }
                   ]
                 }
               },
@@ -406,6 +426,16 @@
                   ],
                   "path": [
                     "conversations"
+                  ],
+                  "query": [
+                    {
+                      "key": "limit",
+                      "value": "50"
+                    },
+                    {
+                      "key": "offset",
+                      "value": "0"
+                    }
                   ]
                 }
               },
@@ -438,6 +468,16 @@
                   ],
                   "path": [
                     "conversations"
+                  ],
+                  "query": [
+                    {
+                      "key": "limit",
+                      "value": "50"
+                    },
+                    {
+                      "key": "offset",
+                      "value": "999999"
+                    }
                   ]
                 }
               },

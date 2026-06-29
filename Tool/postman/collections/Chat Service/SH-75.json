@@ -390,6 +390,12 @@
                     "conversations",
                     "{{conversationId}}",
                     "messages"
+                  ],
+                  "query": [
+                    {
+                      "key": "limit",
+                      "value": "1"
+                    }
                   ]
                 }
               },
@@ -424,6 +430,12 @@
                     "conversations",
                     "{{conversationId}}",
                     "messages"
+                  ],
+                  "query": [
+                    {
+                      "key": "limit",
+                      "value": "0"
+                    }
                   ]
                 }
               },
@@ -458,6 +470,12 @@
                     "conversations",
                     "{{conversationId}}",
                     "messages"
+                  ],
+                  "query": [
+                    {
+                      "key": "limit",
+                      "value": "999999"
+                    }
                   ]
                 }
               },
