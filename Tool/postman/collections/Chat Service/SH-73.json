@@ -456,6 +456,96 @@
               ]
             }
           ]
+        },
+        {
+          "name": "[WHITE BOX] Kiem thu nhanh logic getOrCreateGroupConversation",
+          "item": [
+            {
+              "name": "[WHITE BOX] Goi group conversation lan 1 - tao/lay theo target_id",
+              "request": {
+                "method": "POST",
+                "header": [
+                  {
+                    "key": "Authorization",
+                    "value": "Bearer {{accessToken}}"
+                  },
+                  {
+                    "key": "Content-Type",
+                    "value": "application/json"
+                  }
+                ],
+                "url": {
+                  "raw": "{{chatBaseUrl}}/conversations",
+                  "host": [
+                    "{{chatBaseUrl}}"
+                  ],
+                  "path": [
+                    "conversations"
+                  ]
+                },
+                "body": {
+                  "mode": "raw",
+                  "raw": "{\n  \"type\": \"group\",\n  \"target_id\": \"whitebox-group-fixed\",\n  \"participant_ids\": [\n    \"{{userId}}\",\n    \"{{anotherUserId}}\"\n  ]\n}"
+                }
+              },
+              "event": [
+                {
+                  "listen": "test",
+                  "script": {
+                    "exec": [
+                      "pm.test('Status 201', () => pm.response.to.have.status(201));",
+                      "const json = pm.response.json();",
+                      "const id = json.data && (json.data._id || json.data.id);",
+                      "pm.test('Co group conversation id', () => pm.expect(id).to.exist);",
+                      "pm.collectionVariables.set('whiteboxGroupConversationId', id);"
+                    ]
+                  }
+                }
+              ]
+            },
+            {
+              "name": "[WHITE BOX] Goi group conversation lan 2 - khong tao duplicate",
+              "request": {
+                "method": "POST",
+                "header": [
+                  {
+                    "key": "Authorization",
+                    "value": "Bearer {{accessToken}}"
+                  },
+                  {
+                    "key": "Content-Type",
+                    "value": "application/json"
+                  }
+                ],
+                "url": {
+                  "raw": "{{chatBaseUrl}}/conversations",
+                  "host": [
+                    "{{chatBaseUrl}}"
+                  ],
+                  "path": [
+                    "conversations"
+                  ]
+                },
+                "body": {
+                  "mode": "raw",
+                  "raw": "{\n  \"type\": \"group\",\n  \"target_id\": \"whitebox-group-fixed\",\n  \"participant_ids\": [\n    \"{{userId}}\",\n    \"{{anotherUserId}}\"\n  ]\n}"
+                }
+              },
+              "event": [
+                {
+                  "listen": "test",
+                  "script": {
+                    "exec": [
+                      "pm.test('Status 201', () => pm.response.to.have.status(201));",
+                      "const json = pm.response.json();",
+                      "const id = json.data && (json.data._id || json.data.id);",
+                      "pm.test('Tra ve dung group conversation da ton tai', () => pm.expect(id).to.eql(pm.collectionVariables.get('whiteboxGroupConversationId')));"
+                    ]
+                  }
+                }
+              ]
+            }
+          ]
         }
       ]
     }

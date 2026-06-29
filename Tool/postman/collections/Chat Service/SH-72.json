@@ -367,6 +367,96 @@
               }
             }
           ]
+        },
+        {
+          "name": "[WHITE BOX] Kiem thu nhanh logic getOrCreateDirectConversation",
+          "item": [
+            {
+              "name": "[WHITE BOX] Goi direct conversation lan 1 - lay conversation hien co/tao moi",
+              "request": {
+                "method": "POST",
+                "header": [
+                  {
+                    "key": "Authorization",
+                    "value": "Bearer {{accessToken}}"
+                  },
+                  {
+                    "key": "Content-Type",
+                    "value": "application/json"
+                  }
+                ],
+                "url": {
+                  "raw": "{{chatBaseUrl}}/conversations",
+                  "host": [
+                    "{{chatBaseUrl}}"
+                  ],
+                  "path": [
+                    "conversations"
+                  ]
+                },
+                "body": {
+                  "mode": "raw",
+                  "raw": "{\n  \"type\": \"direct\",\n  \"target_id\": \"{{anotherUserId}}\"\n}"
+                }
+              },
+              "event": [
+                {
+                  "listen": "test",
+                  "script": {
+                    "exec": [
+                      "pm.test('Status 201', () => pm.response.to.have.status(201));",
+                      "const json = pm.response.json();",
+                      "const id = json.data && (json.data._id || json.data.id);",
+                      "pm.test('Co conversation id', () => pm.expect(id).to.exist);",
+                      "pm.collectionVariables.set('whiteboxDirectConversationId', id);"
+                    ]
+                  }
+                }
+              ]
+            },
+            {
+              "name": "[WHITE BOX] Goi direct conversation lan 2 - khong tao duplicate",
+              "request": {
+                "method": "POST",
+                "header": [
+                  {
+                    "key": "Authorization",
+                    "value": "Bearer {{accessToken}}"
+                  },
+                  {
+                    "key": "Content-Type",
+                    "value": "application/json"
+                  }
+                ],
+                "url": {
+                  "raw": "{{chatBaseUrl}}/conversations",
+                  "host": [
+                    "{{chatBaseUrl}}"
+                  ],
+                  "path": [
+                    "conversations"
+                  ]
+                },
+                "body": {
+                  "mode": "raw",
+                  "raw": "{\n  \"type\": \"direct\",\n  \"target_id\": \"{{anotherUserId}}\"\n}"
+                }
+              },
+              "event": [
+                {
+                  "listen": "test",
+                  "script": {
+                    "exec": [
+                      "pm.test('Status 201', () => pm.response.to.have.status(201));",
+                      "const json = pm.response.json();",
+                      "const id = json.data && (json.data._id || json.data.id);",
+                      "pm.test('Tra ve dung conversation da ton tai', () => pm.expect(id).to.eql(pm.collectionVariables.get('whiteboxDirectConversationId')));"
+                    ]
+                  }
+                }
+              ]
+            }
+          ]
         }
       ]
     }
