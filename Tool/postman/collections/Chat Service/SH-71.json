@@ -321,6 +321,139 @@
               }
             }
           ]
+        },
+        {
+          "name": "[BVA] Kiem thu gia tri bien - Danh sach hoi thoai",
+          "item": [
+            {
+              "name": "[BVA] limit = 1 - chi lay toi da 1 hoi thoai",
+              "request": {
+                "method": "GET",
+                "header": [
+                  {
+                    "key": "Authorization",
+                    "value": "Bearer {{accessToken}}"
+                  }
+                ],
+                "url": {
+                  "raw": "{{chatBaseUrl}}/conversations?limit=1&offset=0",
+                  "host": [
+                    "{{chatBaseUrl}}"
+                  ],
+                  "path": [
+                    "conversations"
+                  ]
+                }
+              },
+              "event": [
+                {
+                  "listen": "test",
+                  "script": {
+                    "exec": [
+                      "pm.test('Status 200', () => pm.response.to.have.status(200));",
+                      "pm.test('Data la mang va so luong <= 1', () => { const json = pm.response.json(); pm.expect(json.data).to.be.an('array'); pm.expect(json.data.length).to.be.at.most(1); });"
+                    ]
+                  }
+                }
+              ]
+            },
+            {
+              "name": "[BVA] limit = 0 - bien duoi cua limit",
+              "request": {
+                "method": "GET",
+                "header": [
+                  {
+                    "key": "Authorization",
+                    "value": "Bearer {{accessToken}}"
+                  }
+                ],
+                "url": {
+                  "raw": "{{chatBaseUrl}}/conversations?limit=0&offset=0",
+                  "host": [
+                    "{{chatBaseUrl}}"
+                  ],
+                  "path": [
+                    "conversations"
+                  ]
+                }
+              },
+              "event": [
+                {
+                  "listen": "test",
+                  "script": {
+                    "exec": [
+                      "pm.test('Status 200', () => pm.response.to.have.status(200));",
+                      "pm.test('Data la mang', () => pm.expect(pm.response.json().data).to.be.an('array'));"
+                    ]
+                  }
+                }
+              ]
+            },
+            {
+              "name": "[BVA] offset = 0 - bien duoi cua offset",
+              "request": {
+                "method": "GET",
+                "header": [
+                  {
+                    "key": "Authorization",
+                    "value": "Bearer {{accessToken}}"
+                  }
+                ],
+                "url": {
+                  "raw": "{{chatBaseUrl}}/conversations?limit=50&offset=0",
+                  "host": [
+                    "{{chatBaseUrl}}"
+                  ],
+                  "path": [
+                    "conversations"
+                  ]
+                }
+              },
+              "event": [
+                {
+                  "listen": "test",
+                  "script": {
+                    "exec": [
+                      "pm.test('Status 200', () => pm.response.to.have.status(200));",
+                      "pm.test('Data la mang', () => pm.expect(pm.response.json().data).to.be.an('array'));"
+                    ]
+                  }
+                }
+              ]
+            },
+            {
+              "name": "[BVA] offset rat lon - vuot qua so luong du lieu hien co",
+              "request": {
+                "method": "GET",
+                "header": [
+                  {
+                    "key": "Authorization",
+                    "value": "Bearer {{accessToken}}"
+                  }
+                ],
+                "url": {
+                  "raw": "{{chatBaseUrl}}/conversations?limit=50&offset=999999",
+                  "host": [
+                    "{{chatBaseUrl}}"
+                  ],
+                  "path": [
+                    "conversations"
+                  ]
+                }
+              },
+              "event": [
+                {
+                  "listen": "test",
+                  "script": {
+                    "exec": [
+                      "pm.test('Status 200', () => pm.response.to.have.status(200));",
+                      "pm.test('Data la mang', () => pm.expect(pm.response.json().data).to.be.an('array'));"
+                    ]
+                  }
+                }
+              ]
+            }
+          ]
         }
       ]
     }

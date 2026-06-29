@@ -371,6 +371,91 @@
               }
             }
           ]
+        },
+        {
+          "name": "[BVA] Kiem thu gia tri bien - Thanh vien nhom",
+          "item": [
+            {
+              "name": "[BVA] participant_ids rong - bien duoi danh sach thanh vien",
+              "request": {
+                "method": "POST",
+                "header": [
+                  {
+                    "key": "Authorization",
+                    "value": "Bearer {{accessToken}}"
+                  },
+                  {
+                    "key": "Content-Type",
+                    "value": "application/json"
+                  }
+                ],
+                "url": {
+                  "raw": "{{chatBaseUrl}}/conversations",
+                  "host": [
+                    "{{chatBaseUrl}}"
+                  ],
+                  "path": [
+                    "conversations"
+                  ]
+                },
+                "body": {
+                  "mode": "raw",
+                  "raw": "{\n  \"type\": \"group\",\n  \"target_id\": \"bva-empty-group-{{$timestamp}}\",\n  \"participant_ids\": []\n}"
+                }
+              },
+              "event": [
+                {
+                  "listen": "test",
+                  "script": {
+                    "exec": [
+                      "pm.test('Status 201', () => pm.response.to.have.status(201));",
+                      "pm.test('Participants la mang', () => pm.expect(pm.response.json().data.participants).to.be.an('array'));"
+                    ]
+                  }
+                }
+              ]
+            },
+            {
+              "name": "[BVA] participant_ids co 1 thanh vien - bien toi thieu hop le",
+              "request": {
+                "method": "POST",
+                "header": [
+                  {
+                    "key": "Authorization",
+                    "value": "Bearer {{accessToken}}"
+                  },
+                  {
+                    "key": "Content-Type",
+                    "value": "application/json"
+                  }
+                ],
+                "url": {
+                  "raw": "{{chatBaseUrl}}/conversations",
+                  "host": [
+                    "{{chatBaseUrl}}"
+                  ],
+                  "path": [
+                    "conversations"
+                  ]
+                },
+                "body": {
+                  "mode": "raw",
+                  "raw": "{\n  \"type\": \"group\",\n  \"target_id\": \"bva-one-member-group-{{$timestamp}}\",\n  \"participant_ids\": [\n    \"{{userId}}\"\n  ]\n}"
+                }
+              },
+              "event": [
+                {
+                  "listen": "test",
+                  "script": {
+                    "exec": [
+                      "pm.test('Status 201', () => pm.response.to.have.status(201));",
+                      "pm.test('Co it nhat 1 participant', () => pm.expect(pm.response.json().data.participants.length).to.be.at.least(1));"
+                    ]
+                  }
+                }
+              ]
+            }
+          ]
         }
       ]
     }
