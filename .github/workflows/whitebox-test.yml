@@ -1,0 +1,63 @@
+name: White Box Testing (Jest Unit & Integration Test)
+
+on:
+  push:
+    branches:
+      - '**'
+    paths:
+      - 'backend/notification_service/**'
+  pull_request:
+    branches:
+      - '**'
+    paths:
+      - 'backend/notification_service/**'
+
+jobs:
+  whitebox-test:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout Source Code
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: 18
+          cache: 'npm'
+          cache-dependency-path: 'backend/notification_service/package-lock.json'
+
+      - name: Install Dependencies
+        run: |
+          cd backend/notification_service
+          npm ci
+
+      - name: Run White Box Tests
+        run: |
+          cd backend/notification_service
+          npm test -- --json --outputFile=jest-report.json || true
+
+      - name: Parse Test Report and Log Jira Bug
+        if: always()
+        env:
+          JIRA_BASE_URL: ${{ secrets.JIRA_BASE_URL }}
+          JIRA_EMAIL: ${{ secrets.JIRA_EMAIL }}
+          JIRA_API_TOKEN: ${{ secrets.JIRA_API_TOKEN }}
+          JIRA_PROJECT_KEY: ${{ secrets.JIRA_PROJECT_KEY }}
+        run: |
+          node Tool/postman/parse-jest-report.js
+
+      - name: Verify Test Results and Fail Workflow if Failed
+        run: |
+          cd backend/notification_service
+          if [ -f "jest-report.json" ]; then
+            numFailed=$(jq '.numFailedTests' jest-report.json)
+            if [ "$numFailed" -gt 0 ]; then
+              echo "❌ White Box tests failed! $numFailed tests failed."
+              exit 1
+            fi
+            echo "✅ All White Box tests passed!"
+          else
+            echo "❌ No jest-report.json found."
+            exit 1
+          fi
