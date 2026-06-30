@@ -5,12 +5,12 @@ on:
     branches:
       - '**'
     paths:
-      - 'backend/notification_service/**'
+      - 'backend/**'
   pull_request:
     branches:
       - '**'
     paths:
-      - 'backend/notification_service/**'
+      - 'backend/**'
 
 jobs:
   whitebox-test:
@@ -35,40 +35,55 @@ jobs:
             echo "HAS_KEY=true" >> $GITHUB_ENV
           fi
 
-      - name: Setup Node.js
+      # 2. Phát hiện service và tệp test tương ứng bằng cách quét động thư mục backend
+      - name: Detect Service and Test File
         if: env.HAS_KEY == 'true'
+        run: |
+          TEST_FILE_PATH=$(find backend -type f -path "*/test/${{ env.JIRA_KEY }}.test.js" | head -n 1)
+          if [ -n "$TEST_FILE_PATH" ]; then
+            SERVICE_DIR=$(dirname $(dirname "$TEST_FILE_PATH"))
+            echo "SERVICE_DIR=$SERVICE_DIR" >> $GITHUB_ENV
+            echo "TEST_FILE=test/${{ env.JIRA_KEY }}.test.js" >> $GITHUB_ENV
+            echo "CACHE_PATH=$SERVICE_DIR/package-lock.json" >> $GITHUB_ENV
+            echo "FOUND_TEST=true" >> $GITHUB_ENV
+            echo "Found test file at $TEST_FILE_PATH. Service directory is $SERVICE_DIR."
+          else
+            echo "FOUND_TEST=false" >> $GITHUB_ENV
+          fi
+
+      - name: Setup Node.js
+        if: env.HAS_KEY == 'true' && env.FOUND_TEST == 'true'
         uses: actions/setup-node@v4
         with:
           node-version: 18
           cache: 'npm'
-          cache-dependency-path: 'backend/notification_service/package-lock.json'
+          cache-dependency-path: ${{ env.CACHE_PATH }}
 
       - name: Install Dependencies
-        if: env.HAS_KEY == 'true'
+        if: env.HAS_KEY == 'true' && env.FOUND_TEST == 'true'
         run: |
-          cd backend/notification_service
+          cd ${{ env.SERVICE_DIR }}
           npm ci
 
       - name: Run White Box Tests Only On Matching Jira Key
-        if: env.HAS_KEY == 'true'
+        if: env.HAS_KEY == 'true' && env.FOUND_TEST == 'true'
         run: |
-          cd backend/notification_service
-          TEST_FILE="test/${{ env.JIRA_KEY }}.test.js"
-          if [ -f "$TEST_FILE" ]; then
-            echo "Running test file: $TEST_FILE"
-            npm test -- "$TEST_FILE" --json --outputFile=jest-report.json || echo "WHITEBOX_STATUS=FAIL" >> $GITHUB_ENV
-            
-            if [ ! -f "jest-report.json" ] || grep -q '"status": "failed"' jest-report.json; then
-              echo "WHITEBOX_STATUS=FAIL" >> $GITHUB_ENV
-              node ../../Tool/postman/parse-jest-report.js FAIL
-            else
-              echo "WHITEBOX_STATUS=PASS" >> $GITHUB_ENV
-              node ../../Tool/postman/parse-jest-report.js PASS
-            fi
+          cd ${{ env.SERVICE_DIR }}
+          node --experimental-vm-modules node_modules/jest/bin/jest.js "${{ env.TEST_FILE }}" --json --outputFile=jest-report.json || echo "WHITEBOX_STATUS=FAIL" >> $GITHUB_ENV
+          
+          if [ ! -f "jest-report.json" ] || grep -q '"status": "failed"' jest-report.json; then
+            echo "WHITEBOX_STATUS=FAIL" >> $GITHUB_ENV
+            node ../../Tool/postman/parse-jest-report.js FAIL
           else
-            echo "⚠️ Không tìm thấy file test cho ${{ env.JIRA_KEY }}. Bỏ qua chạy test."
-            echo "WHITEBOX_STATUS=SKIP" >> $GITHUB_ENV
+            echo "WHITEBOX_STATUS=PASS" >> $GITHUB_ENV
+            node ../../Tool/postman/parse-jest-report.js PASS
           fi
+
+      - name: Handle Missing Test File
+        if: env.HAS_KEY == 'true' && env.FOUND_TEST == 'false'
+        run: |
+          echo "⚠️ Không tìm thấy file test cho ${{ env.JIRA_KEY }}. Bỏ qua chạy test."
+          echo "WHITEBOX_STATUS=SKIP" >> $GITHUB_ENV
 
       # 4. Đăng nhập Jira & Hành động chuyển trạng thái/báo lỗi
       - name: Jira Login

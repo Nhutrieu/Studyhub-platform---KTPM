@@ -17,7 +17,7 @@ function writeToGithubEnv(key, value, isMultiline = false) {
 }
 
 async function run() {
-  const reportPath = path.resolve('backend/notification_service/jest-report.json');
+  const reportPath = path.resolve('jest-report.json');
   if (!fs.existsSync(reportPath)) {
     console.log("ℹ️ Không tìm thấy file jest-report.json. Bỏ qua phân tích.");
     process.exit(0);
@@ -58,7 +58,7 @@ async function run() {
     let comment = `🎉 **WHITE BOX TESTING SUCCESSFUL** 🎉\n\n`;
     comment += `* 💻 **Nhánh chạy:** \`${branch}\`\n`;
     comment += `* 👤 **Người kích hoạt:** \`${actor}\`\n`;
-    comment += `* 🚀 **GitHub Run:** [#{runId}](https://github.com/${repo}/actions/runs/{runId})\n\n`;
+    comment += `* 🚀 **GitHub Run:** [#${runId}](https://github.com/${repo}/actions/runs/${runId})\n\n`;
     comment += `**📋 Chi tiết kết quả kiểm thử:**\n`;
     
     const totalTests = report.numTotalTests || 0;
