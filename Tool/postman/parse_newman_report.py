@@ -135,6 +135,9 @@ def handle_fail(failures):
         if body_obj:
             req_body = format_body(body_obj)
             
+    if len(req_body) > 1000:
+        req_body = req_body[:1000] + "\n... [BODY TRUNCATED TO 1000 CHARACTERS FOR JIRA LIMIT]"
+            
     assertion_test = fail_obj.get('error', {}).get('test', '')
     assertion_msg = fail_obj.get('error', {}).get('message', '')
     
@@ -174,6 +177,9 @@ Assertion
             f_name = clean_request_name(f_obj.get('source', {}).get('name', 'Unknown API'))
             f_msg = f_obj.get('error', {}).get('message', '')
             description += f"{i}. **{f_name}**: {f_msg}\n"
+
+    if len(description) > 30000:
+        description = description[:30000] + "\n... [DESCRIPTION TRUNCATED TO 30000 CHARACTERS FOR JIRA LIMIT]"
 
     print("=== GENERATED JIRA BUG ===")
     print("SUMMARY:", summary)
