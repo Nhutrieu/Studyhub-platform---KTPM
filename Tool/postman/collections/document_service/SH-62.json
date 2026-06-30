@@ -1,8 +1,10 @@
 {
   "info": {
+    "_postman_id": "b2e0a78b-e2f1-4ba1-a5b3-1adf573b899c",
     "name": "SH-62: Kiểm thử Chức năng Upload Tài liệu",
     "description": "StudyHub Document Service - SH-62: Kiểm thử Chức năng Upload Tài liệu",
-    "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+    "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json",
+    "_exporter_id": "55080140"
   },
   "item": [
     {
@@ -41,10 +43,15 @@
             },
             "url": {
               "raw": "{{authBaseUrl}}/login",
-              "host": ["{{authBaseUrl}}"],
-              "path": ["login"]
+              "host": [
+                "{{authBaseUrl}}"
+              ],
+              "path": [
+                "login"
+              ]
             }
-          }
+          },
+          "response": []
         },
         {
           "name": "🔑 Đăng nhập Outsider (Lấy outsiderToken)",
@@ -78,21 +85,32 @@
             },
             "url": {
               "raw": "{{authBaseUrl}}/login",
-              "host": ["{{authBaseUrl}}"],
-              "path": ["login"]
+              "host": [
+                "{{authBaseUrl}}"
+              ],
+              "path": [
+                "login"
+              ]
             }
-          }
+          },
+          "response": []
         },
         {
           "name": "❌ Upload tài liệu mới - không có token",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test('Status 401', () => pm.response.to.have.status(401));"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ],
           "request": {
             "method": "POST",
             "header": [],
-            "url": {
-              "raw": "{{documentBaseUrl}}/",
-              "host": ["{{documentBaseUrl}}"],
-              "path": [""]
-            },
             "body": {
               "mode": "formdata",
               "formdata": [
@@ -101,21 +119,46 @@
                   "value": "Bai giang Giai tich 1"
                 }
               ]
+            },
+            "url": {
+              "raw": "{{documentBaseUrl}}/",
+              "host": [
+                "{{documentBaseUrl}}"
+              ],
+              "path": [
+                ""
+              ]
             }
           },
+          "response": []
+        },
+        {
+          "name": "✅ [MANUAL - cần file thật] Upload tài liệu mới (multipart, có file)",
           "event": [
+            {
+              "listen": "prerequest",
+              "script": {
+                "exec": [
+                  "// ⚠️ TEST CASE NÀY CẦN FILE THẬT.",
+                  "// Thay '../path/to/document.pdf' bằng đường dẫn tuyệt đối đến file PDF/PPTX/DOCX trên máy.",
+                  "// Ví dụ macOS: /Users/huynhngocbinh/Downloads/sample.pdf",
+                  "// Nếu không có file → Newman sẽ trả 400 → bỏ qua assertion này khi chạy tự động."
+                ],
+                "type": "text/javascript"
+              }
+            },
             {
               "listen": "test",
               "script": {
                 "exec": [
-                  "pm.test('Status 401', () => pm.response.to.have.status(401));"
-                ]
+                  "pm.test('Status 200', () => pm.response.to.have.status(200));",
+                  "const json = pm.response.json();",
+                  "if (json.id) pm.collectionVariables.set('documentId', json.id);"
+                ],
+                "type": "text/javascript"
               }
             }
-          ]
-        },
-        {
-          "name": "✅ [MANUAL - cần file thật] Upload tài liệu mới (multipart, có file)",
+          ],
           "request": {
             "method": "POST",
             "header": [
@@ -124,11 +167,6 @@
                 "value": "Bearer {{accessToken}}"
               }
             ],
-            "url": {
-              "raw": "{{documentBaseUrl}}/",
-              "host": ["{{documentBaseUrl}}"],
-              "path": [""]
-            },
             "body": {
               "mode": "formdata",
               "formdata": [
@@ -158,35 +196,32 @@
                   "src": "path/document.pdf"
                 }
               ]
+            },
+            "url": {
+              "raw": "{{documentBaseUrl}}/",
+              "host": [
+                "{{documentBaseUrl}}"
+              ],
+              "path": [
+                ""
+              ]
             }
           },
+          "response": []
+        },
+        {
+          "name": "❌ Upload tài liệu - không gửi file",
           "event": [
-            {
-              "listen": "prerequest",
-              "script": {
-                "exec": [
-                  "// ⚠️ TEST CASE NÀY CẦN FILE THẬT.",
-                  "// Thay '../path/to/document.pdf' bằng đường dẫn tuyệt đối đến file PDF/PPTX/DOCX trên máy.",
-                  "// Ví dụ macOS: /Users/huynhngocbinh/Downloads/sample.pdf",
-                  "// Nếu không có file → Newman sẽ trả 400 → bỏ qua assertion này khi chạy tự động."
-                ],
-                "type": "text/javascript"
-              }
-            },
             {
               "listen": "test",
               "script": {
                 "exec": [
-                  "pm.test('Status 200', () => pm.response.to.have.status(200));",
-                  "const json = pm.response.json();",
-                  "if (json.id) pm.collectionVariables.set('documentId', json.id);"
-                ]
+                  "pm.test('Status 400', () => pm.response.to.have.status(400));"
+                ],
+                "type": "text/javascript"
               }
             }
-          ]
-        },
-        {
-          "name": "❌ Upload tài liệu - không gửi file",
+          ],
           "request": {
             "method": "POST",
             "header": [
@@ -195,11 +230,6 @@
                 "value": "Bearer {{accessToken}}"
               }
             ],
-            "url": {
-              "raw": "{{documentBaseUrl}}/",
-              "host": ["{{documentBaseUrl}}"],
-              "path": [""]
-            },
             "body": {
               "mode": "formdata",
               "formdata": [
@@ -208,21 +238,32 @@
                   "value": "Khong co file"
                 }
               ]
+            },
+            "url": {
+              "raw": "{{documentBaseUrl}}/",
+              "host": [
+                "{{documentBaseUrl}}"
+              ],
+              "path": [
+                ""
+              ]
             }
           },
+          "response": []
+        },
+        {
+          "name": "❌ Upload tài liệu - file vượt quá 100MB (giới hạn multer)",
           "event": [
             {
               "listen": "test",
               "script": {
                 "exec": [
-                  "pm.test('Status 400', () => pm.response.to.have.status(400));"
-                ]
+                  "pm.test('Status 400 hoặc 413', () => pm.expect([400, 413]).to.include(pm.response.code));"
+                ],
+                "type": "text/javascript"
               }
             }
-          ]
-        },
-        {
-          "name": "❌ Upload tài liệu - file vượt quá 100MB (giới hạn multer)",
+          ],
           "request": {
             "method": "POST",
             "header": [
@@ -231,11 +272,6 @@
                 "value": "Bearer {{accessToken}}"
               }
             ],
-            "url": {
-              "raw": "{{documentBaseUrl}}/",
-              "host": ["{{documentBaseUrl}}"],
-              "path": [""]
-            },
             "body": {
               "mode": "formdata",
               "formdata": [
@@ -249,21 +285,32 @@
                   "src": "/path/to/oversized-file-over-100mb.zip"
                 }
               ]
+            },
+            "url": {
+              "raw": "{{documentBaseUrl}}/",
+              "host": [
+                "{{documentBaseUrl}}"
+              ],
+              "path": [
+                ""
+              ]
             }
           },
+          "response": []
+        },
+        {
+          "name": "❌ Upload tài liệu - thiếu title",
           "event": [
             {
               "listen": "test",
               "script": {
                 "exec": [
-                  "pm.test('Status 400 hoặc 413', () => pm.expect([400, 413]).to.include(pm.response.code));"
-                ]
+                  "pm.test('Status 400', () => pm.response.to.have.status(400));"
+                ],
+                "type": "text/javascript"
               }
             }
-          ]
-        },
-        {
-          "name": "❌ Upload tài liệu - thiếu title",
+          ],
           "request": {
             "method": "POST",
             "header": [
@@ -272,11 +319,6 @@
                 "value": "Bearer {{accessToken}}"
               }
             ],
-            "url": {
-              "raw": "{{documentBaseUrl}}/",
-              "host": ["{{documentBaseUrl}}"],
-              "path": [""]
-            },
             "body": {
               "mode": "formdata",
               "formdata": [
@@ -286,21 +328,32 @@
                   "src": "/path/to/document.pdf"
                 }
               ]
+            },
+            "url": {
+              "raw": "{{documentBaseUrl}}/",
+              "host": [
+                "{{documentBaseUrl}}"
+              ],
+              "path": [
+                ""
+              ]
             }
           },
+          "response": []
+        },
+        {
+          "name": "❌ Upload tài liệu vào group mà mình không phải member - Bị từ chối",
           "event": [
             {
               "listen": "test",
               "script": {
                 "exec": [
                   "pm.test('Status 400', () => pm.response.to.have.status(400));"
-                ]
+                ],
+                "type": "text/javascript"
               }
             }
-          ]
-        },
-        {
-          "name": "❌ Upload tài liệu vào group mà mình không phải member - Bị từ chối",
+          ],
           "request": {
             "method": "POST",
             "header": [
@@ -309,11 +362,6 @@
                 "value": "Bearer {{outsiderToken}}"
               }
             ],
-            "url": {
-              "raw": "{{documentBaseUrl}}/",
-              "host": ["{{documentBaseUrl}}"],
-              "path": [""]
-            },
             "body": {
               "mode": "formdata",
               "formdata": [
@@ -331,18 +379,18 @@
                   "src": "/path/to/document.pdf"
                 }
               ]
+            },
+            "url": {
+              "raw": "{{documentBaseUrl}}/",
+              "host": [
+                "{{documentBaseUrl}}"
+              ],
+              "path": [
+                ""
+              ]
             }
           },
-          "event": [
-            {
-              "listen": "test",
-              "script": {
-                "exec": [
-                  "pm.test('Status 400', () => pm.response.to.have.status(400));"
-                ]
-              }
-            }
-          ]
+          "response": []
         }
       ]
     }
@@ -350,273 +398,219 @@
   "variable": [
     {
       "key": "authBaseUrl",
-      "value": "http://localhost:3000/api/v1/auth",
-      "type": "string"
+      "value": "http://localhost:3000/api/v1/auth"
     },
     {
       "key": "userBaseUrl",
-      "value": "http://localhost:3001/api/v1/user",
-      "type": "string"
+      "value": "http://localhost:3001/api/v1/user"
     },
     {
       "key": "groupBaseUrl",
-      "value": "http://localhost:3002/api/v1/group",
-      "type": "string"
+      "value": "http://localhost:3002/api/v1/group"
     },
     {
       "key": "documentBaseUrl",
-      "value": "http://localhost:3003/api/v1/document",
-      "type": "string"
+      "value": "http://localhost:3003/api/v1/document"
     },
     {
       "key": "notificationBaseUrl",
-      "value": "http://localhost:3005/api/v1/notification",
-      "type": "string"
+      "value": "http://localhost:3005/api/v1/notification"
     },
     {
       "key": "chatBaseUrl",
-      "value": "http://localhost:3006/api/v1/chat",
-      "type": "string"
+      "value": "http://localhost:3006/api/v1/chat"
     },
     {
       "key": "accessToken",
-      "value": "",
-      "type": "string"
+      "value": ""
     },
     {
       "key": "refreshToken",
-      "value": "",
-      "type": "string"
+      "value": ""
     },
     {
       "key": "revokedRefreshToken",
-      "value": "",
-      "type": "string"
+      "value": ""
     },
     {
       "key": "adminAccessToken",
-      "value": "{{REPLACE_WITH_REAL_ADMIN_TOKEN}}",
-      "type": "string"
+      "value": "{{REPLACE_WITH_REAL_ADMIN_TOKEN}}"
     },
     {
       "key": "verificationToken",
-      "value": "",
-      "type": "string"
+      "value": ""
     },
     {
       "key": "resetToken",
-      "value": "",
-      "type": "string"
+      "value": ""
     },
     {
       "key": "secondaryEmailId",
-      "value": "",
-      "type": "string"
+      "value": ""
     },
     {
       "key": "userId",
-      "value": "",
-      "type": "string"
+      "value": ""
     },
     {
       "key": "anotherUserId",
-      "value": "11111111-2222-4222-8222-111111111113",
-      "type": "string"
+      "value": "11111111-2222-4222-8222-111111111113"
     },
     {
       "key": "anotherUserAccessToken",
-      "value": "",
-      "type": "string"
+      "value": ""
     },
     {
       "key": "outsiderToken",
-      "value": "{{REPLACE_WITH_TOKEN_OF_USER_NOT_IN_ANY_GROUP_DOC}}",
-      "type": "string"
+      "value": "{{REPLACE_WITH_TOKEN_OF_USER_NOT_IN_ANY_GROUP_DOC}}"
     },
     {
       "key": "deletableUserId",
-      "value": "11111111-2222-4222-8222-111111111121",
-      "type": "string"
+      "value": "11111111-2222-4222-8222-111111111121"
     },
     {
       "key": "blockedUserEmail",
-      "value": "user10@example.com",
-      "type": "string"
+      "value": "user10@example.com"
     },
     {
       "key": "privateUserId",
-      "value": "11111111-2222-4222-8222-111111111119",
-      "type": "string"
+      "value": "11111111-2222-4222-8222-111111111119"
     },
     {
       "key": "otherUserSocialLinkId",
-      "value": "{{GET_FROM_USER2_PROFILE_AFTER_ADDING_SOCIAL_LINK}}",
-      "type": "string"
+      "value": "{{GET_FROM_USER2_PROFILE_AFTER_ADDING_SOCIAL_LINK}}"
     },
     {
       "key": "socialLinkId",
-      "value": "",
-      "type": "string"
+      "value": ""
     },
     {
       "key": "groupId",
-      "value": "aaaaaaaa-aaaa-4aaa-8aaa-aaaaaaaaaaa1",
-      "type": "string"
+      "value": "aaaaaaaa-aaaa-4aaa-8aaa-aaaaaaaaaaa1"
     },
     {
       "key": "privateGroupId",
-      "value": "aaaaaaaa-aaaa-4aaa-8aaa-aaaaaaaaaaa2",
-      "type": "string"
+      "value": "aaaaaaaa-aaaa-4aaa-8aaa-aaaaaaaaaaa2"
     },
     {
       "key": "emptyGroupId",
-      "value": "{{CREATE_EMPTY_GROUP_VIA_API_THEN_FILL}}",
-      "type": "string"
+      "value": "{{CREATE_EMPTY_GROUP_VIA_API_THEN_FILL}}"
     },
     {
       "key": "joinRequestId",
-      "value": "",
-      "type": "string"
+      "value": ""
     },
     {
       "key": "joinRequestId2",
-      "value": "{{SEND_JOIN_REQUEST_VIA_API_THEN_FILL}}",
-      "type": "string"
+      "value": "{{SEND_JOIN_REQUEST_VIA_API_THEN_FILL}}"
     },
     {
       "key": "groupOwnerToken",
-      "value": "{{REPLACE_WITH_TOKEN_OF_GROUP_OWNER}}",
-      "type": "string"
+      "value": "{{REPLACE_WITH_TOKEN_OF_GROUP_OWNER}}"
     },
     {
       "key": "groupOwnerUserId",
-      "value": "11111111-2222-4222-8222-111111111114",
-      "type": "string"
+      "value": "11111111-2222-4222-8222-111111111114"
     },
     {
       "key": "groupManagerNotOwnerToken",
-      "value": "",
-      "type": "string"
+      "value": ""
     },
     {
       "key": "memberToLeaveToken",
-      "value": "",
-      "type": "string"
+      "value": ""
     },
     {
       "key": "memberToKickId",
-      "value": "11111111-2222-4222-8222-111111111115",
-      "type": "string"
+      "value": "11111111-2222-4222-8222-111111111115"
     },
     {
       "key": "documentId",
-      "value": "1111-0001-4111-8111-aaaaaaaa0001",
-      "type": "string"
+      "value": "1111-0001-4111-8111-aaaaaaaa0001"
     },
     {
       "key": "privateDocumentId",
-      "value": "1112-0002-4111-8111-aaaaaaaa0005",
-      "type": "string"
+      "value": "1112-0002-4111-8111-aaaaaaaa0005"
     },
     {
       "key": "deletableDocumentId",
-      "value": "1120-0001-4111-8111-aaaaaaaa0028",
-      "type": "string"
+      "value": "1120-0001-4111-8111-aaaaaaaa0028"
     },
     {
       "key": "pendingDocumentId",
-      "value": "1119-0003-4111-8111-aaaaaaaa0027",
-      "type": "string"
+      "value": "1119-0003-4111-8111-aaaaaaaa0027"
     },
     {
       "key": "pendingDocumentId2",
-      "value": "1120-0003-4111-8111-aaaaaaaa0030",
-      "type": "string"
+      "value": "1120-0003-4111-8111-aaaaaaaa0030"
     },
     {
       "key": "commentId",
-      "value": "",
-      "type": "string"
+      "value": ""
     },
     {
       "key": "otherUserCommentId",
-      "value": "c0001-1111-4111-8111-aaaaaaaa001",
-      "type": "string"
+      "value": "c0001-1111-4111-8111-aaaaaaaa001"
     },
     {
       "key": "notificationId",
-      "value": "",
-      "type": "string"
+      "value": ""
     },
     {
       "key": "otherUserNotificationId",
-      "value": "",
-      "type": "string"
+      "value": ""
     },
     {
       "key": "deletableNotificationId",
-      "value": "",
-      "type": "string"
+      "value": ""
     },
     {
       "key": "conversationId",
-      "value": "",
-      "type": "string"
+      "value": ""
     },
     {
       "key": "groupConversationId",
-      "value": "",
-      "type": "string"
+      "value": ""
     },
     {
       "key": "messageId",
-      "value": "",
-      "type": "string"
+      "value": ""
     },
     {
       "key": "otherUserMessageId",
-      "value": "",
-      "type": "string"
+      "value": ""
     },
     {
       "key": "userEmail",
-      "value": "user1@example.com",
-      "type": "string"
+      "value": "user1@example.com"
     },
     {
       "key": "adminEmail",
-      "value": "admin@example.com",
-      "type": "string"
+      "value": "admin@example.com"
     },
     {
       "key": "anotherUserEmail",
-      "value": "user2@example.com",
-      "type": "string"
+      "value": "user2@example.com"
     },
     {
       "key": "groupOwnerEmail",
-      "value": "user3@example.com",
-      "type": "string"
+      "value": "user3@example.com"
     },
     {
       "key": "outsiderEmail",
-      "value": "user10@example.com",
-      "type": "string"
+      "value": "user10@example.com"
     },
     {
       "key": "password",
-      "value": "11111111",
-      "type": "string"
+      "value": "11111111"
     },
     {
       "key": "groupManagerEmail",
-      "value": "user4@example.com",
-      "type": "string"
+      "value": "user4@example.com"
     },
     {
       "key": "memberToLeaveEmail",
-      "value": "user5@example.com",
-      "type": "string"
+      "value": "user5@example.com"
     }
   ]
 }
