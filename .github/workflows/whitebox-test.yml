@@ -19,8 +19,24 @@ jobs:
     steps:
       - name: Checkout Source Code
         uses: actions/checkout@v4
+        with:
+          fetch-depth: 2
+
+      # 1. Trích xuất mã ticket Jira từ commit message (ví dụ: FM-57)
+      - name: Extract Jira Key from Commit
+        run: |
+          COMMIT_MSG=$(git log -1 --pretty=%B || true)
+          JIRA_KEY=$(echo "$COMMIT_MSG" | grep -oE "[A-Z]+-[0-9]+" | head -n 1 || true)
+          if [ -z "$JIRA_KEY" ]; then
+            echo "No Jira ID found. Skipping Jira integration."
+            echo "HAS_KEY=false" >> $GITHUB_ENV
+          else
+            echo "JIRA_KEY=$JIRA_KEY" >> $GITHUB_ENV
+            echo "HAS_KEY=true" >> $GITHUB_ENV
+          fi
 
       - name: Setup Node.js
+        if: env.HAS_KEY == 'true'
         uses: actions/setup-node@v4
         with:
           node-version: 18
@@ -28,36 +44,67 @@ jobs:
           cache-dependency-path: 'backend/notification_service/package-lock.json'
 
       - name: Install Dependencies
+        if: env.HAS_KEY == 'true'
         run: |
           cd backend/notification_service
           npm ci
 
-      - name: Run White Box Tests
+      - name: Run White Box Tests Only On Matching Jira Key
+        if: env.HAS_KEY == 'true'
         run: |
           cd backend/notification_service
-          npm test -- --json --outputFile=jest-report.json || true
+          TEST_FILE="test/${{ env.JIRA_KEY }}.test.js"
+          if [ -f "$TEST_FILE" ]; then
+            echo "Running test file: $TEST_FILE"
+            npm test -- "$TEST_FILE" --json --outputFile=jest-report.json || echo "WHITEBOX_STATUS=FAIL" >> $GITHUB_ENV
+            
+            if [ ! -f "jest-report.json" ] || grep -q '"status": "failed"' jest-report.json; then
+              echo "WHITEBOX_STATUS=FAIL" >> $GITHUB_ENV
+              node ../../Tool/postman/parse-jest-report.js FAIL
+            else
+              echo "WHITEBOX_STATUS=PASS" >> $GITHUB_ENV
+              node ../../Tool/postman/parse-jest-report.js PASS
+            fi
+          else
+            echo "⚠️ Không tìm thấy file test cho ${{ env.JIRA_KEY }}. Bỏ qua chạy test."
+            echo "WHITEBOX_STATUS=PASS" >> $GITHUB_ENV
+          fi
 
-      - name: Parse Test Report and Log Jira Bug
-        if: always()
+      # 4. Đăng nhập Jira & Hành động chuyển trạng thái/báo lỗi
+      - name: Jira Login
+        if: env.HAS_KEY == 'true'
+        uses: atlassian/gajira-login@v3
         env:
           JIRA_BASE_URL: ${{ secrets.JIRA_BASE_URL }}
-          JIRA_EMAIL: ${{ secrets.JIRA_EMAIL }}
+          JIRA_USER_EMAIL: ${{ secrets.JIRA_EMAIL }}
           JIRA_API_TOKEN: ${{ secrets.JIRA_API_TOKEN }}
-          JIRA_PROJECT_KEY: ${{ secrets.JIRA_PROJECT_KEY }}
-        run: |
-          node Tool/postman/parse-jest-report.js
 
-      - name: Verify Test Results and Fail Workflow if Failed
+      - name: Create Jira Sub-task Bug
+        if: env.HAS_KEY == 'true' && env.WHITEBOX_STATUS == 'FAIL'
+        uses: atlassian/gajira-create@v3
+        with:
+          project: ${{ secrets.JIRA_PROJECT_KEY }}
+          issuetype: Subtask
+          fields: '{"parent": {"key": "${{ env.JIRA_KEY }}"}}'
+          summary: "${{ env.JIRA_BUG_SUMMARY }}"
+          description: "${{ env.JIRA_BUG_DESCRIPTION }}"
+
+      - name: Comment on Jira Issue
+        if: env.HAS_KEY == 'true' && env.WHITEBOX_STATUS == 'PASS'
+        uses: atlassian/gajira-comment@v3
+        with:
+          issue: ${{ env.JIRA_KEY }}
+          comment: "${{ env.JIRA_COMMENT }}"
+
+      - name: Transition Jira Issue to Done
+        if: env.HAS_KEY == 'true' && env.WHITEBOX_STATUS == 'PASS'
+        uses: atlassian/gajira-transition@v3
+        with:
+          issue: ${{ env.JIRA_KEY }}
+          transition: "DONE"
+
+      - name: Fail workflow if White Box tests failed
+        if: env.WHITEBOX_STATUS == 'FAIL'
         run: |
-          cd backend/notification_service
-          if [ -f "jest-report.json" ]; then
-            numFailed=$(jq '.numFailedTests' jest-report.json)
-            if [ "$numFailed" -gt 0 ]; then
-              echo "❌ White Box tests failed! $numFailed tests failed."
-              exit 1
-            fi
-            echo "✅ All White Box tests passed!"
-          else
-            echo "ℹ️ No jest-report.json found (likely no test files in this commit). Passing build."
-            exit 0
-          fi
+          echo "❌ White Box tests failed. Jira bug has been created or updated."
+          exit 1
