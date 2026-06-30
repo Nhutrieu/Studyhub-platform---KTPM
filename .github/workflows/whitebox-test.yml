@@ -67,7 +67,7 @@ jobs:
             fi
           else
             echo "⚠️ Không tìm thấy file test cho ${{ env.JIRA_KEY }}. Bỏ qua chạy test."
-            echo "WHITEBOX_STATUS=PASS" >> $GITHUB_ENV
+            echo "WHITEBOX_STATUS=SKIP" >> $GITHUB_ENV
           fi
 
       # 4. Đăng nhập Jira & Hành động chuyển trạng thái/báo lỗi
