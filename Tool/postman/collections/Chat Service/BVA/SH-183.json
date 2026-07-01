@@ -1,6 +1,6 @@
 {
   "info": {
-    "name": "StudyHub - SH-75 - BVA lich su tin nhan",
+    "name": "StudyHub - SH-183 - Kiem thu BVA lich su tin nhan (BVA)",
     "description": "Boundary value tests for message history pagination.",
     "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
   },
