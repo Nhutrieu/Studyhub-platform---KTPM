@@ -1,7 +1,7 @@
 {
   "info": {
-    "name": "SH-17 - Functional Testing for Join Group (Tham gia nhom) - Auto Fixed",
-    "description": "Jira Task SH-17: Đã sửa lỗi tự động lấy groupId và privateGroupId từ danh sách group thật.",
+    "name": "SH-209 - Functional Testing for Join Group (Tham gia nhom) - Auto Fixed",
+    "description": "Jira Task SH-209: Đã sửa lỗi tự động lấy groupId và privateGroupId từ danh sách group thật.",
     "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
   },
   "item": [
