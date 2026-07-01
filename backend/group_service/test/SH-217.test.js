@@ -2,7 +2,7 @@ import { jest } from "@jest/globals";
 import express from "express";
 
 // ============================================================
-// 1. Mock các middleware xác thực/phân quyền TRƯỚC khi import router
+// 1. Mock các middleware xác thực/phân quyền TRƯỚC khi import route
 //    Mục tiêu của Integration Test này là xác minh TÍNH LIÊN KẾT ĐỊNH TUYẾN
 //    (method + path -> đúng controller -> đúng response), không lặp lại
 //    logic xác thực JWT (đã được kiểm thử riêng ở SH-216).
