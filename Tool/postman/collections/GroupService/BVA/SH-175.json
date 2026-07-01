@@ -1,8 +1,11 @@
 {
   "info": {
-    "name": "SH-13 - Functional Testing for Group Search and Listing (Tim kiem va danh sach nhom)",
+    "_postman_id": "830a7f36-2e2e-4f38-94c4-43a84cfdd972",
+    "name": "SH-175 - Functional Testing for Group Search and Listing (Tim kiem va danh sach nhom)",
     "description": "Jira Task SH-13: Functional Testing for Group Search and Listing (Tim kiem va danh sach nhom). Tách từ StudyHub_Group_Service_postman_collection.json",
-    "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+    "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json",
+    "_exporter_id": "55081261",
+    "_collection_link": "https://go.postman.co/collection/55081261-830a7f36-2e2e-4f38-94c4-43a84cfdd972?source=collection_link"
   },
   "item": [
     {
@@ -45,10 +48,22 @@
             "login"
           ]
         }
-      }
+      },
+      "response": []
     },
     {
       "name": "✅ Tìm kiếm/lọc danh sách group (findGroups)",
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "exec": [
+              "pm.test('Status 200', () => pm.response.to.have.status(200));"
+            ],
+            "type": "text/javascript"
+          }
+        }
+      ],
       "request": {
         "method": "GET",
         "header": [
@@ -85,19 +100,21 @@
           ]
         }
       },
+      "response": []
+    },
+    {
+      "name": "✅ Lấy tất cả group (không filter)",
       "event": [
         {
           "listen": "test",
           "script": {
             "exec": [
               "pm.test('Status 200', () => pm.response.to.have.status(200));"
-            ]
+            ],
+            "type": "text/javascript"
           }
         }
-      ]
-    },
-    {
-      "name": "✅ Lấy tất cả group (không filter)",
+      ],
       "request": {
         "method": "GET",
         "header": [
@@ -116,19 +133,21 @@
           ]
         }
       },
+      "response": []
+    },
+    {
+      "name": "❌ Tìm kiếm group - không có token",
       "event": [
         {
           "listen": "test",
           "script": {
             "exec": [
-              "pm.test('Status 200', () => pm.response.to.have.status(200));"
-            ]
+              "pm.test('Status 401', () => pm.response.to.have.status(401));"
+            ],
+            "type": "text/javascript"
           }
         }
-      ]
-    },
-    {
-      "name": "❌ Tìm kiếm group - không có token",
+      ],
       "request": {
         "method": "GET",
         "header": [],
@@ -142,16 +161,7 @@
           ]
         }
       },
-      "event": [
-        {
-          "listen": "test",
-          "script": {
-            "exec": [
-              "pm.test('Status 401', () => pm.response.to.have.status(401));"
-            ]
-          }
-        }
-      ]
+      "response": []
     },
     {
       "name": "🧪 [BVA] limit=0 (giá trị falsy) -> hệ thống tự động mặc định về 50",
@@ -366,233 +376,187 @@
   "variable": [
     {
       "key": "authBaseUrl",
-      "value": "http://localhost:3000/api/v1/auth",
-      "type": "string"
+      "value": "http://localhost:3000/api/v1/auth"
     },
     {
       "key": "userBaseUrl",
-      "value": "http://localhost:3001/api/v1/user",
-      "type": "string"
+      "value": "http://localhost:3001/api/v1/user"
     },
     {
       "key": "groupBaseUrl",
-      "value": "http://localhost:3002/api/v1/group",
-      "type": "string"
+      "value": "http://localhost:3002/api/v1/group"
     },
     {
       "key": "documentBaseUrl",
-      "value": "http://localhost:3003/api/v1/document",
-      "type": "string"
+      "value": "http://localhost:3003/api/v1/document"
     },
     {
       "key": "notificationBaseUrl",
-      "value": "http://localhost:3005/api/v1/notification",
-      "type": "string"
+      "value": "http://localhost:3005/api/v1/notification"
     },
     {
       "key": "chatBaseUrl",
-      "value": "http://localhost:3006/api/v1/chat",
-      "type": "string"
+      "value": "http://localhost:3006/api/v1/chat"
     },
     {
       "key": "accessToken",
-      "value": "",
-      "type": "string"
+      "value": ""
     },
     {
       "key": "refreshToken",
-      "value": "",
-      "type": "string"
+      "value": ""
     },
     {
       "key": "revokedRefreshToken",
-      "value": "",
-      "type": "string"
+      "value": ""
     },
     {
       "key": "adminAccessToken",
-      "value": "{{REPLACE_WITH_REAL_ADMIN_TOKEN}}",
-      "type": "string"
+      "value": "{{REPLACE_WITH_REAL_ADMIN_TOKEN}}"
     },
     {
       "key": "verificationToken",
-      "value": "",
-      "type": "string"
+      "value": ""
     },
     {
       "key": "resetToken",
-      "value": "",
-      "type": "string"
+      "value": ""
     },
     {
       "key": "secondaryEmailId",
-      "value": "",
-      "type": "string"
+      "value": ""
     },
     {
       "key": "userId",
-      "value": "",
-      "type": "string"
+      "value": ""
     },
     {
       "key": "anotherUserId",
-      "value": "{{REPLACE_WITH_REAL_USER_ID}}",
-      "type": "string"
+      "value": "{{REPLACE_WITH_REAL_USER_ID}}"
     },
     {
       "key": "anotherUserAccessToken",
-      "value": "{{REPLACE_WITH_REAL_TOKEN_OF_anotherUserId}}",
-      "type": "string"
+      "value": "{{REPLACE_WITH_REAL_TOKEN_OF_anotherUserId}}"
     },
     {
       "key": "outsiderToken",
-      "value": "{{REPLACE_WITH_TOKEN_OF_USER_NOT_IN_ANY_GROUP_DOC}}",
-      "type": "string"
+      "value": "{{REPLACE_WITH_TOKEN_OF_USER_NOT_IN_ANY_GROUP_DOC}}"
     },
     {
       "key": "deletableUserId",
-      "value": "{{REPLACE_WITH_A_USER_ID_SAFE_TO_DELETE}}",
-      "type": "string"
+      "value": "{{REPLACE_WITH_A_USER_ID_SAFE_TO_DELETE}}"
     },
     {
       "key": "blockedUserEmail",
-      "value": "{{REPLACE_WITH_EMAIL_OF_AN_ALREADY_BLOCKED_USER}}",
-      "type": "string"
+      "value": "{{REPLACE_WITH_EMAIL_OF_AN_ALREADY_BLOCKED_USER}}"
     },
     {
       "key": "privateUserId",
-      "value": "{{REPLACE_WITH_USER_ID_WHOSE_PROFILE_IS_PRIVATE}}",
-      "type": "string"
+      "value": "{{REPLACE_WITH_USER_ID_WHOSE_PROFILE_IS_PRIVATE}}"
     },
     {
       "key": "otherUserSocialLinkId",
-      "value": "{{REPLACE_WITH_SOCIAL_LINK_ID_OF_ANOTHER_USER}}",
-      "type": "string"
+      "value": "{{REPLACE_WITH_SOCIAL_LINK_ID_OF_ANOTHER_USER}}"
     },
     {
       "key": "socialLinkId",
-      "value": "",
-      "type": "string"
+      "value": ""
     },
     {
       "key": "groupId",
-      "value": "{{REPLACE_WITH_REAL_PUBLIC_GROUP_ID}}",
-      "type": "string"
+      "value": "{{REPLACE_WITH_REAL_PUBLIC_GROUP_ID}}"
     },
     {
       "key": "privateGroupId",
-      "value": "{{REPLACE_WITH_REAL_PRIVATE_GROUP_ID}}",
-      "type": "string"
+      "value": "{{REPLACE_WITH_REAL_PRIVATE_GROUP_ID}}"
     },
     {
       "key": "emptyGroupId",
-      "value": "{{REPLACE_WITH_GROUP_ID_SAFE_TO_DELETE}}",
-      "type": "string"
+      "value": "{{REPLACE_WITH_GROUP_ID_SAFE_TO_DELETE}}"
     },
     {
       "key": "joinRequestId",
-      "value": "",
-      "type": "string"
+      "value": ""
     },
     {
       "key": "joinRequestId2",
-      "value": "{{REPLACE_WITH_ANOTHER_PENDING_JOIN_REQUEST_ID}}",
-      "type": "string"
+      "value": "{{REPLACE_WITH_ANOTHER_PENDING_JOIN_REQUEST_ID}}"
     },
     {
       "key": "groupOwnerToken",
-      "value": "{{REPLACE_WITH_TOKEN_OF_GROUP_OWNER}}",
-      "type": "string"
+      "value": "{{REPLACE_WITH_TOKEN_OF_GROUP_OWNER}}"
     },
     {
       "key": "groupOwnerUserId",
-      "value": "{{REPLACE_WITH_USER_ID_OF_GROUP_OWNER}}",
-      "type": "string"
+      "value": "{{REPLACE_WITH_USER_ID_OF_GROUP_OWNER}}"
     },
     {
       "key": "groupManagerNotOwnerToken",
-      "value": "{{REPLACE_WITH_TOKEN_OF_A_MANAGER_WHO_IS_NOT_OWNER}}",
-      "type": "string"
+      "value": "{{REPLACE_WITH_TOKEN_OF_A_MANAGER_WHO_IS_NOT_OWNER}}"
     },
     {
       "key": "memberToLeaveToken",
-      "value": "{{REPLACE_WITH_TOKEN_OF_A_REGULAR_MEMBER_TO_TEST_LEAVE}}",
-      "type": "string"
+      "value": "{{REPLACE_WITH_TOKEN_OF_A_REGULAR_MEMBER_TO_TEST_LEAVE}}"
     },
     {
       "key": "memberToKickId",
-      "value": "{{REPLACE_WITH_USER_ID_OF_A_MEMBER_TO_KICK}}",
-      "type": "string"
+      "value": "{{REPLACE_WITH_USER_ID_OF_A_MEMBER_TO_KICK}}"
     },
     {
       "key": "documentId",
-      "value": "",
-      "type": "string"
+      "value": ""
     },
     {
       "key": "privateDocumentId",
-      "value": "{{REPLACE_WITH_REAL_PRIVATE_DOCUMENT_ID}}",
-      "type": "string"
+      "value": "{{REPLACE_WITH_REAL_PRIVATE_DOCUMENT_ID}}"
     },
     {
       "key": "deletableDocumentId",
-      "value": "{{REPLACE_WITH_DOCUMENT_ID_SAFE_TO_DELETE}}",
-      "type": "string"
+      "value": "{{REPLACE_WITH_DOCUMENT_ID_SAFE_TO_DELETE}}"
     },
     {
       "key": "pendingDocumentId",
-      "value": "{{REPLACE_WITH_DOCUMENT_ID_PENDING_APPROVAL}}",
-      "type": "string"
+      "value": "{{REPLACE_WITH_DOCUMENT_ID_PENDING_APPROVAL}}"
     },
     {
       "key": "pendingDocumentId2",
-      "value": "{{REPLACE_WITH_ANOTHER_DOCUMENT_ID_PENDING_APPROVAL}}",
-      "type": "string"
+      "value": "{{REPLACE_WITH_ANOTHER_DOCUMENT_ID_PENDING_APPROVAL}}"
     },
     {
       "key": "commentId",
-      "value": "",
-      "type": "string"
+      "value": ""
     },
     {
       "key": "otherUserCommentId",
-      "value": "{{REPLACE_WITH_COMMENT_ID_OF_ANOTHER_USER}}",
-      "type": "string"
+      "value": "{{REPLACE_WITH_COMMENT_ID_OF_ANOTHER_USER}}"
     },
     {
       "key": "notificationId",
-      "value": "",
-      "type": "string"
+      "value": ""
     },
     {
       "key": "otherUserNotificationId",
-      "value": "{{REPLACE_WITH_NOTIFICATION_ID_OF_ANOTHER_USER}}",
-      "type": "string"
+      "value": "{{REPLACE_WITH_NOTIFICATION_ID_OF_ANOTHER_USER}}"
     },
     {
       "key": "deletableNotificationId",
-      "value": "{{REPLACE_WITH_NOTIFICATION_ID_SAFE_TO_DELETE}}",
-      "type": "string"
+      "value": "{{REPLACE_WITH_NOTIFICATION_ID_SAFE_TO_DELETE}}"
     },
     {
       "key": "conversationId",
-      "value": "",
-      "type": "string"
+      "value": ""
     },
     {
       "key": "groupConversationId",
-      "value": "",
-      "type": "string"
+      "value": ""
     },
     {
       "key": "messageId",
-      "value": "",
-      "type": "string"
+      "value": ""
     },
     {
       "key": "otherUserMessageId",
-      "value": "{{REPLACE_WITH_MESSAGE_ID_OF_ANOTHER_USER}}",
-      "type": "string"
+      "value": "{{REPLACE_WITH_MESSAGE_ID_OF_ANOTHER_USER}}"
     }
   ]
 }
