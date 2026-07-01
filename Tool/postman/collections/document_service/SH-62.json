@@ -1,0 +1,584 @@
+{
+  "info": {
+    "_postman_id": "b2e0a78b-e2f1-4ba1-a5b3-1adf573b899c",
+    "name": "SH-62: Kiểm thử Chức năng Upload Tài liệu",
+    "description": "StudyHub Document Service - SH-62: Kiểm thử Chức năng Upload Tài liệu",
+    "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json",
+    "_exporter_id": "55080140"
+  },
+  "item": [
+    {
+      "name": "📄 [document-service:3003] Document (/)",
+      "item": [
+        {
+          "name": "🔑 Đăng nhập User thường (Lấy accessToken)",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test('Status 200 - Đăng nhập thành công', () => pm.response.to.have.status(200));",
+                  "const json = pm.response.json();",
+                  "const resData = json.data || json;",
+                  "if (resData.access_token) {",
+                  "    pm.collectionVariables.set('accessToken', resData.access_token);",
+                  "    pm.collectionVariables.set('userId', resData.user && resData.user.id);",
+                  "}"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"email\": \"{{userEmail}}\",\n  \"password\": \"{{password}}\"\n}"
+            },
+            "url": {
+              "raw": "{{authBaseUrl}}/login",
+              "host": ["{{authBaseUrl}}"],
+              "path": ["login"]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "🔑 Đăng nhập Outsider (Lấy outsiderToken)",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test('Status 200 - Đăng nhập thành công', () => pm.response.to.have.status(200));",
+                  "const json = pm.response.json();",
+                  "const resData = json.data || json;",
+                  "if (resData.access_token) {",
+                  "    pm.collectionVariables.set('outsiderToken', resData.access_token);",
+                  "}"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"email\": \"{{outsiderEmail}}\",\n  \"password\": \"{{password}}\"\n}"
+            },
+            "url": {
+              "raw": "{{authBaseUrl}}/login",
+              "host": ["{{authBaseUrl}}"],
+              "path": ["login"]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "❌ Upload tài liệu mới - không có token",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test('Status 401', () => pm.response.to.have.status(401));"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [],
+            "body": {
+              "mode": "formdata",
+              "formdata": [
+                {
+                  "key": "title",
+                  "value": "Bai giang Giai tich 1"
+                }
+              ]
+            },
+            "url": {
+              "raw": "{{documentBaseUrl}}/",
+              "host": ["{{documentBaseUrl}}"],
+              "path": [""]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "✅ [MANUAL - cần file thật] Upload tài liệu mới (multipart, có file)",
+          "event": [
+            {
+              "listen": "prerequest",
+              "script": {
+                "exec": [
+                  "// ⚠️ TEST CASE NÀY CẦN FILE THẬT.",
+                  "// Thay '../path/to/document.pdf' bằng đường dẫn tuyệt đối đến file PDF/PPTX/DOCX trên máy.",
+                  "// Ví dụ macOS: /Users/huynhngocbinh/Downloads/sample.pdf",
+                  "// Nếu không có file → Newman sẽ trả 400 → bỏ qua assertion này khi chạy tự động."
+                ],
+                "type": "text/javascript"
+              }
+            },
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test('Status 200', () => pm.response.to.have.status(200));",
+                  "const json = pm.response.json();",
+                  "if (json.id) pm.collectionVariables.set('documentId', json.id);"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{accessToken}}"
+              }
+            ],
+            "body": {
+              "mode": "formdata",
+              "formdata": [
+                {
+                  "key": "title",
+                  "value": "Bai giang Giai tich 1 - Chuong 1"
+                },
+                {
+                  "key": "description",
+                  "value": "Tai lieu on tap chuong 1: gioi han va lien tuc"
+                },
+                {
+                  "key": "visibility",
+                  "value": "public"
+                },
+                {
+                  "key": "tags",
+                  "value": "toan,giai-tich,chuong1"
+                },
+                {
+                  "key": "group_id",
+                  "value": "{{groupId}}"
+                },
+                {
+                  "key": "file",
+                  "type": "file",
+                  "src": "postman/fixtures/document.pdf"
+                }
+              ]
+            },
+            "url": {
+              "raw": "{{documentBaseUrl}}/",
+              "host": ["{{documentBaseUrl}}"],
+              "path": [""]
+            }
+          },
+            "response": []
+          },
+          {
+          "name": "❌ Upload tài liệu - không gửi file",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test('Status 400', () => pm.response.to.have.status(400));"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{accessToken}}"
+              }
+            ],
+            "body": {
+              "mode": "formdata",
+              "formdata": [
+                {
+                  "key": "title",
+                  "value": "Khong co file"
+                }
+              ]
+            },
+            "url": {
+              "raw": "{{documentBaseUrl}}/",
+              "host": ["{{documentBaseUrl}}"],
+              "path": [""]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "❌ Upload tài liệu - file vượt quá 100MB (giới hạn multer)",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test('Status 400 hoặc 413', () => pm.expect([400, 413]).to.include(pm.response.code));"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{accessToken}}"
+              }
+            ],
+            "body": {
+              "mode": "formdata",
+              "formdata": [
+                {
+                  "key": "title",
+                  "value": "File qua lon"
+                },
+                {
+                  "key": "file",
+                  "type": "file",
+                  "src": "postman/fixtures/oversized-file-over-100mb.zip"
+                }
+              ]
+            },
+            "url": {
+              "raw": "{{documentBaseUrl}}/",
+              "host": ["{{documentBaseUrl}}"],
+              "path": [""]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "❌ Upload tài liệu - thiếu title",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test('Status 400', () => pm.response.to.have.status(400));"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{accessToken}}"
+              }
+            ],
+            "body": {
+              "mode": "formdata",
+              "formdata": [
+                {
+                  "key": "file",
+                  "type": "file",
+                  "src": "postman/fixtures/document.pdf"
+                }
+              ]
+            },
+            "url": {
+              "raw": "{{documentBaseUrl}}/",
+              "host": ["{{documentBaseUrl}}"],
+              "path": [""]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "❌ Upload tài liệu vào group mà mình không phải member - Bị từ chối",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test('Status 400', () => pm.response.to.have.status(400));"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{outsiderToken}}"
+              }
+            ],
+            "body": {
+              "mode": "formdata",
+              "formdata": [
+                {
+                  "key": "title",
+                  "value": "Upload trai phep"
+                },
+                {
+                  "key": "group_id",
+                  "value": "{{groupId}}"
+                },
+                {
+                  "key": "file",
+                  "type": "file",
+                  "src": "postman/fixtures/document.pdf"
+                }
+              ]
+            },
+            "url": {
+              "raw": "{{documentBaseUrl}}/",
+              "host": ["{{documentBaseUrl}}"],
+              "path": [""]
+            }
+          },
+          "response": []
+        }
+      ]
+    }
+  ],
+  "variable": [
+    {
+      "key": "authBaseUrl",
+      "value": "http://localhost:3000/api/v1/auth"
+    },
+    {
+      "key": "userBaseUrl",
+      "value": "http://localhost:3001/api/v1/user"
+    },
+    {
+      "key": "groupBaseUrl",
+      "value": "http://localhost:3002/api/v1/group"
+    },
+    {
+      "key": "documentBaseUrl",
+      "value": "http://localhost:3003/api/v1/document"
+    },
+    {
+      "key": "notificationBaseUrl",
+      "value": "http://localhost:3005/api/v1/notification"
+    },
+    {
+      "key": "chatBaseUrl",
+      "value": "http://localhost:3006/api/v1/chat"
+    },
+    {
+      "key": "accessToken",
+      "value": ""
+    },
+    {
+      "key": "refreshToken",
+      "value": ""
+    },
+    {
+      "key": "revokedRefreshToken",
+      "value": ""
+    },
+    {
+      "key": "adminAccessToken",
+      "value": "{{REPLACE_WITH_REAL_ADMIN_TOKEN}}"
+    },
+    {
+      "key": "verificationToken",
+      "value": ""
+    },
+    {
+      "key": "resetToken",
+      "value": ""
+    },
+    {
+      "key": "secondaryEmailId",
+      "value": ""
+    },
+    {
+      "key": "userId",
+      "value": ""
+    },
+    {
+      "key": "anotherUserId",
+      "value": "11111111-2222-4222-8222-111111111113"
+    },
+    {
+      "key": "anotherUserAccessToken",
+      "value": ""
+    },
+    {
+      "key": "outsiderToken",
+      "value": "{{REPLACE_WITH_TOKEN_OF_USER_NOT_IN_ANY_GROUP_DOC}}"
+    },
+    {
+      "key": "deletableUserId",
+      "value": "11111111-2222-4222-8222-111111111121"
+    },
+    {
+      "key": "blockedUserEmail",
+      "value": "user10@example.com"
+    },
+    {
+      "key": "privateUserId",
+      "value": "11111111-2222-4222-8222-111111111119"
+    },
+    {
+      "key": "otherUserSocialLinkId",
+      "value": "{{GET_FROM_USER2_PROFILE_AFTER_ADDING_SOCIAL_LINK}}"
+    },
+    {
+      "key": "socialLinkId",
+      "value": ""
+    },
+    {
+      "key": "groupId",
+      "value": "aaaaaaaa-aaaa-4aaa-8aaa-aaaaaaaaaaa1"
+    },
+    {
+      "key": "privateGroupId",
+      "value": "aaaaaaaa-aaaa-4aaa-8aaa-aaaaaaaaaaa2"
+    },
+    {
+      "key": "emptyGroupId",
+      "value": "{{CREATE_EMPTY_GROUP_VIA_API_THEN_FILL}}"
+    },
+    {
+      "key": "joinRequestId",
+      "value": ""
+    },
+    {
+      "key": "joinRequestId2",
+      "value": "{{SEND_JOIN_REQUEST_VIA_API_THEN_FILL}}"
+    },
+    {
+      "key": "groupOwnerToken",
+      "value": "{{REPLACE_WITH_TOKEN_OF_GROUP_OWNER}}"
+    },
+    {
+      "key": "groupOwnerUserId",
+      "value": "11111111-2222-4222-8222-111111111114"
+    },
+    {
+      "key": "groupManagerNotOwnerToken",
+      "value": ""
+    },
+    {
+      "key": "memberToLeaveToken",
+      "value": ""
+    },
+    {
+      "key": "memberToKickId",
+      "value": "11111111-2222-4222-8222-111111111115"
+    },
+    {
+      "key": "documentId",
+      "value": "1111-0001-4111-8111-aaaaaaaa0001"
+    },
+    {
+      "key": "privateDocumentId",
+      "value": "1112-0002-4111-8111-aaaaaaaa0005"
+    },
+    {
+      "key": "deletableDocumentId",
+      "value": "1120-0001-4111-8111-aaaaaaaa0028"
+    },
+    {
+      "key": "pendingDocumentId",
+      "value": "1119-0003-4111-8111-aaaaaaaa0027"
+    },
+    {
+      "key": "pendingDocumentId2",
+      "value": "1120-0003-4111-8111-aaaaaaaa0030"
+    },
+    {
+      "key": "commentId",
+      "value": ""
+    },
+    {
+      "key": "otherUserCommentId",
+      "value": "c0001-1111-4111-8111-aaaaaaaa001"
+    },
+    {
+      "key": "notificationId",
+      "value": ""
+    },
+    {
+      "key": "otherUserNotificationId",
+      "value": ""
+    },
+    {
+      "key": "deletableNotificationId",
+      "value": ""
+    },
+    {
+      "key": "conversationId",
+      "value": ""
+    },
+    {
+      "key": "groupConversationId",
+      "value": ""
+    },
+    {
+      "key": "messageId",
+      "value": ""
+    },
+    {
+      "key": "otherUserMessageId",
+      "value": ""
+    },
+    {
+      "key": "userEmail",
+      "value": "user1@example.com"
+    },
+    {
+      "key": "adminEmail",
+      "value": "admin@example.com"
+    },
+    {
+      "key": "anotherUserEmail",
+      "value": "user2@example.com"
+    },
+    {
+      "key": "groupOwnerEmail",
+      "value": "user3@example.com"
+    },
+    {
+      "key": "outsiderEmail",
+      "value": "user10@example.com"
+    },
+    {
+      "key": "password",
+      "value": "11111111"
+    },
+    {
+      "key": "groupManagerEmail",
+      "value": "user4@example.com"
+    },
+    {
+      "key": "memberToLeaveEmail",
+      "value": "user5@example.com"
+    }
+  ]
+}
