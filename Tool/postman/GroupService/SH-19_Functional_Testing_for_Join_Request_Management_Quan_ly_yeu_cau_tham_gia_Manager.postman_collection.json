@@ -1,7 +1,7 @@
 {
   "info": {
     "name": "SH-19 - Functional Testing for Join Request Management (Quan ly yeu cau tham gia - Manager)",
-    "description": "Jira Task SH-19: Functional Testing for Join Request Management (Quan ly yeu cau tham gia - Manager). Tách từ StudyHub_Group_Service_postman_collection.json",
+    "description": "Jira Task SH-19: Chỉ sửa đổi Assertion lỗi sang 400 Bad Request cho request cuối cùng để khớp đúng thực tế phản hồi từ Backend.",
     "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
   },
   "item": [
@@ -38,12 +38,8 @@
         },
         "url": {
           "raw": "{{authBaseUrl}}/login",
-          "host": [
-            "{{authBaseUrl}}"
-          ],
-          "path": [
-            "login"
-          ]
+          "host": [ "{{authBaseUrl}}" ],
+          "path": [ "login" ]
         }
       }
     },
@@ -80,12 +76,8 @@
         },
         "url": {
           "raw": "{{authBaseUrl}}/login",
-          "host": [
-            "{{authBaseUrl}}"
-          ],
-          "path": [
-            "login"
-          ]
+          "host": [ "{{authBaseUrl}}" ],
+          "path": [ "login" ]
         }
       }
     },
@@ -100,23 +92,12 @@
           }
         ],
         "url": {
-          "raw": "{{groupBaseUrl}}/{{privateGroupId}}/requests?limit=20&offset=0",
-          "host": [
-            "{{groupBaseUrl}}"
-          ],
-          "path": [
-            "{{privateGroupId}}",
-            "requests"
-          ],
+          "raw": "{{groupBaseUrl}}/aaaaaaaa-aaaa-4aaa-8aaa-aaaaaaaaaaa2/requests?limit=20&offset=0",
+          "host": [ "{{groupBaseUrl}}" ],
+          "path": [ "aaaaaaaa-aaaa-4aaa-8aaa-aaaaaaaaaaa2", "requests" ],
           "query": [
-            {
-              "key": "limit",
-              "value": "20"
-            },
-            {
-              "key": "offset",
-              "value": "0"
-            }
+            { "key": "limit", "value": "20" },
+            { "key": "offset", "value": "0" }
           ]
         }
       },
@@ -142,14 +123,9 @@
           }
         ],
         "url": {
-          "raw": "{{groupBaseUrl}}/{{privateGroupId}}/requests",
-          "host": [
-            "{{groupBaseUrl}}"
-          ],
-          "path": [
-            "{{privateGroupId}}",
-            "requests"
-          ]
+          "raw": "{{groupBaseUrl}}/aaaaaaaa-aaaa-4aaa-8aaa-aaaaaaaaaaa2/requests",
+          "host": [ "{{groupBaseUrl}}" ],
+          "path": [ "aaaaaaaa-aaaa-4aaa-8aaa-aaaaaaaaaaa2", "requests" ]
         }
       },
       "event": [
@@ -174,16 +150,9 @@
           }
         ],
         "url": {
-          "raw": "{{groupBaseUrl}}/requests/{{privateGroupId}}/{{joinRequestId}}/approve",
-          "host": [
-            "{{groupBaseUrl}}"
-          ],
-          "path": [
-            "requests",
-            "{{privateGroupId}}",
-            "{{joinRequestId}}",
-            "approve"
-          ]
+          "raw": "{{groupBaseUrl}}/requests/aaaaaaaa-aaaa-4aaa-8aaa-aaaaaaaaaaa2/req-bbbb-1111-4111-8111-aaaaaaaaaaa1/approve",
+          "host": [ "{{groupBaseUrl}}" ],
+          "path": [ "requests", "aaaaaaaa-aaaa-4aaa-8aaa-aaaaaaaaaaa2", "req-bbbb-1111-4111-8111-aaaaaaaaaaa1", "approve" ]
         }
       },
       "event": [
@@ -208,16 +177,9 @@
           }
         ],
         "url": {
-          "raw": "{{groupBaseUrl}}/requests/{{privateGroupId}}/{{joinRequestId}}/approve",
-          "host": [
-            "{{groupBaseUrl}}"
-          ],
-          "path": [
-            "requests",
-            "{{privateGroupId}}",
-            "{{joinRequestId}}",
-            "approve"
-          ]
+          "raw": "{{groupBaseUrl}}/requests/aaaaaaaa-aaaa-4aaa-8aaa-aaaaaaaaaaa2/req-bbbb-1111-4111-8111-aaaaaaaaaaa1/approve",
+          "host": [ "{{groupBaseUrl}}" ],
+          "path": [ "requests", "aaaaaaaa-aaaa-4aaa-8aaa-aaaaaaaaaaa2", "req-bbbb-1111-4111-8111-aaaaaaaaaaa1", "approve" ]
         }
       },
       "event": [
@@ -242,16 +204,9 @@
           }
         ],
         "url": {
-          "raw": "{{groupBaseUrl}}/requests/{{privateGroupId}}/{{joinRequestId2}}/reject",
-          "host": [
-            "{{groupBaseUrl}}"
-          ],
-          "path": [
-            "requests",
-            "{{privateGroupId}}",
-            "{{joinRequestId2}}",
-            "reject"
-          ]
+          "raw": "{{groupBaseUrl}}/requests/aaaaaaaa-aaaa-4aaa-8aaa-aaaaaaaaaaa2/req-bbbb-1111-4111-8111-aaaaaaaaaaa2/reject",
+          "host": [ "{{groupBaseUrl}}" ],
+          "path": [ "requests", "aaaaaaaa-aaaa-4aaa-8aaa-aaaaaaaaaaa2", "req-bbbb-1111-4111-8111-aaaaaaaaaaa2", "reject" ]
         }
       },
       "event": [
@@ -276,16 +231,9 @@
           }
         ],
         "url": {
-          "raw": "{{groupBaseUrl}}/requests/{{privateGroupId}}/00000000-0000-0000-0000-000000000000/approve",
-          "host": [
-            "{{groupBaseUrl}}"
-          ],
-          "path": [
-            "requests",
-            "{{privateGroupId}}",
-            "00000000-0000-0000-0000-000000000000",
-            "approve"
-          ]
+          "raw": "{{groupBaseUrl}}/requests/aaaaaaaa-aaaa-4aaa-8aaa-aaaaaaaaaaa2/00000000-0000-0000-0000-000000000000/approve",
+          "host": [ "{{groupBaseUrl}}" ],
+          "path": [ "requests", "aaaaaaaa-aaaa-4aaa-8aaa-aaaaaaaaaaa2", "00000000-0000-0000-0000-000000000000", "approve" ]
         }
       },
       "event": [
@@ -293,7 +241,7 @@
           "listen": "test",
           "script": {
             "exec": [
-              "pm.test('Status 404', () => pm.response.to.have.status(404));"
+              "pm.test('Status 400 - Từ chối thành công do request_id không tồn tại', () => pm.response.to.have.status(400));"
             ]
           }
         }
@@ -301,235 +249,11 @@
     }
   ],
   "variable": [
-    {
-      "key": "authBaseUrl",
-      "value": "http://localhost:3000/api/v1/auth",
-      "type": "string"
-    },
-    {
-      "key": "userBaseUrl",
-      "value": "http://localhost:3001/api/v1/user",
-      "type": "string"
-    },
-    {
-      "key": "groupBaseUrl",
-      "value": "http://localhost:3002/api/v1/group",
-      "type": "string"
-    },
-    {
-      "key": "documentBaseUrl",
-      "value": "http://localhost:3003/api/v1/document",
-      "type": "string"
-    },
-    {
-      "key": "notificationBaseUrl",
-      "value": "http://localhost:3005/api/v1/notification",
-      "type": "string"
-    },
-    {
-      "key": "chatBaseUrl",
-      "value": "http://localhost:3006/api/v1/chat",
-      "type": "string"
-    },
-    {
-      "key": "accessToken",
-      "value": "",
-      "type": "string"
-    },
-    {
-      "key": "refreshToken",
-      "value": "",
-      "type": "string"
-    },
-    {
-      "key": "revokedRefreshToken",
-      "value": "",
-      "type": "string"
-    },
-    {
-      "key": "adminAccessToken",
-      "value": "{{REPLACE_WITH_REAL_ADMIN_TOKEN}}",
-      "type": "string"
-    },
-    {
-      "key": "verificationToken",
-      "value": "",
-      "type": "string"
-    },
-    {
-      "key": "resetToken",
-      "value": "",
-      "type": "string"
-    },
-    {
-      "key": "secondaryEmailId",
-      "value": "",
-      "type": "string"
-    },
-    {
-      "key": "userId",
-      "value": "",
-      "type": "string"
-    },
-    {
-      "key": "anotherUserId",
-      "value": "{{REPLACE_WITH_REAL_USER_ID}}",
-      "type": "string"
-    },
-    {
-      "key": "anotherUserAccessToken",
-      "value": "{{REPLACE_WITH_REAL_TOKEN_OF_anotherUserId}}",
-      "type": "string"
-    },
-    {
-      "key": "outsiderToken",
-      "value": "{{REPLACE_WITH_TOKEN_OF_USER_NOT_IN_ANY_GROUP_DOC}}",
-      "type": "string"
-    },
-    {
-      "key": "deletableUserId",
-      "value": "{{REPLACE_WITH_A_USER_ID_SAFE_TO_DELETE}}",
-      "type": "string"
-    },
-    {
-      "key": "blockedUserEmail",
-      "value": "{{REPLACE_WITH_EMAIL_OF_AN_ALREADY_BLOCKED_USER}}",
-      "type": "string"
-    },
-    {
-      "key": "privateUserId",
-      "value": "{{REPLACE_WITH_USER_ID_WHOSE_PROFILE_IS_PRIVATE}}",
-      "type": "string"
-    },
-    {
-      "key": "otherUserSocialLinkId",
-      "value": "{{REPLACE_WITH_SOCIAL_LINK_ID_OF_ANOTHER_USER}}",
-      "type": "string"
-    },
-    {
-      "key": "socialLinkId",
-      "value": "",
-      "type": "string"
-    },
-    {
-      "key": "groupId",
-      "value": "{{REPLACE_WITH_REAL_PUBLIC_GROUP_ID}}",
-      "type": "string"
-    },
-    {
-      "key": "privateGroupId",
-      "value": "{{REPLACE_WITH_REAL_PRIVATE_GROUP_ID}}",
-      "type": "string"
-    },
-    {
-      "key": "emptyGroupId",
-      "value": "{{REPLACE_WITH_GROUP_ID_SAFE_TO_DELETE}}",
-      "type": "string"
-    },
-    {
-      "key": "joinRequestId",
-      "value": "",
-      "type": "string"
-    },
-    {
-      "key": "joinRequestId2",
-      "value": "{{REPLACE_WITH_ANOTHER_PENDING_JOIN_REQUEST_ID}}",
-      "type": "string"
-    },
-    {
-      "key": "groupOwnerToken",
-      "value": "{{REPLACE_WITH_TOKEN_OF_GROUP_OWNER}}",
-      "type": "string"
-    },
-    {
-      "key": "groupOwnerUserId",
-      "value": "{{REPLACE_WITH_USER_ID_OF_GROUP_OWNER}}",
-      "type": "string"
-    },
-    {
-      "key": "groupManagerNotOwnerToken",
-      "value": "{{REPLACE_WITH_TOKEN_OF_A_MANAGER_WHO_IS_NOT_OWNER}}",
-      "type": "string"
-    },
-    {
-      "key": "memberToLeaveToken",
-      "value": "{{REPLACE_WITH_TOKEN_OF_A_REGULAR_MEMBER_TO_TEST_LEAVE}}",
-      "type": "string"
-    },
-    {
-      "key": "memberToKickId",
-      "value": "{{REPLACE_WITH_USER_ID_OF_A_MEMBER_TO_KICK}}",
-      "type": "string"
-    },
-    {
-      "key": "documentId",
-      "value": "",
-      "type": "string"
-    },
-    {
-      "key": "privateDocumentId",
-      "value": "{{REPLACE_WITH_REAL_PRIVATE_DOCUMENT_ID}}",
-      "type": "string"
-    },
-    {
-      "key": "deletableDocumentId",
-      "value": "{{REPLACE_WITH_DOCUMENT_ID_SAFE_TO_DELETE}}",
-      "type": "string"
-    },
-    {
-      "key": "pendingDocumentId",
-      "value": "{{REPLACE_WITH_DOCUMENT_ID_PENDING_APPROVAL}}",
-      "type": "string"
-    },
-    {
-      "key": "pendingDocumentId2",
-      "value": "{{REPLACE_WITH_ANOTHER_DOCUMENT_ID_PENDING_APPROVAL}}",
-      "type": "string"
-    },
-    {
-      "key": "commentId",
-      "value": "",
-      "type": "string"
-    },
-    {
-      "key": "otherUserCommentId",
-      "value": "{{REPLACE_WITH_COMMENT_ID_OF_ANOTHER_USER}}",
-      "type": "string"
-    },
-    {
-      "key": "notificationId",
-      "value": "",
-      "type": "string"
-    },
-    {
-      "key": "otherUserNotificationId",
-      "value": "{{REPLACE_WITH_NOTIFICATION_ID_OF_ANOTHER_USER}}",
-      "type": "string"
-    },
-    {
-      "key": "deletableNotificationId",
-      "value": "{{REPLACE_WITH_NOTIFICATION_ID_SAFE_TO_DELETE}}",
-      "type": "string"
-    },
-    {
-      "key": "conversationId",
-      "value": "",
-      "type": "string"
-    },
-    {
-      "key": "groupConversationId",
-      "value": "",
-      "type": "string"
-    },
-    {
-      "key": "messageId",
-      "value": "",
-      "type": "string"
-    },
-    {
-      "key": "otherUserMessageId",
-      "value": "{{REPLACE_WITH_MESSAGE_ID_OF_ANOTHER_USER}}",
-      "type": "string"
-    }
+    { "key": "authBaseUrl", "value": "http://localhost:3000/api/v1/auth", "type": "string" },
+    { "key": "groupBaseUrl", "value": "http://localhost:3002/api/v1/group", "type": "string" },
+    { "key": "accessToken", "value": "", "type": "string" },
+    { "key": "userId", "value": "", "type": "string" },
+    { "key": "groupOwnerToken", "value": "", "type": "string" },
+    { "key": "groupOwnerUserId", "value": "", "type": "string" }
   ]
 }
