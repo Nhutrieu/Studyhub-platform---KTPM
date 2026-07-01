@@ -115,8 +115,16 @@
                   "value": "Temp doc for SH-65"
                 },
                 {
+                  "key": "description",
+                  "value": "Tai lieu tam dung cho testcase cap nhat va xoa SH-65"
+                },
+                {
                   "key": "visibility",
-                  "value": "public"
+                  "value": "PUBLIC"
+                },
+                {
+                  "key": "tags",
+                  "value": "sh-65,temp-document"
                 },
                 {
                   "key": "file",
