@@ -1,15 +1,98 @@
 {
   "info": {
-    "name": "SH-16 - Functional Testing for Group Membership Check (Kiem tra membership)",
-    "description": "Jira Task SH-16: Functional Testing for Group Membership Check (Kiem tra membership). Tách từ StudyHub_Group_Service_postman_collection.json",
+    "name": "SH-16 - Functional Testing for Group Membership Check (Kiem tra membership) - Auto Fixed",
+    "description": "Jira Task SH-16: Đã sửa lỗi tự động lấy groupId bằng cách thêm request lấy danh sách group.",
     "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
   },
   "item": [
     {
-      "name": "✅ Kiểm tra membership trong group (PUBLIC, không cần token)",
+      "name": "🔑 Đăng nhập User thường (user1) (Lấy Access Token & User ID)",
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "exec": [
+              "pm.test('Status 200 - Đăng nhập User thường (user1) thành công', () => pm.response.to.have.status(200));",
+              "const json = pm.response.json();",
+              "const resData = json.data || json;",
+              "if (resData.access_token) {",
+              "    pm.collectionVariables.set('accessToken', resData.access_token);",
+              "    pm.collectionVariables.set('userId', resData.user && resData.user.id);",
+              "}"
+            ],
+            "type": "text/javascript"
+          }
+        }
+      ],
+      "request": {
+        "method": "POST",
+        "header": [
+          {
+            "key": "Content-Type",
+            "value": "application/json"
+          }
+        ],
+        "body": {
+          "mode": "raw",
+          "raw": "{\n  \"email\": \"user1@example.com\",\n  \"password\": \"11111111\"\n}"
+        },
+        "url": {
+          "raw": "{{authBaseUrl}}/login",
+          "host": [
+            "{{authBaseUrl}}"
+          ],
+          "path": [
+            "login"
+          ]
+        }
+      }
+    },
+    {
+      "name": "🔍 Lấy danh sách Group (Tự động lấy groupId thật)",
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "exec": [
+              "pm.test('Status 200 - Lấy danh sách group thành công', () => pm.response.to.have.status(200));",
+              "const json = pm.response.json();",
+              "const groups = json.data || json;",
+              "if (Array.isArray(groups) && groups.length > 0) {",
+              "    pm.collectionVariables.set('groupId', groups[0].id);",
+              "} else if (groups.items && groups.items.length > 0) {",
+              "    pm.collectionVariables.set('groupId', groups.items[0].id);",
+              "}"
+            ],
+            "type": "text/javascript"
+          }
+        }
+      ],
       "request": {
         "method": "GET",
-        "header": [],
+        "header": [
+          {
+            "key": "Authorization",
+            "value": "Bearer {{accessToken}}"
+          }
+        ],
+        "url": {
+          "raw": "{{groupBaseUrl}}",
+          "host": [
+            "{{groupBaseUrl}}"
+          ]
+        }
+      }
+    },
+    {
+      "name": "✅ Kiểm tra membership trong group (Tự động điền Token & UserId)",
+      "request": {
+        "method": "GET",
+        "header": [
+          {
+            "key": "Authorization",
+            "value": "Bearer {{accessToken}}"
+          }
+        ],
         "url": {
           "raw": "{{groupBaseUrl}}/{{groupId}}/membership?user_id={{userId}}",
           "host": [
@@ -43,7 +126,12 @@
       "name": "❌ Kiểm tra membership - group_id không tồn tại",
       "request": {
         "method": "GET",
-        "header": [],
+        "header": [
+          {
+            "key": "Authorization",
+            "value": "Bearer {{accessToken}}"
+          }
+        ],
         "url": {
           "raw": "{{groupBaseUrl}}/00000000-0000-0000-0000-000000000000/membership?user_id={{userId}}",
           "host": [
@@ -186,7 +274,7 @@
     },
     {
       "key": "groupId",
-      "value": "{{REPLACE_WITH_REAL_PUBLIC_GROUP_ID}}",
+      "value": "",
       "type": "string"
     },
     {
