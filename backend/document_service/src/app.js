@@ -3,6 +3,7 @@ import cors from "cors";
 import morgan from "morgan";
 import helmet from "helmet";
 import compression from "compression";
+import multer from "multer";
 
 import env from "./config/env.js";
 import { pool } from "./config/db.js";
@@ -106,6 +107,15 @@ export function createApp() {
   // ===== Error handler =====
   app.use((err, req, res, next) => {
     console.error("[DocumentService] Unhandled error:", err);
+
+    if (err instanceof multer.MulterError) {
+      if (err.code === "LIMIT_FILE_SIZE") {
+        return res.status(413).json({ error: "file_too_large" });
+      }
+
+      return res.status(400).json({ error: err.message || "Bad Request" });
+    }
+
     res.status(err.status || 500).json({
       error: err.message || "Internal Server Error",
     });
