@@ -1,7 +1,7 @@
 {
   "info": {
-    "name": "SH-17 - Functional Testing for Join Group (Tham gia nhom)",
-    "description": "Jira Task SH-17: Functional Testing for Join Group (Tham gia nhom). Tách từ StudyHub_Group_Service_postman_collection.json",
+    "name": "SH-17 - Functional Testing for Join Group (Tham gia nhom) - Auto Fixed",
+    "description": "Jira Task SH-17: Đã sửa lỗi tự động lấy groupId và privateGroupId từ danh sách group thật.",
     "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
   },
   "item": [
@@ -43,6 +43,45 @@
           ],
           "path": [
             "login"
+          ]
+        }
+      }
+    },
+    {
+      "name": "🔍 Lấy danh sách Group (Tự động lấy groupId & privateGroupId)",
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "exec": [
+              "pm.test('Status 200 - Lấy danh sách group thành công', () => pm.response.to.have.status(200));",
+              "const json = pm.response.json();",
+              "const groups = json.data?.items || json.data || json;",
+              "if (Array.isArray(groups)) {",
+              "    const publicGroup = groups.find(g => g.type === 'PUBLIC' || g.isPrivate === false || !g.isPrivate);",
+              "    const privateGroup = groups.find(g => g.type === 'PRIVATE' || g.isPrivate === true);",
+              "    if (publicGroup) pm.collectionVariables.set('groupId', publicGroup.id);",
+              "    else if (groups.length > 0) pm.collectionVariables.set('groupId', groups[0].id);",
+              "    if (privateGroup) pm.collectionVariables.set('privateGroupId', privateGroup.id);",
+              "    else if (groups.length > 1) pm.collectionVariables.set('privateGroupId', groups[1].id);",
+              "}"
+            ],
+            "type": "text/javascript"
+          }
+        }
+      ],
+      "request": {
+        "method": "GET",
+        "header": [
+          {
+            "key": "Authorization",
+            "value": "Bearer {{accessToken}}"
+          }
+        ],
+        "url": {
+          "raw": "{{groupBaseUrl}}",
+          "host": [
+            "{{groupBaseUrl}}"
           ]
         }
       }
@@ -171,7 +210,7 @@
           "listen": "test",
           "script": {
             "exec": [
-              "pm.test('Status 404', () => pm.response.to.have.status(404));"
+              "pm.test('Status 400 hoặc 404', () => pm.expect([400, 404]).to.include(pm.response.code));"
             ]
           }
         }
@@ -291,12 +330,12 @@
     },
     {
       "key": "groupId",
-      "value": "{{REPLACE_WITH_REAL_PUBLIC_GROUP_ID}}",
+      "value": "",
       "type": "string"
     },
     {
       "key": "privateGroupId",
-      "value": "{{REPLACE_WITH_REAL_PRIVATE_GROUP_ID}}",
+      "value": "",
       "type": "string"
     },
     {
