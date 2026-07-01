@@ -43,6 +43,32 @@ jobs:
           npm install -g newman
           sudo apt-get update && sudo apt-get install -y jq
 
+      - name: Setup Backend Environment
+        if: env.HAS_KEY == 'true'
+        run: |
+          for d in backend/*_service; do
+            if [ -f "$d/.env.example" ]; then
+              cp "$d/.env.example" "$d/.env"
+            fi
+          done
+
+      - name: Prepare Postman file fixtures
+        if: env.HAS_KEY == 'true'
+        run: |
+          mkdir -p Tool/postman/fixtures
+          if [ ! -f "Tool/postman/fixtures/document.pdf" ]; then
+            printf 'StudyHub document upload fixture\n' > "Tool/postman/fixtures/document.pdf"
+          fi
+          truncate -s 101M "Tool/postman/fixtures/oversized-file-over-100mb.zip"
+
+      - name: Start Docker Compose
+        if: env.HAS_KEY == 'true'
+        run: |
+          cd deployment/docker
+          docker compose up -d --build
+          echo "Waiting for backend services to boot..."
+          sleep 45
+
       # 3. Lọc file thay đổi và chạy Newman
       - name: Run Newman Only On Committed Files
         if: env.HAS_KEY == 'true'
