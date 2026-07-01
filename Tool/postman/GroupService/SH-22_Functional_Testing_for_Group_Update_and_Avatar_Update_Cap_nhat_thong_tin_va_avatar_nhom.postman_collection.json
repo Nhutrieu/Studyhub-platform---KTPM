@@ -6,13 +6,13 @@
   },
   "item": [
     {
-      "name": "🔑 Đăng nhập User thường (user1) (Lấy Access Token)",
+      "name": "🔑 Đăng nhập User thường (user3) (Lấy Access Token)",
       "event": [
         {
           "listen": "test",
           "script": {
             "exec": [
-              "pm.test('Status 200 - Đăng nhập User thường (user1) thành công', () => pm.response.to.have.status(200));",
+              "pm.test('Status 200 - Đăng nhập User thường (user3) thành công', () => pm.response.to.have.status(200));",
               "const json = pm.response.json();",
               "const resData = json.data || json;",
               "if (resData.access_token) {",
@@ -34,7 +34,7 @@
         ],
         "body": {
           "mode": "raw",
-          "raw": "{\n  \"email\": \"user1@example.com\",\n  \"password\": \"11111111\"\n}"
+          "raw": "{\n  \"email\": \"user3@example.com\",\n  \"password\": \"11111111\"\n}"
         },
         "url": {
           "raw": "{{authBaseUrl}}/login",
@@ -234,7 +234,7 @@
         },
         "body": {
           "mode": "raw",
-          "raw": "{\n  \"name\": \"Nhom Toan Cao Cap K65 (Updated)\",\n  \"description\": \"Cap nhat mo ta moi\",\n  \"access\": \"PRIVATE\",\n  \"auto_approve_docs\": 0\n}"
+          "raw": "{\n  \"name\": \"Nhom Toan Cao Cap K65 (Updated)\",\n  \"description\": \"Cap nhat mo ta moi\",\n  \"access\": \"RESTRICTED\",\n  \"auto_approve_docs\": 0\n}"
         }
       },
       "event": [
@@ -401,7 +401,7 @@
     },
     {
       "key": "groupId",
-      "value": "{{REPLACE_WITH_REAL_PUBLIC_GROUP_ID}}",
+      "value": "aaaaaaaa-aaaa-4aaa-8aaa-aaaaaaaaaaa1",
       "type": "string"
     },
     {
