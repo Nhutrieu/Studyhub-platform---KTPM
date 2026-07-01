@@ -108,10 +108,19 @@ export function createApp() {
   app.use((err, req, res, next) => {
     console.error("[DocumentService] Unhandled error:", err);
 
+    const isFileTooLarge =
+      (err instanceof multer.MulterError && err.code === "LIMIT_FILE_SIZE") ||
+      err?.code === "LIMIT_FILE_SIZE" ||
+      /file too large|request entity too large|payload too large/i.test(
+        err?.message || "",
+      );
+
+    if (isFileTooLarge) {
+      return res.status(413).json({ error: "file_too_large" });
+    }
+
     if (err instanceof multer.MulterError) {
-      if (err.code === "LIMIT_FILE_SIZE") {
-        return res.status(413).json({ error: "file_too_large" });
-      }
+      return res.status(413).json({ error: "file_too_large" });
 
       return res.status(400).json({ error: err.message || "Bad Request" });
     }

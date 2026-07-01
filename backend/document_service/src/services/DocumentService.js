@@ -72,7 +72,7 @@ export default class DocumentService {
         if (g.status === "APPROVED") {
           const { allowed } = await this.groupClient.canViewGroupDocuments(
             g.group_id,
-            user_id
+            user_id,
           );
           if (allowed) return true;
         } else {
@@ -117,6 +117,16 @@ export default class DocumentService {
       filename: ext ? `${publicId}.${ext}` : publicId,
     });
 
+    if (group_id) {
+      const { group, role } = await this.groupClient.getMembership(
+        group_id,
+        owner_id,
+      );
+
+      if (!group) throw new Error("group_not_found");
+      if (!role) throw new Error("forbidden");
+    }
+
     const doc = await this.documentRepo.create({
       id: document_id,
       owner_id,
@@ -136,10 +146,17 @@ export default class DocumentService {
     if (visibility === "GROUP") {
       if (!group_id) throw new Error("group_id_required");
 
-      const { autoApprove } = await this.groupClient.evaluateDocumentApproval({
+      const { group, role } = await this.groupClient.getMembership(
         group_id,
-        requester_id: owner_id,
-      });
+        owner_id,
+      );
+
+      if (!group) throw new Error("group_not_found");
+      if (!role) throw new Error("forbidden");
+
+      const autoApprove =
+        Number(group?.auto_approve_docs) === 1 ||
+        ["OWNER", "MODERATOR"].includes(role);
 
       await this.groupDocRepo.createRecord({
         id: randomUUID(),
@@ -204,7 +221,7 @@ export default class DocumentService {
 
   async getUserPublicProfileDocuments(
     user_id,
-    { limit = 50, offset = 0 } = {}
+    { limit = 50, offset = 0 } = {},
   ) {
     const docs = await this.documentRepo.findPublicOfUser(user_id, {
       limit,
@@ -233,7 +250,7 @@ export default class DocumentService {
     if (doc.visibility === "GROUP") {
       const allowed = await this._canAccessGroupDocument(
         document_id,
-        requester_id
+        requester_id,
       );
       if (!allowed) throw new Error("forbidden");
       return this._attachTagsToDocument(doc);
@@ -273,7 +290,7 @@ export default class DocumentService {
     if (doc.visibility === "GROUP") {
       const allowed = await this._canAccessGroupDocument(
         document_id,
-        requester_id
+        requester_id,
       );
       if (!allowed) throw new Error("forbidden");
 
@@ -299,14 +316,15 @@ export default class DocumentService {
   async getGroupApproved(
     group_id,
     requester_id,
-    { limit = 50, offset = 0 } = {}
+    { limit = 50, offset = 0 } = {},
   ) {
-    const { allowed, reason } = await this.groupClient.canViewGroupDocuments(
+    const { group, role } = await this.groupClient.getMembership(
       group_id,
-      requester_id
+      requester_id,
     );
 
-    if (!allowed) throw new Error(reason || "forbidden");
+    if (!group) throw new Error("group_not_found");
+    if (group.access !== "PUBLIC" && !role) throw new Error("forbidden");
 
     const docs = await this.groupDocRepo.findApprovedInGroup(group_id, {
       limit,
@@ -318,14 +336,17 @@ export default class DocumentService {
   async getGroupPending(
     group_id,
     requester_id,
-    { limit = 50, offset = 0 } = {}
+    { limit = 50, offset = 0 } = {},
   ) {
-    const { allowed, reason } = await this.groupClient.canViewGroupDocuments(
+    const { group, role } = await this.groupClient.getMembership(
       group_id,
-      requester_id
+      requester_id,
     );
 
-    if (!allowed) throw new Error(reason || "forbidden");
+    if (!group) throw new Error("group_not_found");
+    if (!role || !["OWNER", "MODERATOR"].includes(role)) {
+      throw new Error("forbidden");
+    }
 
     const docs = await this.groupDocRepo.findPendingInGroup(group_id, {
       limit,
@@ -340,14 +361,16 @@ export default class DocumentService {
     if (!doc) throw new Error("document_not_found");
     if (doc.owner_id !== requester_id) throw new Error("forbidden");
 
+    const { tags, ...fields } = updates || {};
+
     const updated = await this.documentRepo.update(document_id, {
-      ...updates,
+      ...fields,
       updated_at: new Date(),
     });
 
-    if (updates.tags) {
+    if (tags) {
       await this.tagRepo.deleteAllTags(document_id);
-      await this.tagRepo.attachTags(document_id, updates.tags);
+      await this.tagRepo.attachTags(document_id, tags);
     }
 
     return this._attachTagsToDocument(updated);
@@ -366,14 +389,14 @@ export default class DocumentService {
   async searchDocuments(
     keyword,
     requester_id,
-    { limit = 10, offset = 0 } = {}
+    { limit = 10, offset = 0 } = {},
   ) {
     if (!keyword) return [];
 
     const results = await this.documentRepo.searchByKeyword(
       keyword,
       limit,
-      offset
+      offset,
     );
     if (!results || results.length === 0) return [];
 
@@ -403,7 +426,7 @@ export default class DocumentService {
                   groupCache[g.group_id] =
                     await this.groupClient.canViewGroupDocuments(
                       g.group_id,
-                      requester_id
+                      requester_id,
                     );
                 }
                 if (groupCache[g.group_id].allowed) {
@@ -430,7 +453,7 @@ export default class DocumentService {
         }
       } catch (err) {
         this.logger.error(
-          `Skipping doc ${doc.id} due to group check error: ${err.message}`
+          `Skipping doc ${doc.id} due to group check error: ${err.message}`,
         );
         continue; // bỏ doc này, tiếp tục vòng lặp
       }
@@ -447,7 +470,7 @@ export default class DocumentService {
   async getCommentsByDocument(document_id, { limit = 10, offset = 0 }) {
     const latestComments = await this.commentRepo.findByDocumentPaginated(
       document_id,
-      { limit, offset }
+      { limit, offset },
     );
 
     const allCommentsMap = new Map();
@@ -463,7 +486,7 @@ export default class DocumentService {
         }
 
         const parent = await this.commentRepo.findById(
-          current.parent_comment_id
+          current.parent_comment_id,
         );
         if (!parent) break;
 
