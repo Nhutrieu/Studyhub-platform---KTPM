@@ -181,7 +181,7 @@
                 {
                   "key": "file",
                   "type": "file",
-                  "src": "Tool/postman/fixtures/document-sample.pdf"
+                  "src": "Tool/postman/fixtures/document.pdf"
                 }
               ]
             },
@@ -191,9 +191,9 @@
               "path": [""]
             }
           },
-          "response": []
-        },
-        {
+            "response": []
+          },
+          {
           "name": "❌ Upload tài liệu - không gửi file",
           "event": [
             {
@@ -301,7 +301,7 @@
                 {
                   "key": "file",
                   "type": "file",
-                  "src": "Tool/postman/fixtures/document-sample.pdf"
+                  "src": "Tool/postman/fixtures/document.pdf"
                 }
               ]
             },
@@ -348,7 +348,7 @@
                 {
                   "key": "file",
                   "type": "file",
-                  "src": "Tool/postman/fixtures/document-sample.pdf"
+                  "src": "Tool/postman/fixtures/document.pdf"
                 }
               ]
             },
