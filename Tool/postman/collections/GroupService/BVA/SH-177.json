@@ -1,0 +1,546 @@
+{
+  "info": {
+    "_postman_id": "a3ffe77a-2476-4d14-8465-a4f0ddf635fb",
+    "name": "SH-177 - Functional Testing for Users Group List (Danh sach nhom theo nguoi dung)",
+    "description": "Jira Task SH-15: Functional Testing for Users Group List (Danh sach nhom theo nguoi dung). Tách từ StudyHub_Group_Service_postman_collection.json",
+    "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json",
+    "_exporter_id": "55081261",
+    "_collection_link": "https://go.postman.co/collection/55081261-a3ffe77a-2476-4d14-8465-a4f0ddf635fb?source=collection_link"
+  },
+  "item": [
+    {
+      "name": "🔑 Đăng nhập User thường (user1) (Lấy Access Token)",
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "exec": [
+              "pm.test('Status 200 - Đăng nhập User thường (user1) thành công', () => pm.response.to.have.status(200));",
+              "const json = pm.response.json();",
+              "const resData = json.data || json;",
+              "if (resData.access_token) {",
+              "    pm.collectionVariables.set('accessToken', resData.access_token);",
+              "    pm.collectionVariables.set('userId', resData.user && resData.user.id);",
+              "}"
+            ],
+            "type": "text/javascript"
+          }
+        }
+      ],
+      "request": {
+        "method": "POST",
+        "header": [
+          {
+            "key": "Content-Type",
+            "value": "application/json"
+          }
+        ],
+        "body": {
+          "mode": "raw",
+          "raw": "{\n  \"email\": \"user1@example.com\",\n  \"password\": \"11111111\"\n}"
+        },
+        "url": {
+          "raw": "{{authBaseUrl}}/login",
+          "host": [
+            "{{authBaseUrl}}"
+          ],
+          "path": [
+            "login"
+          ]
+        }
+      },
+      "response": []
+    },
+    {
+      "name": "✅ Lấy danh sách group tôi sở hữu (owned)",
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "exec": [
+              "pm.test('Status 200', () => pm.response.to.have.status(200));"
+            ],
+            "type": "text/javascript"
+          }
+        }
+      ],
+      "request": {
+        "method": "GET",
+        "header": [
+          {
+            "key": "Authorization",
+            "value": "Bearer {{accessToken}}"
+          }
+        ],
+        "url": {
+          "raw": "{{groupBaseUrl}}/user/owned",
+          "host": [
+            "{{groupBaseUrl}}"
+          ],
+          "path": [
+            "user",
+            "owned"
+          ]
+        }
+      },
+      "response": []
+    },
+    {
+      "name": "✅ Lấy danh sách group của 1 user cụ thể (xem chính mình)",
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "exec": [
+              "pm.test('Status 200', () => pm.response.to.have.status(200));"
+            ],
+            "type": "text/javascript"
+          }
+        }
+      ],
+      "request": {
+        "method": "GET",
+        "header": [
+          {
+            "key": "Authorization",
+            "value": "Bearer {{accessToken}}"
+          }
+        ],
+        "url": {
+          "raw": "{{groupBaseUrl}}/user/{{userId}}",
+          "host": [
+            "{{groupBaseUrl}}"
+          ],
+          "path": [
+            "user",
+            "{{userId}}"
+          ]
+        }
+      },
+      "response": []
+    },
+    {
+      "name": "✅ Lấy danh sách group của user KHÁC (chỉ thấy group public)",
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "exec": [
+              "pm.test('Status 200', () => pm.response.to.have.status(200));",
+              "const json = pm.response.json();",
+              "pm.test('Chỉ trả group PUBLIC', () => { if (Array.isArray(json.data)) json.data.forEach(g => pm.expect(g.access).to.eql('PUBLIC')); });"
+            ],
+            "type": "text/javascript"
+          }
+        }
+      ],
+      "request": {
+        "method": "GET",
+        "header": [
+          {
+            "key": "Authorization",
+            "value": "Bearer {{accessToken}}"
+          }
+        ],
+        "url": {
+          "raw": "{{groupBaseUrl}}/user/{{anotherUserId}}",
+          "host": [
+            "{{groupBaseUrl}}"
+          ],
+          "path": [
+            "user",
+            "{{anotherUserId}}"
+          ]
+        }
+      },
+      "response": []
+    },
+    {
+      "name": "✅ Lấy danh sách lời mời vào group của tôi (invites/me)",
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "exec": [
+              "pm.test('Status 200', () => pm.response.to.have.status(200));"
+            ],
+            "type": "text/javascript"
+          }
+        }
+      ],
+      "request": {
+        "method": "GET",
+        "header": [
+          {
+            "key": "Authorization",
+            "value": "Bearer {{accessToken}}"
+          }
+        ],
+        "url": {
+          "raw": "{{groupBaseUrl}}/invites/me",
+          "host": [
+            "{{groupBaseUrl}}"
+          ],
+          "path": [
+            "invites",
+            "me"
+          ]
+        }
+      },
+      "response": []
+    },
+    {
+      "name": "✅ Lấy danh sách group tôi chưa tham gia (not-joined)",
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "exec": [
+              "pm.test('Status 200', () => pm.response.to.have.status(200));"
+            ],
+            "type": "text/javascript"
+          }
+        }
+      ],
+      "request": {
+        "method": "GET",
+        "header": [
+          {
+            "key": "Authorization",
+            "value": "Bearer {{accessToken}}"
+          }
+        ],
+        "url": {
+          "raw": "{{groupBaseUrl}}/not-joined?limit=10&offset=0",
+          "host": [
+            "{{groupBaseUrl}}"
+          ],
+          "path": [
+            "not-joined"
+          ],
+          "query": [
+            {
+              "key": "limit",
+              "value": "10"
+            },
+            {
+              "key": "offset",
+              "value": "0"
+            }
+          ]
+        }
+      },
+      "response": []
+    },
+    {
+      "name": "🧪 [BVA] not-joined?limit=0 -> fallback mặc định 50",
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "exec": [
+              "// [BVA - Boundary Value Analysis] Test case bo sung dua tren rang buoc thuc te trong source code backend.",
+              "pm.test('Status 200 - limit=0 fallback ve mac dinh 50', () => pm.response.to.have.status(200));"
+            ],
+            "type": "text/javascript"
+          }
+        }
+      ],
+      "request": {
+        "method": "GET",
+        "header": [
+          {
+            "key": "Authorization",
+            "value": "Bearer {{accessToken}}"
+          }
+        ],
+        "url": {
+          "raw": "{{groupBaseUrl}}/not-joined?limit=0",
+          "host": [
+            "{{groupBaseUrl}}"
+          ],
+          "path": [
+            "not-joined"
+          ],
+          "query": [
+            {
+              "key": "limit",
+              "value": "0"
+            }
+          ]
+        }
+      },
+      "response": []
+    },
+    {
+      "name": "🧪 [BVA] not-joined?limit=-1 -> giá trị âm không bị chặn",
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "exec": [
+              "// [BVA - Boundary Value Analysis] Test case bo sung dua tren rang buoc thuc te trong source code backend.",
+              "pm.test('Status 400 hoac 500 - limit am', () => {",
+              "    pm.expect(pm.response.code).to.be.oneOf([400, 500]);",
+              "});"
+            ],
+            "type": "text/javascript"
+          }
+        }
+      ],
+      "request": {
+        "method": "GET",
+        "header": [
+          {
+            "key": "Authorization",
+            "value": "Bearer {{accessToken}}"
+          }
+        ],
+        "url": {
+          "raw": "{{groupBaseUrl}}/not-joined?limit=-1",
+          "host": [
+            "{{groupBaseUrl}}"
+          ],
+          "path": [
+            "not-joined"
+          ],
+          "query": [
+            {
+              "key": "limit",
+              "value": "-1"
+            }
+          ]
+        }
+      },
+      "response": []
+    },
+    {
+      "name": "🧪 [BVA] not-joined?offset=-1 -> giá trị âm không bị chặn",
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "exec": [
+              "// [BVA - Boundary Value Analysis] Test case bo sung dua tren rang buoc thuc te trong source code backend.",
+              "pm.test('Status 400 hoac 500 - offset am', () => {",
+              "    pm.expect(pm.response.code).to.be.oneOf([400, 500]);",
+              "});"
+            ],
+            "type": "text/javascript"
+          }
+        }
+      ],
+      "request": {
+        "method": "GET",
+        "header": [
+          {
+            "key": "Authorization",
+            "value": "Bearer {{accessToken}}"
+          }
+        ],
+        "url": {
+          "raw": "{{groupBaseUrl}}/not-joined?offset=-1",
+          "host": [
+            "{{groupBaseUrl}}"
+          ],
+          "path": [
+            "not-joined"
+          ],
+          "query": [
+            {
+              "key": "offset",
+              "value": "-1"
+            }
+          ]
+        }
+      },
+      "response": []
+    }
+  ],
+  "variable": [
+    {
+      "key": "authBaseUrl",
+      "value": "http://localhost:3000/api/v1/auth"
+    },
+    {
+      "key": "userBaseUrl",
+      "value": "http://localhost:3001/api/v1/user"
+    },
+    {
+      "key": "groupBaseUrl",
+      "value": "http://localhost:3002/api/v1/group"
+    },
+    {
+      "key": "documentBaseUrl",
+      "value": "http://localhost:3003/api/v1/document"
+    },
+    {
+      "key": "notificationBaseUrl",
+      "value": "http://localhost:3005/api/v1/notification"
+    },
+    {
+      "key": "chatBaseUrl",
+      "value": "http://localhost:3006/api/v1/chat"
+    },
+    {
+      "key": "accessToken",
+      "value": ""
+    },
+    {
+      "key": "refreshToken",
+      "value": ""
+    },
+    {
+      "key": "revokedRefreshToken",
+      "value": ""
+    },
+    {
+      "key": "adminAccessToken",
+      "value": "{{REPLACE_WITH_REAL_ADMIN_TOKEN}}"
+    },
+    {
+      "key": "verificationToken",
+      "value": ""
+    },
+    {
+      "key": "resetToken",
+      "value": ""
+    },
+    {
+      "key": "secondaryEmailId",
+      "value": ""
+    },
+    {
+      "key": "userId",
+      "value": ""
+    },
+    {
+      "key": "anotherUserId",
+      "value": "{{REPLACE_WITH_REAL_USER_ID}}"
+    },
+    {
+      "key": "anotherUserAccessToken",
+      "value": "{{REPLACE_WITH_REAL_TOKEN_OF_anotherUserId}}"
+    },
+    {
+      "key": "outsiderToken",
+      "value": "{{REPLACE_WITH_TOKEN_OF_USER_NOT_IN_ANY_GROUP_DOC}}"
+    },
+    {
+      "key": "deletableUserId",
+      "value": "{{REPLACE_WITH_A_USER_ID_SAFE_TO_DELETE}}"
+    },
+    {
+      "key": "blockedUserEmail",
+      "value": "{{REPLACE_WITH_EMAIL_OF_AN_ALREADY_BLOCKED_USER}}"
+    },
+    {
+      "key": "privateUserId",
+      "value": "{{REPLACE_WITH_USER_ID_WHOSE_PROFILE_IS_PRIVATE}}"
+    },
+    {
+      "key": "otherUserSocialLinkId",
+      "value": "{{REPLACE_WITH_SOCIAL_LINK_ID_OF_ANOTHER_USER}}"
+    },
+    {
+      "key": "socialLinkId",
+      "value": ""
+    },
+    {
+      "key": "groupId",
+      "value": "{{REPLACE_WITH_REAL_PUBLIC_GROUP_ID}}"
+    },
+    {
+      "key": "privateGroupId",
+      "value": "{{REPLACE_WITH_REAL_PRIVATE_GROUP_ID}}"
+    },
+    {
+      "key": "emptyGroupId",
+      "value": "{{REPLACE_WITH_GROUP_ID_SAFE_TO_DELETE}}"
+    },
+    {
+      "key": "joinRequestId",
+      "value": ""
+    },
+    {
+      "key": "joinRequestId2",
+      "value": "{{REPLACE_WITH_ANOTHER_PENDING_JOIN_REQUEST_ID}}"
+    },
+    {
+      "key": "groupOwnerToken",
+      "value": "{{REPLACE_WITH_TOKEN_OF_GROUP_OWNER}}"
+    },
+    {
+      "key": "groupOwnerUserId",
+      "value": "{{REPLACE_WITH_USER_ID_OF_GROUP_OWNER}}"
+    },
+    {
+      "key": "groupManagerNotOwnerToken",
+      "value": "{{REPLACE_WITH_TOKEN_OF_A_MANAGER_WHO_IS_NOT_OWNER}}"
+    },
+    {
+      "key": "memberToLeaveToken",
+      "value": "{{REPLACE_WITH_TOKEN_OF_A_REGULAR_MEMBER_TO_TEST_LEAVE}}"
+    },
+    {
+      "key": "memberToKickId",
+      "value": "{{REPLACE_WITH_USER_ID_OF_A_MEMBER_TO_KICK}}"
+    },
+    {
+      "key": "documentId",
+      "value": ""
+    },
+    {
+      "key": "privateDocumentId",
+      "value": "{{REPLACE_WITH_REAL_PRIVATE_DOCUMENT_ID}}"
+    },
+    {
+      "key": "deletableDocumentId",
+      "value": "{{REPLACE_WITH_DOCUMENT_ID_SAFE_TO_DELETE}}"
+    },
+    {
+      "key": "pendingDocumentId",
+      "value": "{{REPLACE_WITH_DOCUMENT_ID_PENDING_APPROVAL}}"
+    },
+    {
+      "key": "pendingDocumentId2",
+      "value": "{{REPLACE_WITH_ANOTHER_DOCUMENT_ID_PENDING_APPROVAL}}"
+    },
+    {
+      "key": "commentId",
+      "value": ""
+    },
+    {
+      "key": "otherUserCommentId",
+      "value": "{{REPLACE_WITH_COMMENT_ID_OF_ANOTHER_USER}}"
+    },
+    {
+      "key": "notificationId",
+      "value": ""
+    },
+    {
+      "key": "otherUserNotificationId",
+      "value": "{{REPLACE_WITH_NOTIFICATION_ID_OF_ANOTHER_USER}}"
+    },
+    {
+      "key": "deletableNotificationId",
+      "value": "{{REPLACE_WITH_NOTIFICATION_ID_SAFE_TO_DELETE}}"
+    },
+    {
+      "key": "conversationId",
+      "value": ""
+    },
+    {
+      "key": "groupConversationId",
+      "value": ""
+    },
+    {
+      "key": "messageId",
+      "value": ""
+    },
+    {
+      "key": "otherUserMessageId",
+      "value": "{{REPLACE_WITH_MESSAGE_ID_OF_ANOTHER_USER}}"
+    }
+  ]
+}
