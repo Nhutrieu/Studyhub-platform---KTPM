@@ -53,6 +53,15 @@ jobs:
             fi
           done
 
+      - name: Prepare Postman file fixtures
+        if: env.HAS_KEY == 'true'
+        run: |
+          mkdir -p Tool/postman/fixtures
+          if [ ! -f "Tool/postman/fixtures/document-sample.pdf" ]; then
+            printf 'StudyHub document upload fixture\n' > "Tool/postman/fixtures/document-sample.pdf"
+          fi
+          truncate -s 101M "Tool/postman/fixtures/oversized-file-over-100mb.zip"
+
       - name: Start Docker Compose
         if: env.HAS_KEY == 'true'
         run: |
