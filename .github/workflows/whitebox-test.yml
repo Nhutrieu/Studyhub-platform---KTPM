@@ -1,0 +1,112 @@
+name: White Box Testing (Jest Unit & Integration Test)
+
+on:
+  push:
+    branches:
+      - '**'
+    paths:
+      - 'backend/chat_service/**'
+      - '.github/workflows/whitebox-test.yml'
+      - 'Tool/postman/parse-jest-report.js'
+  pull_request:
+    branches:
+      - '**'
+    paths:
+      - 'backend/chat_service/**'
+      - '.github/workflows/whitebox-test.yml'
+      - 'Tool/postman/parse-jest-report.js'
+
+jobs:
+  whitebox-test:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout Source Code
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 2
+
+      - name: Extract Jira Key from Commit
+        run: |
+          COMMIT_MSG=$(git log -1 --pretty=%B || true)
+          JIRA_KEY=$(echo "$COMMIT_MSG" | grep -oE "[A-Z]+-[0-9]+" | head -n 1 || true)
+          if [ -z "$JIRA_KEY" ]; then
+            echo "No Jira ID found. Skipping Jira integration."
+            echo "HAS_KEY=false" >> $GITHUB_ENV
+          else
+            echo "JIRA_KEY=$JIRA_KEY" >> $GITHUB_ENV
+            echo "HAS_KEY=true" >> $GITHUB_ENV
+          fi
+
+      - name: Setup Node.js
+        if: env.HAS_KEY == 'true'
+        uses: actions/setup-node@v4
+        with:
+          node-version: 18
+          cache: 'npm'
+          cache-dependency-path: 'backend/chat_service/package-lock.json'
+
+      - name: Install Dependencies
+        if: env.HAS_KEY == 'true'
+        run: |
+          cd backend/chat_service
+          npm ci
+
+      - name: Run White Box Tests Only On Matching Jira Key
+        if: env.HAS_KEY == 'true'
+        run: |
+          cd backend/chat_service
+          TEST_FILE="test/${{ env.JIRA_KEY }}.test.js"
+          if [ -f "$TEST_FILE" ]; then
+            echo "Running test file: $TEST_FILE"
+            npm test -- "$TEST_FILE" --json --outputFile=jest-report.json || echo "WHITEBOX_STATUS=FAIL" >> $GITHUB_ENV
+
+            if [ ! -f "jest-report.json" ] || grep -q '"status": "failed"' jest-report.json; then
+              echo "WHITEBOX_STATUS=FAIL" >> $GITHUB_ENV
+              node ../../Tool/postman/parse-jest-report.js FAIL
+            else
+              echo "WHITEBOX_STATUS=PASS" >> $GITHUB_ENV
+              node ../../Tool/postman/parse-jest-report.js PASS
+            fi
+          else
+            echo "No white-box test file found for ${{ env.JIRA_KEY }}. Skipping test run."
+            echo "WHITEBOX_STATUS=SKIP" >> $GITHUB_ENV
+          fi
+
+      - name: Jira Login
+        if: env.HAS_KEY == 'true'
+        uses: atlassian/gajira-login@v3
+        env:
+          JIRA_BASE_URL: ${{ secrets.JIRA_BASE_URL }}
+          JIRA_USER_EMAIL: ${{ secrets.JIRA_EMAIL }}
+          JIRA_API_TOKEN: ${{ secrets.JIRA_API_TOKEN }}
+
+      - name: Create Jira Sub-task Bug
+        if: env.HAS_KEY == 'true' && env.WHITEBOX_STATUS == 'FAIL'
+        uses: atlassian/gajira-create@v3
+        with:
+          project: ${{ secrets.JIRA_PROJECT_KEY }}
+          issuetype: Subtask
+          fields: '{"parent": {"key": "${{ env.JIRA_KEY }}"}}'
+          summary: "${{ env.JIRA_BUG_SUMMARY }}"
+          description: "${{ env.JIRA_BUG_DESCRIPTION }}"
+
+      - name: Comment on Jira Issue
+        if: env.HAS_KEY == 'true' && env.WHITEBOX_STATUS == 'PASS'
+        uses: atlassian/gajira-comment@v3
+        with:
+          issue: ${{ env.JIRA_KEY }}
+          comment: "${{ env.JIRA_COMMENT }}"
+
+      - name: Transition Jira Issue to Done
+        if: env.HAS_KEY == 'true' && env.WHITEBOX_STATUS == 'PASS'
+        uses: atlassian/gajira-transition@v3
+        with:
+          issue: ${{ env.JIRA_KEY }}
+          transition: "DONE"
+
+      - name: Fail workflow if White Box tests failed
+        if: env.WHITEBOX_STATUS == 'FAIL'
+        run: |
+          echo "White Box tests failed. Jira bug has been created or updated."
+          exit 1
