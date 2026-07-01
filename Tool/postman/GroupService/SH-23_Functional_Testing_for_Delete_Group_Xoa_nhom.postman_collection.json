@@ -6,13 +6,13 @@
   },
   "item": [
     {
-      "name": "🔑 Đăng nhập User thường (user1) (Lấy Access Token)",
+      "name": "🔑 Đăng nhập User thường (user3) (Lấy Access Token)",
       "event": [
         {
           "listen": "test",
           "script": {
             "exec": [
-              "pm.test('Status 200 - Đăng nhập User thường (user1) thành công', () => pm.response.to.have.status(200));",
+              "pm.test('Status 200 - Đăng nhập User thường (user3) thành công', () => pm.response.to.have.status(200));",
               "const json = pm.response.json();",
               "const resData = json.data || json;",
               "if (resData.access_token) {",
@@ -34,7 +34,7 @@
         ],
         "body": {
           "mode": "raw",
-          "raw": "{\n  \"email\": \"user1@example.com\",\n  \"password\": \"11111111\"\n}"
+          "raw": "{\n  \"email\": \"user3@example.com\",\n  \"password\": \"11111111\"\n}"
         },
         "url": {
           "raw": "{{authBaseUrl}}/login",
@@ -90,13 +90,13 @@
       }
     },
     {
-      "name": "🔑 Đăng nhập Group Manager (user3) (Lấy Access Token)",
+      "name": "🔑 Đăng nhập Group Manager - không phải Owner (user2 - Moderator Group Alpha) (Lấy Access Token)",
       "event": [
         {
           "listen": "test",
           "script": {
             "exec": [
-              "pm.test('Status 200 - Đăng nhập Group Manager (user3) thành công', () => pm.response.to.have.status(200));",
+              "pm.test('Status 200 - Đăng nhập Group Manager (user2) thành công', () => pm.response.to.have.status(200));",
               "const json = pm.response.json();",
               "const resData = json.data || json;",
               "if (resData.access_token) {",
@@ -117,7 +117,7 @@
         ],
         "body": {
           "mode": "raw",
-          "raw": "{\n  \"email\": \"user3@example.com\",\n  \"password\": \"11111111\"\n}"
+          "raw": "{\n  \"email\": \"user2@example.com\",\n  \"password\": \"11111111\"\n}"
         },
         "url": {
           "raw": "{{authBaseUrl}}/login",
@@ -337,7 +337,7 @@
     },
     {
       "key": "groupId",
-      "value": "{{REPLACE_WITH_REAL_PUBLIC_GROUP_ID}}",
+      "value": "aaaaaaaa-aaaa-4aaa-8aaa-aaaaaaaaaaa1",
       "type": "string"
     },
     {
@@ -347,7 +347,7 @@
     },
     {
       "key": "emptyGroupId",
-      "value": "{{REPLACE_WITH_GROUP_ID_SAFE_TO_DELETE}}",
+      "value": "aaaaaaaa-aaaa-4aaa-8aaa-aaaaaaaaaaa2",
       "type": "string"
     },
     {
