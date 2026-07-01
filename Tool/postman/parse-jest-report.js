@@ -21,12 +21,29 @@ function cleanFailureMessage(message) {
   return message.replace(/[\u001b\u009b][[()#;?]*(?:[0-9]{1,4}(?:;[0-9]{0,4})*)?[0-9A-ORZcf-nqry=><]/g, "");
 }
 
+function findReportPath() {
+  const directPath = path.resolve("jest-report.json");
+  if (fs.existsSync(directPath)) {
+    return directPath;
+  }
+
+  const backendDir = path.resolve("backend");
+  if (!fs.existsSync(backendDir)) {
+    return null;
+  }
+
+  for (const serviceName of fs.readdirSync(backendDir)) {
+    const candidate = path.join(backendDir, serviceName, "jest-report.json");
+    if (fs.existsSync(candidate)) {
+      return candidate;
+    }
+  }
+
+  return null;
+}
+
 function run() {
-  const candidatePaths = [
-    path.resolve("jest-report.json"),
-    path.resolve("backend/chat_service/jest-report.json"),
-  ];
-  const reportPath = candidatePaths.find((candidatePath) => fs.existsSync(candidatePath));
+  const reportPath = findReportPath();
 
   if (!reportPath) {
     console.log("No jest-report.json found. Skipping report parsing.");
@@ -41,7 +58,7 @@ function run() {
     );
 
     if (failedResults.length === 0) {
-      writeToGithubEnv("JIRA_BUG_SUMMARY", "[WHITE BOX TEST FAILED] Chat Service test failed");
+      writeToGithubEnv("JIRA_BUG_SUMMARY", "[WHITE BOX TEST FAILED] Test failed");
       writeToGithubEnv(
         "JIRA_BUG_DESCRIPTION",
         "CI detected a white-box failure but the Jest report did not include assertion details.",
@@ -62,7 +79,7 @@ function run() {
       details += `${cleanFailureMessage((assertion.failureMessages || []).join("\n"))}\n\n`;
     });
 
-    writeToGithubEnv("JIRA_BUG_SUMMARY", `[WHITE BOX TEST FAILED] Chat Service failure in ${baseName}`);
+    writeToGithubEnv("JIRA_BUG_SUMMARY", `[WHITE BOX TEST FAILED] Failure in ${baseName}`);
     writeToGithubEnv("JIRA_BUG_DESCRIPTION", details.slice(0, 2000), true);
     return;
   }
@@ -80,7 +97,7 @@ function run() {
   comment += `* GitHub Run: [#${runId}](https://github.com/${repo}/actions/runs/${runId})\n\n`;
   comment += `* Total test cases: **${totalTests}**\n`;
   comment += `* Passed test cases: **${passedTests}**\n\n`;
-  comment += "All Chat Service white-box tests for this Jira key passed.";
+  comment += "All white-box tests for this Jira key passed.";
 
   writeToGithubEnv("JIRA_COMMENT", comment, true);
 }

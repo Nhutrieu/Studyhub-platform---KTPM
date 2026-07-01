@@ -5,14 +5,14 @@ on:
     branches:
       - '**'
     paths:
-      - 'backend/chat_service/**'
+      - 'backend/**'
       - '.github/workflows/whitebox-test.yml'
       - 'Tool/postman/parse-jest-report.js'
   pull_request:
     branches:
       - '**'
     paths:
-      - 'backend/chat_service/**'
+      - 'backend/**'
       - '.github/workflows/whitebox-test.yml'
       - 'Tool/postman/parse-jest-report.js'
 
@@ -38,40 +38,54 @@ jobs:
             echo "HAS_KEY=true" >> $GITHUB_ENV
           fi
 
-      - name: Setup Node.js
+      - name: Detect Service and Test File
         if: env.HAS_KEY == 'true'
+        run: |
+          TEST_FILE_PATH=$(find backend -type f -path "*/test/${{ env.JIRA_KEY }}.test.js" | head -n 1)
+          if [ -n "$TEST_FILE_PATH" ]; then
+            SERVICE_DIR=$(dirname $(dirname "$TEST_FILE_PATH"))
+            echo "SERVICE_DIR=$SERVICE_DIR" >> $GITHUB_ENV
+            echo "TEST_FILE=test/${{ env.JIRA_KEY }}.test.js" >> $GITHUB_ENV
+            echo "CACHE_PATH=$SERVICE_DIR/package-lock.json" >> $GITHUB_ENV
+            echo "FOUND_TEST=true" >> $GITHUB_ENV
+            echo "Found test file at $TEST_FILE_PATH. Service directory is $SERVICE_DIR."
+          else
+            echo "FOUND_TEST=false" >> $GITHUB_ENV
+          fi
+
+      - name: Setup Node.js
+        if: env.HAS_KEY == 'true' && env.FOUND_TEST == 'true'
         uses: actions/setup-node@v4
         with:
           node-version: 18
           cache: 'npm'
-          cache-dependency-path: 'backend/chat_service/package-lock.json'
+          cache-dependency-path: ${{ env.CACHE_PATH }}
 
       - name: Install Dependencies
-        if: env.HAS_KEY == 'true'
+        if: env.HAS_KEY == 'true' && env.FOUND_TEST == 'true'
         run: |
-          cd backend/chat_service
+          cd ${{ env.SERVICE_DIR }}
           npm ci
 
       - name: Run White Box Tests Only On Matching Jira Key
-        if: env.HAS_KEY == 'true'
+        if: env.HAS_KEY == 'true' && env.FOUND_TEST == 'true'
         run: |
-          cd backend/chat_service
-          TEST_FILE="test/${{ env.JIRA_KEY }}.test.js"
-          if [ -f "$TEST_FILE" ]; then
-            echo "Running test file: $TEST_FILE"
-            npm test -- "$TEST_FILE" --json --outputFile=jest-report.json || echo "WHITEBOX_STATUS=FAIL" >> $GITHUB_ENV
+          cd ${{ env.SERVICE_DIR }}
+          node --experimental-vm-modules node_modules/jest/bin/jest.js "${{ env.TEST_FILE }}" --json --outputFile=jest-report.json || echo "WHITEBOX_STATUS=FAIL" >> $GITHUB_ENV
 
-            if [ ! -f "jest-report.json" ] || grep -q '"status": "failed"' jest-report.json; then
-              echo "WHITEBOX_STATUS=FAIL" >> $GITHUB_ENV
-              node ../../Tool/postman/parse-jest-report.js FAIL
-            else
-              echo "WHITEBOX_STATUS=PASS" >> $GITHUB_ENV
-              node ../../Tool/postman/parse-jest-report.js PASS
-            fi
+          if [ ! -f "jest-report.json" ] || grep -q '"status": "failed"' jest-report.json; then
+            echo "WHITEBOX_STATUS=FAIL" >> $GITHUB_ENV
+            node ../../Tool/postman/parse-jest-report.js FAIL
           else
-            echo "No white-box test file found for ${{ env.JIRA_KEY }}. Skipping test run."
-            echo "WHITEBOX_STATUS=SKIP" >> $GITHUB_ENV
+            echo "WHITEBOX_STATUS=PASS" >> $GITHUB_ENV
+            node ../../Tool/postman/parse-jest-report.js PASS
           fi
+
+      - name: Handle Missing Test File
+        if: env.HAS_KEY == 'true' && env.FOUND_TEST == 'false'
+        run: |
+          echo "No white-box test file found for ${{ env.JIRA_KEY }}. Skipping test run."
+          echo "WHITEBOX_STATUS=SKIP" >> $GITHUB_ENV
 
       - name: Jira Login
         if: env.HAS_KEY == 'true'
