@@ -1,6 +1,6 @@
 {
   "info": {
-    "name": "StudyHub - SH-71 - BVA danh sach cuoc hoi thoai",
+    "name": "StudyHub - SH-179 - Kiem thu BVA danh sach cuoc hoi thoai (BVA)",
     "description": "Boundary value tests for pagination on chat conversation list.",
     "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
   },
