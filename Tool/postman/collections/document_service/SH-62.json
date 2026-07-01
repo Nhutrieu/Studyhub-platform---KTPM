@@ -43,12 +43,8 @@
             },
             "url": {
               "raw": "{{authBaseUrl}}/login",
-              "host": [
-                "{{authBaseUrl}}"
-              ],
-              "path": [
-                "login"
-              ]
+              "host": ["{{authBaseUrl}}"],
+              "path": ["login"]
             }
           },
           "response": []
@@ -85,12 +81,8 @@
             },
             "url": {
               "raw": "{{authBaseUrl}}/login",
-              "host": [
-                "{{authBaseUrl}}"
-              ],
-              "path": [
-                "login"
-              ]
+              "host": ["{{authBaseUrl}}"],
+              "path": ["login"]
             }
           },
           "response": []
@@ -122,12 +114,8 @@
             },
             "url": {
               "raw": "{{documentBaseUrl}}/",
-              "host": [
-                "{{documentBaseUrl}}"
-              ],
-              "path": [
-                ""
-              ]
+              "host": ["{{documentBaseUrl}}"],
+              "path": [""]
             }
           },
           "response": []
@@ -193,18 +181,14 @@
                 {
                   "key": "file",
                   "type": "file",
-                  "src": "path/document.pdf"
+                  "src": "Tool/postman/fixtures/document-sample.pdf"
                 }
               ]
             },
             "url": {
               "raw": "{{documentBaseUrl}}/",
-              "host": [
-                "{{documentBaseUrl}}"
-              ],
-              "path": [
-                ""
-              ]
+              "host": ["{{documentBaseUrl}}"],
+              "path": [""]
             }
           },
           "response": []
@@ -241,12 +225,8 @@
             },
             "url": {
               "raw": "{{documentBaseUrl}}/",
-              "host": [
-                "{{documentBaseUrl}}"
-              ],
-              "path": [
-                ""
-              ]
+              "host": ["{{documentBaseUrl}}"],
+              "path": [""]
             }
           },
           "response": []
@@ -282,18 +262,14 @@
                 {
                   "key": "file",
                   "type": "file",
-                  "src": "/path/to/oversized-file-over-100mb.zip"
+                  "src": "Tool/postman/fixtures/oversized-file-over-100mb.zip"
                 }
               ]
             },
             "url": {
               "raw": "{{documentBaseUrl}}/",
-              "host": [
-                "{{documentBaseUrl}}"
-              ],
-              "path": [
-                ""
-              ]
+              "host": ["{{documentBaseUrl}}"],
+              "path": [""]
             }
           },
           "response": []
@@ -325,18 +301,14 @@
                 {
                   "key": "file",
                   "type": "file",
-                  "src": "/path/to/document.pdf"
+                  "src": "Tool/postman/fixtures/document-sample.pdf"
                 }
               ]
             },
             "url": {
               "raw": "{{documentBaseUrl}}/",
-              "host": [
-                "{{documentBaseUrl}}"
-              ],
-              "path": [
-                ""
-              ]
+              "host": ["{{documentBaseUrl}}"],
+              "path": [""]
             }
           },
           "response": []
@@ -376,18 +348,14 @@
                 {
                   "key": "file",
                   "type": "file",
-                  "src": "/path/to/document.pdf"
+                  "src": "Tool/postman/fixtures/document-sample.pdf"
                 }
               ]
             },
             "url": {
               "raw": "{{documentBaseUrl}}/",
-              "host": [
-                "{{documentBaseUrl}}"
-              ],
-              "path": [
-                ""
-              ]
+              "host": ["{{documentBaseUrl}}"],
+              "path": [""]
             }
           },
           "response": []
