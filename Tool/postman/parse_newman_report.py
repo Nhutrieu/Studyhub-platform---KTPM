@@ -11,6 +11,12 @@ def clean_request_name(name):
     return name.strip()
 
 def get_relative_path(url_str):
+    if url_str.startswith("{{"):
+        end_var = url_str.find("}}")
+        if end_var != -1:
+            relative = url_str[end_var + 2:]
+            return relative if relative else "/"
+
     try:
         parsed = urlparse(url_str)
         path = parsed.path
