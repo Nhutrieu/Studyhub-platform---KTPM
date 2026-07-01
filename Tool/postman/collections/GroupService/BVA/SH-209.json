@@ -1,0 +1,526 @@
+{
+  "info": {
+    "name": "SH-17 - Functional Testing for Join Group (Tham gia nhom) - Auto Fixed",
+    "description": "Jira Task SH-17: Đã sửa lỗi tự động lấy groupId và privateGroupId từ danh sách group thật.",
+    "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+  },
+  "item": [
+    {
+      "name": "🔑 Đăng nhập User thường (user1) (Lấy Access Token)",
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "exec": [
+              "pm.test('Status 200 - Đăng nhập User thường (user1) thành công', () => pm.response.to.have.status(200));",
+              "const json = pm.response.json();",
+              "const resData = json.data || json;",
+              "if (resData.access_token) {",
+              "    pm.collectionVariables.set('accessToken', resData.access_token);",
+              "    pm.collectionVariables.set('userId', resData.user && resData.user.id);",
+              "}"
+            ],
+            "type": "text/javascript"
+          }
+        }
+      ],
+      "request": {
+        "method": "POST",
+        "header": [
+          {
+            "key": "Content-Type",
+            "value": "application/json"
+          }
+        ],
+        "body": {
+          "mode": "raw",
+          "raw": "{\n  \"email\": \"user1@example.com\",\n  \"password\": \"11111111\"\n}"
+        },
+        "url": {
+          "raw": "{{authBaseUrl}}/login",
+          "host": [
+            "{{authBaseUrl}}"
+          ],
+          "path": [
+            "login"
+          ]
+        }
+      }
+    },
+    {
+      "name": "🔍 Lấy danh sách Group (Tự động lấy groupId & privateGroupId)",
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "exec": [
+              "pm.test('Status 200 - Lấy danh sách group thành công', () => pm.response.to.have.status(200));",
+              "const json = pm.response.json();",
+              "const groups = json.data?.items || json.data || json;",
+              "if (Array.isArray(groups)) {",
+              "    const publicGroup = groups.find(g => g.type === 'PUBLIC' || g.isPrivate === false || !g.isPrivate);",
+              "    const privateGroup = groups.find(g => g.type === 'PRIVATE' || g.isPrivate === true);",
+              "    if (publicGroup) pm.collectionVariables.set('groupId', publicGroup.id);",
+              "    else if (groups.length > 0) pm.collectionVariables.set('groupId', groups[0].id);",
+              "    if (privateGroup) pm.collectionVariables.set('privateGroupId', privateGroup.id);",
+              "    else if (groups.length > 1) pm.collectionVariables.set('privateGroupId', groups[1].id);",
+              "}"
+            ],
+            "type": "text/javascript"
+          }
+        }
+      ],
+      "request": {
+        "method": "GET",
+        "header": [
+          {
+            "key": "Authorization",
+            "value": "Bearer {{accessToken}}"
+          }
+        ],
+        "url": {
+          "raw": "{{groupBaseUrl}}",
+          "host": [
+            "{{groupBaseUrl}}"
+          ]
+        }
+      }
+    },
+    {
+      "name": "✅ Tham gia group PUBLIC (join - tự động vào ngay)",
+      "request": {
+        "method": "POST",
+        "header": [
+          {
+            "key": "Authorization",
+            "value": "Bearer {{accessToken}}"
+          }
+        ],
+        "url": {
+          "raw": "{{groupBaseUrl}}/{{groupId}}/join",
+          "host": [
+            "{{groupBaseUrl}}"
+          ],
+          "path": [
+            "{{groupId}}",
+            "join"
+          ]
+        }
+      },
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "exec": [
+              "pm.test('Status 200', () => pm.response.to.have.status(200));"
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "name": "✅ Yêu cầu tham gia group PRIVATE (join - tạo join request chờ duyệt)",
+      "request": {
+        "method": "POST",
+        "header": [
+          {
+            "key": "Authorization",
+            "value": "Bearer {{accessToken}}"
+          }
+        ],
+        "url": {
+          "raw": "{{groupBaseUrl}}/{{privateGroupId}}/join",
+          "host": [
+            "{{groupBaseUrl}}"
+          ],
+          "path": [
+            "{{privateGroupId}}",
+            "join"
+          ]
+        }
+      },
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "exec": [
+              "pm.test('Status 200', () => pm.response.to.have.status(200));",
+              "const json = pm.response.json();",
+              "if (json.data?.id) pm.collectionVariables.set('joinRequestId', json.data.id);"
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "name": "❌ Tham gia group đã là member rồi",
+      "request": {
+        "method": "POST",
+        "header": [
+          {
+            "key": "Authorization",
+            "value": "Bearer {{accessToken}}"
+          }
+        ],
+        "url": {
+          "raw": "{{groupBaseUrl}}/{{groupId}}/join",
+          "host": [
+            "{{groupBaseUrl}}"
+          ],
+          "path": [
+            "{{groupId}}",
+            "join"
+          ]
+        }
+      },
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "exec": [
+              "pm.test('Status 400', () => pm.response.to.have.status(400));"
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "name": "❌ Tham gia group không tồn tại",
+      "request": {
+        "method": "POST",
+        "header": [
+          {
+            "key": "Authorization",
+            "value": "Bearer {{accessToken}}"
+          }
+        ],
+        "url": {
+          "raw": "{{groupBaseUrl}}/00000000-0000-0000-0000-000000000000/join",
+          "host": [
+            "{{groupBaseUrl}}"
+          ],
+          "path": [
+            "00000000-0000-0000-0000-000000000000",
+            "join"
+          ]
+        }
+      },
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "exec": [
+              "pm.test('Status 400 hoặc 404', () => pm.expect([400, 404]).to.include(pm.response.code));"
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "name": "🧪 [BVA] Tham gia group - group_id thiếu 1 ký tự (35 ký tự, dưới biên CHAR(36))",
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "exec": [
+              "// [BVA - Boundary Value Analysis] Test case bo sung dua tren rang buoc thuc te trong source code backend.",
+              "pm.test('Status 400 hoac 404 - group_id duoi 36 ky tu', () => {",
+              "    pm.expect(pm.response.code).to.be.oneOf([400, 404]);",
+              "});"
+            ],
+            "type": "text/javascript"
+          }
+        }
+      ],
+      "request": {
+        "method": "POST",
+        "header": [
+          {
+            "key": "Authorization",
+            "value": "Bearer {{accessToken}}"
+          }
+        ],
+        "url": {
+          "raw": "{{groupBaseUrl}}/aaaaaaaa-aaaa-4aaa-8aaa-aaaaaaaaaaa/join",
+          "host": [
+            "{{groupBaseUrl}}"
+          ],
+          "path": [
+            "aaaaaaaa-aaaa-4aaa-8aaa-aaaaaaaaaaa",
+            "join"
+          ]
+        }
+      },
+      "response": []
+    },
+    {
+      "name": "🧪 [BVA] Tham gia group - group_id dư 1 ký tự (37 ký tự, vượt biên CHAR(36))",
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "exec": [
+              "// [BVA - Boundary Value Analysis] Test case bo sung dua tren rang buoc thuc te trong source code backend.",
+              "pm.test('Status 400 hoac 404 - group_id vuot qua 36 ky tu', () => {",
+              "    pm.expect(pm.response.code).to.be.oneOf([400, 404]);",
+              "});"
+            ],
+            "type": "text/javascript"
+          }
+        }
+      ],
+      "request": {
+        "method": "POST",
+        "header": [
+          {
+            "key": "Authorization",
+            "value": "Bearer {{accessToken}}"
+          }
+        ],
+        "url": {
+          "raw": "{{groupBaseUrl}}/aaaaaaaa-aaaa-4aaa-8aaa-aaaaaaaaaaa22/join",
+          "host": [
+            "{{groupBaseUrl}}"
+          ],
+          "path": [
+            "aaaaaaaa-aaaa-4aaa-8aaa-aaaaaaaaaaa22",
+            "join"
+          ]
+        }
+      },
+      "response": []
+    }
+  ],
+  "variable": [
+    {
+      "key": "authBaseUrl",
+      "value": "http://localhost:3000/api/v1/auth",
+      "type": "string"
+    },
+    {
+      "key": "userBaseUrl",
+      "value": "http://localhost:3001/api/v1/user",
+      "type": "string"
+    },
+    {
+      "key": "groupBaseUrl",
+      "value": "http://localhost:3002/api/v1/group",
+      "type": "string"
+    },
+    {
+      "key": "documentBaseUrl",
+      "value": "http://localhost:3003/api/v1/document",
+      "type": "string"
+    },
+    {
+      "key": "notificationBaseUrl",
+      "value": "http://localhost:3005/api/v1/notification",
+      "type": "string"
+    },
+    {
+      "key": "chatBaseUrl",
+      "value": "http://localhost:3006/api/v1/chat",
+      "type": "string"
+    },
+    {
+      "key": "accessToken",
+      "value": "",
+      "type": "string"
+    },
+    {
+      "key": "refreshToken",
+      "value": "",
+      "type": "string"
+    },
+    {
+      "key": "revokedRefreshToken",
+      "value": "",
+      "type": "string"
+    },
+    {
+      "key": "adminAccessToken",
+      "value": "{{REPLACE_WITH_REAL_ADMIN_TOKEN}}",
+      "type": "string"
+    },
+    {
+      "key": "verificationToken",
+      "value": "",
+      "type": "string"
+    },
+    {
+      "key": "resetToken",
+      "value": "",
+      "type": "string"
+    },
+    {
+      "key": "secondaryEmailId",
+      "value": "",
+      "type": "string"
+    },
+    {
+      "key": "userId",
+      "value": "",
+      "type": "string"
+    },
+    {
+      "key": "anotherUserId",
+      "value": "{{REPLACE_WITH_REAL_USER_ID}}",
+      "type": "string"
+    },
+    {
+      "key": "anotherUserAccessToken",
+      "value": "{{REPLACE_WITH_REAL_TOKEN_OF_anotherUserId}}",
+      "type": "string"
+    },
+    {
+      "key": "outsiderToken",
+      "value": "{{REPLACE_WITH_TOKEN_OF_USER_NOT_IN_ANY_GROUP_DOC}}",
+      "type": "string"
+    },
+    {
+      "key": "deletableUserId",
+      "value": "{{REPLACE_WITH_A_USER_ID_SAFE_TO_DELETE}}",
+      "type": "string"
+    },
+    {
+      "key": "blockedUserEmail",
+      "value": "{{REPLACE_WITH_EMAIL_OF_AN_ALREADY_BLOCKED_USER}}",
+      "type": "string"
+    },
+    {
+      "key": "privateUserId",
+      "value": "{{REPLACE_WITH_USER_ID_WHOSE_PROFILE_IS_PRIVATE}}",
+      "type": "string"
+    },
+    {
+      "key": "otherUserSocialLinkId",
+      "value": "{{REPLACE_WITH_SOCIAL_LINK_ID_OF_ANOTHER_USER}}",
+      "type": "string"
+    },
+    {
+      "key": "socialLinkId",
+      "value": "",
+      "type": "string"
+    },
+    {
+      "key": "groupId",
+      "value": "",
+      "type": "string"
+    },
+    {
+      "key": "privateGroupId",
+      "value": "",
+      "type": "string"
+    },
+    {
+      "key": "emptyGroupId",
+      "value": "{{REPLACE_WITH_GROUP_ID_SAFE_TO_DELETE}}",
+      "type": "string"
+    },
+    {
+      "key": "joinRequestId",
+      "value": "",
+      "type": "string"
+    },
+    {
+      "key": "joinRequestId2",
+      "value": "{{REPLACE_WITH_ANOTHER_PENDING_JOIN_REQUEST_ID}}",
+      "type": "string"
+    },
+    {
+      "key": "groupOwnerToken",
+      "value": "{{REPLACE_WITH_TOKEN_OF_GROUP_OWNER}}",
+      "type": "string"
+    },
+    {
+      "key": "groupOwnerUserId",
+      "value": "{{REPLACE_WITH_USER_ID_OF_GROUP_OWNER}}",
+      "type": "string"
+    },
+    {
+      "key": "groupManagerNotOwnerToken",
+      "value": "{{REPLACE_WITH_TOKEN_OF_A_MANAGER_WHO_IS_NOT_OWNER}}",
+      "type": "string"
+    },
+    {
+      "key": "memberToLeaveToken",
+      "value": "{{REPLACE_WITH_TOKEN_OF_A_REGULAR_MEMBER_TO_TEST_LEAVE}}",
+      "type": "string"
+    },
+    {
+      "key": "memberToKickId",
+      "value": "{{REPLACE_WITH_USER_ID_OF_A_MEMBER_TO_KICK}}",
+      "type": "string"
+    },
+    {
+      "key": "documentId",
+      "value": "",
+      "type": "string"
+    },
+    {
+      "key": "privateDocumentId",
+      "value": "{{REPLACE_WITH_REAL_PRIVATE_DOCUMENT_ID}}",
+      "type": "string"
+    },
+    {
+      "key": "deletableDocumentId",
+      "value": "{{REPLACE_WITH_DOCUMENT_ID_SAFE_TO_DELETE}}",
+      "type": "string"
+    },
+    {
+      "key": "pendingDocumentId",
+      "value": "{{REPLACE_WITH_DOCUMENT_ID_PENDING_APPROVAL}}",
+      "type": "string"
+    },
+    {
+      "key": "pendingDocumentId2",
+      "value": "{{REPLACE_WITH_ANOTHER_DOCUMENT_ID_PENDING_APPROVAL}}",
+      "type": "string"
+    },
+    {
+      "key": "commentId",
+      "value": "",
+      "type": "string"
+    },
+    {
+      "key": "otherUserCommentId",
+      "value": "{{REPLACE_WITH_COMMENT_ID_OF_ANOTHER_USER}}",
+      "type": "string"
+    },
+    {
+      "key": "notificationId",
+      "value": "",
+      "type": "string"
+    },
+    {
+      "key": "otherUserNotificationId",
+      "value": "{{REPLACE_WITH_NOTIFICATION_ID_OF_ANOTHER_USER}}",
+      "type": "string"
+    },
+    {
+      "key": "deletableNotificationId",
+      "value": "{{REPLACE_WITH_NOTIFICATION_ID_SAFE_TO_DELETE}}",
+      "type": "string"
+    },
+    {
+      "key": "conversationId",
+      "value": "",
+      "type": "string"
+    },
+    {
+      "key": "groupConversationId",
+      "value": "",
+      "type": "string"
+    },
+    {
+      "key": "messageId",
+      "value": "",
+      "type": "string"
+    },
+    {
+      "key": "otherUserMessageId",
+      "value": "{{REPLACE_WITH_MESSAGE_ID_OF_ANOTHER_USER}}",
+      "type": "string"
+    }
+  ]
+}
