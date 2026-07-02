@@ -34,6 +34,8 @@ Truoc khi bam Run workflow, can dam bao:
 2. Nen tao PR tu nhanh bug fix vao `main` truoc khi chay workflow.
    Khi co PR, comment Jira se co dong `Thay doi code: PR #...` de thay/co giao vien bam vao
    xem code da sua.
+   Muon xem code backend da fix o dau thi bam link `Thay doi code`, sau do mo tab
+   `Files changed` trong PR.
 3. Bug subtask Jira da co san, vi du `SH-102`.
 4. Task cha cua bug da co san, vi du `SH-37`.
 5. File test dung de verify da co san:
@@ -46,6 +48,10 @@ Truoc khi bam Run workflow, can dam bao:
    - `JIRA_PROJECT_KEY` neu cac workflow khac can tao bug
 
 Khong paste Jira API token vao input workflow.
+
+> Luu y: Workflow phai chay tren nhanh/PR dang chua code fix bug that su. Neu chay tren
+> nhanh tool hoac mot nhanh khong co code backend fix bug, link `Thay doi code` se chi hien
+> thay doi cua nhanh do, khong phai code backend cua bug.
 
 ## 3. Mo workflow tren GitHub
 
@@ -62,6 +68,8 @@ Khong paste Jira API token vao input workflow.
 ### `bug_keys`
 
 Danh sach bug subtask can xac minh, ngan cach bang dau phay hoac xuong dong.
+Nen nhap bang dau phay de ten run tren GitHub Actions hien gon, vi du
+`Verify bug fix: SH-102,SH-103,SH-146`.
 
 Vi du:
 
@@ -300,6 +308,8 @@ post comment moi. No khong xoa comment cua cac workflow cu nhu `[API Automation]
 Sau khi workflow chay xong:
 
 1. Mo GitHub Actions run.
+   Ten run manual se co dang `Verify bug fix: SH-102,SH-103,...` de de truy vet
+   tren danh sach Actions.
 2. Kiem tra cac step sau phai xanh:
    - `Run Newman Verification` neu co Postman input
    - `Run Jest Verification` neu co Jest input
@@ -309,8 +319,9 @@ Sau khi workflow chay xong:
 4. Kiem tra comment moi chi noi ve dung bug do.
 5. Bam thu cac link trong comment:
    - `GitHub Run` de xem bo test da PASS.
-   - `Commit chay test` de xem commit workflow verify.
-   - `Thay doi code` de xem PR/diff code da sua.
+   - `Commit chay test` de xem commit ma workflow verify.
+   - `Thay doi code` de mo PR/diff code da sua. Day la link nen bam khi can xem
+     backend da sua file nao; sau khi mo PR, vao tab `Files changed`.
 6. Kiem tra trang thai Jira da sang Done neu da chon transition.
 
 ## 8. Cac loi thuong gap

@@ -1,4 +1,5 @@
 name: Bug Fix Verification + Jira
+run-name: "${{ github.event_name == 'workflow_dispatch' && format('Verify bug fix: {0}', inputs.bug_keys) || github.event.pull_request.title || github.event.head_commit.message || github.workflow }}"
 
 on:
   pull_request:
