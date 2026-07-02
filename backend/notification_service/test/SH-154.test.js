@@ -98,7 +98,7 @@ describe("StudyHub - SH-154 - Kiểm thử tích hợp Router API (White Box)", 
             const payload = {
                 sender_id: "sender1",
                 content: "new message",
-                target: { type: "post", id: "post1" },
+                target: { type: "post", id: "post123456" },
                 type: "ALERT",
                 receiver_ids: ["user1"],
             };

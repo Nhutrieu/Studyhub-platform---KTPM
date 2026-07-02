@@ -18,13 +18,29 @@ export class NotificationController {
         try {
             const user_id = req.user.id;
             const { status, limit = 50, offset = 0 } = req.query;
+            const parsedLimit = Number(limit);
+            const parsedOffset = Number(offset);
+
+            if (!Number.isInteger(parsedLimit) || parsedLimit < 1 || parsedLimit > 100) {
+                return res.status(400).json({
+                    success: false,
+                    message: "limit must be an integer between 1 and 100",
+                });
+            }
+
+            if (!Number.isInteger(parsedOffset) || parsedOffset < 0) {
+                return res.status(400).json({
+                    success: false,
+                    message: "offset must be a non-negative integer",
+                });
+            }
 
             const notifications = await this.notificationService.getNotificationsForUser(
                 user_id,
                 {
                     status,
-                    limit: Number(limit),
-                    offset: Number(offset),
+                    limit: parsedLimit,
+                    offset: parsedOffset,
                 }
             );
 
@@ -93,6 +109,40 @@ export class NotificationController {
                 return res.status(400).json({
                     success: false,
                     message: "Missing required fields: sender_id, content, target, type, receiver_ids",
+                });
+            }
+
+            if (typeof content !== "string" || content.length < 1 || content.length > 500) {
+                return res.status(400).json({
+                    success: false,
+                    message: "content must be between 1 and 500 characters",
+                });
+            }
+
+            if (!Array.isArray(receiver_ids) || receiver_ids.length < 1 || receiver_ids.length > 1000) {
+                return res.status(400).json({
+                    success: false,
+                    message: "receiver_ids must contain between 1 and 1000 receivers",
+                });
+            }
+
+            if (typeof type !== "string" || type.length < 4 || type.length > 20) {
+                return res.status(400).json({
+                    success: false,
+                    message: "type must be between 4 and 20 characters",
+                });
+            }
+
+            if (
+                typeof target !== "object" ||
+                typeof target.type !== "string" ||
+                typeof target.id !== "string" ||
+                target.id.length < 10 ||
+                target.id.length > 24
+            ) {
+                return res.status(400).json({
+                    success: false,
+                    message: "target.id must be between 10 and 24 characters",
                 });
             }
 
