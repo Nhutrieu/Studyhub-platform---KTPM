@@ -54,6 +54,7 @@ export function createApp() {
 
   const followService = new FollowService({
     followRepo,
+    userRepo,
   });
 
   // Mount routers

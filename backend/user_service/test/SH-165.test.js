@@ -93,6 +93,7 @@ describe('ProfileController - Unit Test', () => {
   describe('updateProfile', () => {
     it('should update profile successfully', async () => {
       req.params.user_id = 'user-123';
+      req.user.id = 'user-123';
       req.body = { display_name: 'test' };
       profileServiceMock.updateProfile.mockResolvedValue({ success: true });
 
@@ -104,11 +105,22 @@ describe('ProfileController - Unit Test', () => {
 
     it('should return 400 on error', async () => {
       req.params.user_id = 'user-123';
+      req.user.id = 'user-123';
       profileServiceMock.updateProfile.mockRejectedValue(new Error('Validation error'));
 
       await controller.updateProfile(req, res);
 
       expect(res.status).toHaveBeenCalledWith(400);
+    });
+
+    it('should return 403 when updating another user profile', async () => {
+      req.params.user_id = 'other-user';
+      req.user.id = 'user-123';
+
+      await controller.updateProfile(req, res);
+
+      expect(profileServiceMock.updateProfile).not.toHaveBeenCalled();
+      expect(res.status).toHaveBeenCalledWith(403);
     });
   });
 
@@ -131,17 +143,19 @@ describe('ProfileController - Unit Test', () => {
 
     it('should upload avatar successfully', async () => {
       req.params.user_id = 'user-123';
+      req.user.id = 'user-123';
       req.file = { buffer: Buffer.from('image') };
       profileServiceMock.updateAvatar.mockResolvedValue({ avatar_url: 'url' });
 
       await handler.call(controller, req, res);
 
-      expect(profileServiceMock.updateAvatar).toHaveBeenCalledWith('user-123', req.file.buffer);
+      expect(profileServiceMock.updateAvatar).toHaveBeenCalledWith('user-123', req.file);
       expect(res.json).toHaveBeenCalledWith({ avatar_url: 'url' });
     });
 
     it('should return 400 on service error', async () => {
       req.params.user_id = 'user-123';
+      req.user.id = 'user-123';
       req.file = { buffer: Buffer.from('image') };
       profileServiceMock.updateAvatar.mockRejectedValue(new Error('Upload failed'));
 
@@ -174,6 +188,7 @@ describe('ProfileController - Unit Test', () => {
 
     it('should update privacy successfully', async () => {
       req.params.user_id = 'user-123';
+      req.user.id = 'user-123';
       req.body = { show_bio: 0 };
       profileServiceMock.updatePrivacy.mockResolvedValue({ show_bio: 0 });
 
@@ -185,6 +200,7 @@ describe('ProfileController - Unit Test', () => {
 
     it('should return 400 if updating privacy fails', async () => {
       req.params.user_id = 'user-123';
+      req.user.id = 'user-123';
       profileServiceMock.updatePrivacy.mockRejectedValue(new Error('Update failed'));
 
       await controller.updatePrivacy(req, res);
@@ -240,6 +256,7 @@ describe('ProfileController - Unit Test', () => {
   describe('socialLinks & interests', () => {
     it('should add social link successfully', async () => {
       req.params.user_id = 'user-123';
+      req.user.id = 'user-123';
       req.body.url = 'https://github.com';
       profileServiceMock.addSocialLink.mockResolvedValue({ id: 'link-1' });
 
@@ -259,11 +276,12 @@ describe('ProfileController - Unit Test', () => {
 
     it('should remove social link successfully', async () => {
       req.params.id = 'link-1';
+      req.user.id = 'user-123';
       profileServiceMock.removeSocialLink.mockResolvedValue(1);
 
       await controller.removeSocialLink(req, res);
 
-      expect(profileServiceMock.removeSocialLink).toHaveBeenCalledWith('link-1');
+      expect(profileServiceMock.removeSocialLink).toHaveBeenCalledWith('user-123', 'link-1');
       expect(res.json).toHaveBeenCalledWith({ success: 1 });
     });
 
@@ -279,6 +297,7 @@ describe('ProfileController - Unit Test', () => {
 
     it('should add interest successfully', async () => {
       req.params.user_id = 'user-123';
+      req.user.id = 'user-123';
       req.body.interest = 'AI';
       profileServiceMock.addInterest.mockResolvedValue({ id: 'int-1' });
 
@@ -299,6 +318,7 @@ describe('ProfileController - Unit Test', () => {
 
     it('should remove interest successfully', async () => {
       req.params.user_id = 'user-123';
+      req.user.id = 'user-123';
       req.body.interest = 'AI';
       profileServiceMock.removeInterest.mockResolvedValue(1);
 

@@ -319,8 +319,8 @@
             {
               "key": "avatar",
               "type": "file",
-              "src": "/path/to/avatar.jpg",
-              "description": "Chọn file ảnh thật để test"
+              "src": "avatar.jpg",
+              "description": "File avatar test trong repo"
             }
           ]
         }

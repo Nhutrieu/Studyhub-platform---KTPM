@@ -36,12 +36,14 @@ describe('ProfileService - Unit Test', () => {
       upsert: jest.fn()
     };
     socialRepoMock = {
+      findById: jest.fn(),
       findByUserAndPlatform: jest.fn(),
       updateLink: jest.fn(),
       createLink: jest.fn(),
       deleteLink: jest.fn()
     };
     interestsRepoMock = {
+      findByUserAndInterest: jest.fn(),
       addInterest: jest.fn(),
       removeInterest: jest.fn()
     };
@@ -215,6 +217,25 @@ describe('ProfileService - Unit Test', () => {
       expect(privacyRepoMock.upsert).toHaveBeenCalledWith({ user_id: 'user-123', show_bio: 0 });
       expect(result).toEqual(mockPrivacy);
     });
+
+    it('should map profile_visibility and reject invalid privacy values', async () => {
+      const mockPrivacy = { user_id: 'user-123', show_profile: 0 };
+      privacyRepoMock.upsert.mockResolvedValue(mockPrivacy);
+
+      const result = await profileService.updatePrivacy('user-123', {
+        profile_visibility: 'private'
+      });
+
+      expect(privacyRepoMock.upsert).toHaveBeenCalledWith({
+        user_id: 'user-123',
+        show_profile: 0
+      });
+      expect(result).toEqual(mockPrivacy);
+
+      await expect(profileService.updatePrivacy('user-123', {
+        profile_visibility: 'super_secret'
+      })).rejects.toThrow('profile_visibility must be public or private');
+    });
   });
 
   describe('searchUsers', () => {
@@ -312,30 +333,57 @@ describe('ProfileService - Unit Test', () => {
     });
 
     it('should remove social link successfully', async () => {
+      socialRepoMock.findById.mockResolvedValue({ id: 'link-123', user_id: 'user-123' });
       socialRepoMock.deleteLink.mockResolvedValue(1);
 
-      const result = await profileService.removeSocialLink('link-123');
+      const result = await profileService.removeSocialLink('user-123', 'link-123');
 
+      expect(socialRepoMock.findById).toHaveBeenCalledWith('link-123');
       expect(socialRepoMock.deleteLink).toHaveBeenCalledWith('link-123');
       expect(result).toBe(1);
     });
 
+    it('should reject missing or forbidden social link removal', async () => {
+      socialRepoMock.findById.mockResolvedValueOnce(null);
+
+      await expect(profileService.removeSocialLink('user-123', 'missing-link')).rejects.toThrow('Social link not found');
+
+      socialRepoMock.findById.mockResolvedValueOnce({ id: 'link-123', user_id: 'other-user' });
+
+      await expect(profileService.removeSocialLink('user-123', 'link-123')).rejects.toThrow("Cannot remove another user's social link");
+    });
+
     it('should add interest successfully', async () => {
+      interestsRepoMock.findByUserAndInterest.mockResolvedValue(null);
       interestsRepoMock.addInterest.mockResolvedValue({ id: 'interest-123', interest: 'Coding' });
 
       const result = await profileService.addInterest('user-123', 'Coding');
 
+      expect(interestsRepoMock.findByUserAndInterest).toHaveBeenCalledWith('user-123', 'Coding');
       expect(interestsRepoMock.addInterest).toHaveBeenCalled();
       expect(result).toEqual({ id: 'interest-123', interest: 'Coding' });
     });
 
+    it('should reject duplicate interests', async () => {
+      interestsRepoMock.findByUserAndInterest.mockResolvedValue({ id: 'interest-123', interest: 'Coding' });
+
+      await expect(profileService.addInterest('user-123', 'Coding')).rejects.toThrow('Interest already exists');
+      expect(interestsRepoMock.addInterest).not.toHaveBeenCalled();
+    });
+
     it('should remove interest successfully', async () => {
-      interestsRepoMock.removeInterest.mockResolvedValue(1);
+      interestsRepoMock.removeInterest.mockResolvedValue(true);
 
       const result = await profileService.removeInterest('user-123', 'Coding');
 
       expect(interestsRepoMock.removeInterest).toHaveBeenCalledWith('user-123', 'Coding');
-      expect(result).toBe(1);
+      expect(result).toBe(true);
+    });
+
+    it('should reject removing a missing interest', async () => {
+      interestsRepoMock.removeInterest.mockResolvedValue(false);
+
+      await expect(profileService.removeInterest('user-123', 'Coding')).rejects.toThrow('Interest not found');
     });
   });
 });

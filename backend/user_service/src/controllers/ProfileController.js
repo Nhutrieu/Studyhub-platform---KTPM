@@ -2,6 +2,22 @@ import multer from "multer";
 
 const upload = multer({ storage: multer.memoryStorage() });
 
+function errorStatus(err, fallback = 400) {
+  return err.statusCode || fallback;
+}
+
+function forbidden(message) {
+  const err = new Error(message);
+  err.statusCode = 403;
+  return err;
+}
+
+function ensureOwnProfile(req) {
+  if (req.user?.id && req.params?.user_id && req.user.id !== req.params.user_id) {
+    throw forbidden("Cannot modify another user's profile");
+  }
+}
+
 export class ProfileController {
   /**
    * @param {Object} deps
@@ -39,29 +55,31 @@ export class ProfileController {
   }
 
   /** Update core profile info and details */
-  async updateProfile({ params, body }, res) {
+  async updateProfile(req, res) {
     try {
+      ensureOwnProfile(req);
       const updated = await this.profileService.updateProfile(
-        params.user_id,
-        body
+        req.params.user_id,
+        req.body
       );
       res.json(updated);
     } catch (err) {
-      res.status(400).json({ error: err.message });
+      res.status(errorStatus(err)).json({ error: err.message });
     }
   }
 
   /** Update avatar using Cloudinary */
-  async updateAvatar({ params, file }, res) {
+  async updateAvatar(req, res) {
     try {
-      if (!file) throw new Error("No avatar file uploaded");
+      ensureOwnProfile(req);
+      if (!req.file) throw new Error("No avatar file uploaded");
       const updated = await this.profileService.updateAvatar(
-        params.user_id,
-        file.buffer
+        req.params.user_id,
+        req.file
       );
       res.json(updated);
     } catch (err) {
-      res.status(400).json({ error: err.message });
+      res.status(errorStatus(err)).json({ error: err.message });
     }
   }
 
@@ -76,15 +94,16 @@ export class ProfileController {
   }
 
   /** Update privacy settings */
-  async updatePrivacy({ params, body }, res) {
+  async updatePrivacy(req, res) {
     try {
+      ensureOwnProfile(req);
       const updated = await this.profileService.updatePrivacy(
-        params.user_id,
-        body
+        req.params.user_id,
+        req.body
       );
       res.json(updated);
     } catch (err) {
-      res.status(400).json({ error: err.message });
+      res.status(errorStatus(err)).json({ error: err.message });
     }
   }
 
@@ -124,46 +143,52 @@ export class ProfileController {
   }
   
   /** Add a social link */
-  async addSocialLink({ params, body }, res) {
+  async addSocialLink(req, res) {
     try {
+      ensureOwnProfile(req);
       const updated = await this.profileService.addSocialLink(
-        params.user_id,
-        body.url,
-        body.platform
+        req.params.user_id,
+        req.body.url,
+        req.body.platform
       );
       res.json(updated);
     } catch (err) {
-      res.status(400).json({ error: err.message });
+      res.status(errorStatus(err)).json({ error: err.message });
     }
   }
 
   /** Remove a social link */
-  async removeSocialLink({ params }, res) {
+  async removeSocialLink(req, res) {
     try {
-      const deleted = await this.profileService.removeSocialLink(params.id);
+      const deleted = await this.profileService.removeSocialLink(
+        req.user?.id,
+        req.params.id
+      );
       res.json({ success: deleted });
     } catch (err) {
-      res.status(400).json({ error: err.message });
+      res.status(errorStatus(err)).json({ error: err.message });
     }
   }
 
   /** Add interest */
-  async addInterest({ params, body }, res) {
+  async addInterest(req, res) {
     try {
-      await this.profileService.addInterest(params.user_id, body.interest);
+      ensureOwnProfile(req);
+      await this.profileService.addInterest(req.params.user_id, req.body.interest);
       res.json({ success: true });
     } catch (err) {
-      res.status(400).json({ error: err.message });
+      res.status(errorStatus(err)).json({ error: err.message });
     }
   }
 
   /** Remove interest */
-  async removeInterest({ params, body }, res) {
+  async removeInterest(req, res) {
     try {
-      await this.profileService.removeInterest(params.user_id, body.interest);
+      ensureOwnProfile(req);
+      await this.profileService.removeInterest(req.params.user_id, req.body.interest);
       res.json({ success: true });
     } catch (err) {
-      res.status(400).json({ error: err.message });
+      res.status(errorStatus(err)).json({ error: err.message });
     }
   }
 }
