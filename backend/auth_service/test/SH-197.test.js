@@ -118,24 +118,24 @@ describe('AuthService - Unit Test', () => {
 
   describe('register', () => {
     it('should throw error if payload parameters are missing', async () => {
-      await expect(authService.register({})).rejects.toThrow('Username, email, display name and password are required');
+      await expect(authService.register({})).rejects.toThrow('Username, email and password are required');
     });
 
     it('should throw error if username already exists', async () => {
       userRepoMock.findByUserName.mockResolvedValue({ id: '1' });
-      await expect(authService.register({ user_name: 'taken', email: 'a@a.com', password: '1', display_name: '1' }))
+      await expect(authService.register({ user_name: 'taken', email: 'a@a.com', password: '11111111', display_name: '1' }))
         .rejects.toThrow('Username already exists');
     });
 
     it('should throw error if email format is invalid', async () => {
-      await expect(authService.register({ user_name: 'free', email: 'invalid-email', password: '1', display_name: '1' }))
+      await expect(authService.register({ user_name: 'free', email: 'invalid-email', password: '11111111', display_name: '1' }))
         .rejects.toThrow('Invalid email format');
     });
 
     it('should throw error if email already exists', async () => {
       userRepoMock.findByUserName.mockResolvedValue(null);
       userEmailRepoMock.findByEmail.mockResolvedValue({ id: '1' });
-      await expect(authService.register({ user_name: 'free', email: 'taken@a.com', password: '1', display_name: '1' }))
+      await expect(authService.register({ user_name: 'free', email: 'taken@a.com', password: '11111111', display_name: '1' }))
         .rejects.toThrow('Email already exists');
     });
 

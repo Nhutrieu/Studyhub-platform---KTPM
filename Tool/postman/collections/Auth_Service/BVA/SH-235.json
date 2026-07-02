@@ -16,7 +16,7 @@
         ],
         "body": {
           "mode": "raw",
-          "raw": "{\n  \"user_name\": \"usr\",\n  \"password\": \"11111111\",\n  \"email\": \"a@b.c\"\n}"
+          "raw": "{\n  \"user_name\": \"{{minUsername}}\",\n  \"password\": \"11111111\",\n  \"email\": \"{{minEmail}}\"\n}"
         },
         "url": {
           "raw": "{{authBaseUrl}}/register",
@@ -35,6 +35,18 @@
             "exec": [
               "pm.test('Status 201', () => pm.response.to.have.status(201));"
             ]
+          }
+        },
+        {
+          "listen": "prerequest",
+          "script": {
+            "exec": [
+              "const randLetter = () => String.fromCharCode(97 + Math.floor(Math.random() * 26));",
+              "const randStr = (len) => Array.from({length: len}, randLetter).join('');",
+              "pm.collectionVariables.set('minUsername', randStr(3));",
+              "pm.collectionVariables.set('minEmail', `${randLetter()}@${randLetter()}.${randLetter()}`);"
+            ],
+            "type": "text/javascript"
           }
         }
       ]
@@ -51,7 +63,7 @@
         ],
         "body": {
           "mode": "raw",
-          "raw": "{\n  \"user_name\": \"uuuuuuuuuuuuuuuuuuuu\",\n  \"password\": \"pppppppppppppppppppppppppppppppppppppppppppppppppp\",\n  \"email\": \"eeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeee@test.com\"\n}"
+          "raw": "{\n  \"user_name\": \"{{maxUsername}}\",\n  \"password\": \"pppppppppppppppppppppppppppppppppppppppppppppppppp\",\n  \"email\": \"{{maxEmail}}\"\n}"
         },
         "url": {
           "raw": "{{authBaseUrl}}/register",
@@ -70,6 +82,18 @@
             "exec": [
               "pm.test('Status 201', () => pm.response.to.have.status(201));"
             ]
+          }
+        },
+        {
+          "listen": "prerequest",
+          "script": {
+            "exec": [
+              "const randLetter = () => String.fromCharCode(97 + Math.floor(Math.random() * 26));",
+              "const randStr = (len) => Array.from({length: len}, randLetter).join('');",
+              "pm.collectionVariables.set('maxUsername', randStr(20));",
+              "pm.collectionVariables.set('maxEmail', `${randStr(90)}@test.com`);"
+            ],
+            "type": "text/javascript"
           }
         }
       ]
@@ -228,6 +252,26 @@
     },
     {
       "key": "userId",
+      "value": "",
+      "type": "string"
+    },
+    {
+      "key": "minUsername",
+      "value": "",
+      "type": "string"
+    },
+    {
+      "key": "minEmail",
+      "value": "",
+      "type": "string"
+    },
+    {
+      "key": "maxUsername",
+      "value": "",
+      "type": "string"
+    },
+    {
+      "key": "maxEmail",
       "value": "",
       "type": "string"
     }

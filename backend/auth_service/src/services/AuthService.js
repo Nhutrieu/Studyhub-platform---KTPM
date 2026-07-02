@@ -106,10 +106,19 @@ export class AuthService {
     user_agent = null,
     ip = null,
   }) {
-    if (!user_name || !email || !password || !display_name)
+    const final_display_name = display_name || user_name;
+    if (!user_name || !email || !password)
       throw new Error(
-        "Username, email, display name and password are required"
+        "Username, email and password are required"
       );
+
+    if (user_name.length < 3 || user_name.length > 20) {
+      throw new Error("Username must be between 3 and 20 characters");
+    }
+
+    if (password.length < 8 || password.length > 50) {
+      throw new Error("Password must be between 8 and 50 characters");
+    }
 
     const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
     if (!emailRegex.test(email)) {
@@ -170,7 +179,7 @@ export class AuthService {
         id: newUser.id,
         user_name,
         email,
-        display_name,
+        display_name: final_display_name,
         created_at: newUser.created_at,
       },
       {
@@ -370,6 +379,10 @@ export class AuthService {
   async changePassword(user_id, old_password, new_password) {
     if (!user_id || !old_password || !new_password)
       throw new Error("Missing parameters");
+
+    if (new_password.length < 8 || new_password.length > 50) {
+      throw new Error("Password must be between 8 and 50 characters");
+    }
 
     const user = await this.userRepo.findById(user_id);
     if (!user) throw new Error("User not found");
