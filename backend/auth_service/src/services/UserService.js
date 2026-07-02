@@ -43,7 +43,19 @@ export class UserService {
     const payload = {};
     for (const key of allowed) if (key in fields) payload[key] = fields[key];
 
-    await this.userRepo.updateById(user_id, payload);
+    if (Object.keys(payload).length > 0) {
+      if ("userName" in payload) {
+        payload.user_name = payload.userName;
+        delete payload.userName;
+      }
+      // Only keep database columns
+      const dbPayload = {};
+      if ("user_name" in payload) dbPayload.user_name = payload.user_name;
+      
+      if (Object.keys(dbPayload).length > 0) {
+        await this.userRepo.updateById(user_id, dbPayload);
+      }
+    }
     const updated_user = await this.userRepo.findById(user_id);
 
     await this.auditRepo.logAction({ actor_user_id: user_id, action: "UPDATE_PROFILE", target_user_id: user_id, created_at: new Date() });
@@ -68,6 +80,11 @@ export class UserService {
    */
   async addEmail(user_id, email) {
     if (!user_id || !email) throw new Error("Missing parameters");
+
+    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+    if (!emailRegex.test(email)) {
+      throw new Error("Invalid email format");
+    }
 
     const existing_email = await this.userEmailRepo.findByEmail(email);
     if (existing_email) throw new Error("Email already in use");
