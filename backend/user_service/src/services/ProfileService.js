@@ -18,6 +18,26 @@ const SOCIAL_PLATFORM_DOMAINS = {
   facebook: ["facebook.com"],
 };
 
+const PRIVACY_BOOLEAN_FIELDS = [
+  "show_full_name",
+  "show_bio",
+  "show_gender",
+  "show_birthday",
+  "show_location",
+  "show_avatar",
+  "show_profile",
+  "allow_tagging",
+];
+
+const PROFILE_VISIBILITY_VALUES = new Set(["public", "private"]);
+const ALLOW_MESSAGES_VALUES = new Set(["everyone", "no_one", "contacts"]);
+
+function httpError(message, statusCode = 400) {
+  const err = new Error(message);
+  err.statusCode = statusCode;
+  return err;
+}
+
 function validateOptionalStringLength(value, field, { min, max, required }) {
   if (value === undefined || value === null) return;
   if (typeof value !== "string") {
@@ -32,6 +52,50 @@ function validateOptionalStringLength(value, field, { min, max, required }) {
   if (max && value.length > max) {
     throw new Error(`${field} is too long`);
   }
+}
+
+function normalizeInterest(interest) {
+  if (typeof interest !== "string" || interest.trim() === "") {
+    throw new Error("Interest is required");
+  }
+
+  return interest.trim();
+}
+
+function normalizePrivacySettings(settings = {}) {
+  const normalized = { ...settings };
+
+  if (normalized.profile_visibility !== undefined) {
+    const visibility = String(normalized.profile_visibility).trim().toLowerCase();
+
+    if (!PROFILE_VISIBILITY_VALUES.has(visibility)) {
+      throw new Error("profile_visibility must be public or private");
+    }
+
+    normalized.show_profile = visibility === "public" ? 1 : 0;
+    delete normalized.profile_visibility;
+  }
+
+  for (const field of PRIVACY_BOOLEAN_FIELDS) {
+    if (
+      normalized[field] !== undefined &&
+      normalized[field] !== true &&
+      normalized[field] !== false &&
+      normalized[field] !== 0 &&
+      normalized[field] !== 1
+    ) {
+      throw new Error(`${field} must be a boolean`);
+    }
+  }
+
+  if (
+    normalized.allow_messages !== undefined &&
+    !ALLOW_MESSAGES_VALUES.has(String(normalized.allow_messages).trim().toLowerCase())
+  ) {
+    throw new Error("allow_messages is invalid");
+  }
+
+  return normalized;
 }
 
 export class ProfileService {
@@ -193,7 +257,10 @@ export class ProfileService {
    * @returns {Promise<Object>} - Updated privacy settings
    */
   async updatePrivacy(user_id, settings) {
-    return this.privacyRepo.upsert({ user_id, ...settings });
+    return this.privacyRepo.upsert({
+      user_id,
+      ...normalizePrivacySettings(settings),
+    });
   }
 
   /**
@@ -290,7 +357,17 @@ export class ProfileService {
    * @param {string} id - Social link ID
    * @returns {Promise<number>} - Number of records deleted
    */
-  async removeSocialLink(id) {
+  async removeSocialLink(user_id, id) {
+    const existing = await this.socialRepo.findById(id);
+
+    if (!existing) {
+      throw new Error("Social link not found");
+    }
+
+    if (user_id && existing.user_id !== user_id) {
+      throw httpError("Cannot remove another user's social link", 403);
+    }
+
     return this.socialRepo.deleteLink(id);
   }
 
@@ -301,7 +378,17 @@ export class ProfileService {
    * @returns {Promise<Object>} - Added interest record
    */
   async addInterest(user_id, interest) {
-    return this.interestsRepo.addInterest(user_id, interest, uuidv4());
+    const normalizedInterest = normalizeInterest(interest);
+    const existing = await this.interestsRepo.findByUserAndInterest(
+      user_id,
+      normalizedInterest
+    );
+
+    if (existing) {
+      throw new Error("Interest already exists");
+    }
+
+    return this.interestsRepo.addInterest(user_id, normalizedInterest, uuidv4());
   }
 
   /**
@@ -311,6 +398,16 @@ export class ProfileService {
    * @returns {Promise<number>} - Number of interests removed
    */
   async removeInterest(user_id, interest) {
-    return this.interestsRepo.removeInterest(user_id, interest);
+    const normalizedInterest = normalizeInterest(interest);
+    const removed = await this.interestsRepo.removeInterest(
+      user_id,
+      normalizedInterest
+    );
+
+    if (!removed) {
+      throw new Error("Interest not found");
+    }
+
+    return removed;
   }
 }

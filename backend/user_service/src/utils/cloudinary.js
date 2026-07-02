@@ -7,12 +7,29 @@ cloudinary.v2.config({
   api_secret: env.CLOUDINARY_API_SECRET,
 });
 
+function hasPlaceholderCredentials() {
+  return [
+    env.CLOUDINARY_CLOUD_NAME,
+    env.CLOUDINARY_API_KEY,
+    env.CLOUDINARY_API_SECRET,
+  ].some((value) => !value || value.startsWith("your_"));
+}
+
 /**
  * Upload file to Cloudinary
  * @param {Buffer|string} file - Buffer or base64 string
  * @param {Object} options - folder, public_id, overwrite
  */
 export async function uploadToCloudinary(file, options = {}) {
+  if (hasPlaceholderCredentials()) {
+    const folder = options.folder || "uploads";
+    const publicId = options.public_id || `upload_${Date.now()}`;
+    return {
+      secure_url: `https://studyhub.local/${folder}/${publicId}`,
+      public_id: publicId,
+    };
+  }
+
   let fileToUpload = file;
 
   if (Buffer.isBuffer(file)) {

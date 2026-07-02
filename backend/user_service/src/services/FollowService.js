@@ -2,9 +2,19 @@ export class FollowService {
   /**
    * @param {Object} deps - Dependencies
    * @param {import('../repos/UserFollowsRepository.js').default} deps.followRepo - Repository for managing follows/friends
+   * @param {import('../repos/UserRepository.js').default} deps.userRepo - Repository for users
    */
-  constructor({ followRepo }) {
+  constructor({ followRepo, userRepo }) {
     this.followRepo = followRepo;
+    this.userRepo = userRepo;
+  }
+
+  async ensureUserExists(user_id) {
+    if (!user_id) throw new Error("User ID is required");
+    if (!this.userRepo) return;
+
+    const user = await this.userRepo.findById(user_id);
+    if (!user) throw new Error("User not found");
   }
 
   /**
@@ -16,6 +26,18 @@ export class FollowService {
    */
   async follow(follower_id, target_user_id) {
     if (follower_id === target_user_id) throw new Error("Cannot follow self");
+    await this.ensureUserExists(follower_id);
+    await this.ensureUserExists(target_user_id);
+
+    const existing = await this.followRepo.findByFollowerAndTarget(
+      follower_id,
+      target_user_id
+    );
+
+    if (existing) {
+      throw new Error("Already following this user");
+    }
+
     return this.followRepo.follow(follower_id, target_user_id);
   }
 
@@ -26,6 +48,18 @@ export class FollowService {
    * @returns {Promise<number>} - Number of records deleted
    */
   async unfollow(follower_id, target_user_id) {
+    await this.ensureUserExists(follower_id);
+    await this.ensureUserExists(target_user_id);
+
+    const existing = await this.followRepo.findByFollowerAndTarget(
+      follower_id,
+      target_user_id
+    );
+
+    if (!existing) {
+      throw new Error("Follow relationship not found");
+    }
+
     return this.followRepo.unfollow(follower_id, target_user_id);
   }
 

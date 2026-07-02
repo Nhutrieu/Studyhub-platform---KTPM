@@ -20,12 +20,12 @@ export class UserFollowsRepository extends BaseRepository {
   }
 
   async unfollow(follower_id, target_user_id) {
-    await this.pool.query(
+    const [result] = await this.pool.query(
       `DELETE FROM ${this.table} WHERE follower_id=? AND target_user_id=?`,
       [follower_id, target_user_id]
     );
 
-    return true;
+    return result.affectedRows > 0;
   }
 
   async findByFollowerAndTarget(follower_id, target_user_id) {
