@@ -319,13 +319,30 @@ def build_parent_map(pairs):
     return parent_map
 
 
+def markdown_link(label, url):
+    if not url:
+        return label
+    return f"[{label}]({url})"
+
+
+def format_link_line(label, text, url):
+    return f"* {label}: {markdown_link(text, url)}"
+
+
 def build_comment(status, issue_key, issue_kind, bug_key, parent_key, action_result=None):
+    server_url = os.environ.get("GITHUB_SERVER_URL", "https://github.com").rstrip("/")
     repo = os.environ.get("GITHUB_REPOSITORY", "unknown-repo")
     run_id = os.environ.get("GITHUB_RUN_ID", "unknown-run")
-    branch = os.environ.get("GITHUB_REF_NAME", "unknown-branch")
+    branch = os.environ.get("GITHUB_HEAD_REF") or os.environ.get("GITHUB_REF_NAME", "unknown-branch")
     actor = os.environ.get("GITHUB_ACTOR", "unknown-actor")
-    sha = (os.environ.get("GITHUB_SHA") or "unknown")[:12]
-    run_url = f"https://github.com/{repo}/actions/runs/{run_id}"
+    full_sha = os.environ.get("GITHUB_SHA") or "unknown"
+    sha = full_sha[:12]
+    run_url = os.environ.get("BUGFIX_RUN_URL") or f"{server_url}/{repo}/actions/runs/{run_id}"
+    commit_url = os.environ.get("BUGFIX_COMMIT_URL")
+    if not commit_url and repo != "unknown-repo" and full_sha != "unknown":
+        commit_url = f"{server_url}/{repo}/commit/{full_sha}"
+    code_url = os.environ.get("BUGFIX_CODE_URL", "")
+    code_label = os.environ.get("BUGFIX_CODE_LABEL") or branch
 
     newman_results, newman_failures = parse_newman_reports()
     jest_results, jest_failures = parse_jest_reports()
@@ -365,7 +382,8 @@ def build_comment(status, issue_key, issue_kind, bug_key, parent_key, action_res
             f"* Nhánh chạy: {branch}",
             f"* Người kích hoạt: {actor}",
             f"* GitHub Run: [#{run_id}]({run_url})",
-            f"* Commit: {sha}",
+            format_link_line("Commit chạy test", sha, commit_url),
+            format_link_line("Thay đổi code", code_label, code_url),
             "",
             "Phạm vi xác minh:",
             *[f"* {line}" for line in scope_lines],
@@ -382,7 +400,8 @@ def build_comment(status, issue_key, issue_kind, bug_key, parent_key, action_res
             f"* Nhánh chạy: {branch}",
             f"* Người kích hoạt: {actor}",
             f"* GitHub Run: [#{run_id}]({run_url})",
-            f"* Commit: {sha}",
+            format_link_line("Commit chạy test", sha, commit_url),
+            format_link_line("Thay đổi code", code_label, code_url),
             "",
             "Phạm vi xác minh:",
             *[f"* {line}" for line in scope_lines],
