@@ -160,6 +160,62 @@ def parse_jest_reports():
     return results, failures
 
 
+def join_keys(keys):
+    return ", ".join(keys) if keys else "none"
+
+
+def build_newman_summary(results):
+    if not results:
+        return None
+
+    total_requests = sum(item["requests_total"] for item in results)
+    failed_requests = sum(item["requests_failed"] for item in results)
+    total_assertions = sum(item["assertions_total"] for item in results)
+    failed_assertions = sum(item["assertions_failed"] for item in results)
+    passed_assertions = max(total_assertions - failed_assertions, 0)
+
+    if failed_requests or failed_assertions:
+        return (
+            f"Newman API: {len(results)} collections, {total_requests} requests, "
+            f"{passed_assertions}/{total_assertions} assertions pass "
+            f"({failed_assertions} failed assertions)"
+        )
+
+    return (
+        f"Newman API: {len(results)} collections, {total_requests} requests, "
+        f"{total_assertions} assertions pass"
+    )
+
+
+def build_jest_summary(results):
+    if not results:
+        return None
+
+    total_tests = sum(item["tests_total"] for item in results)
+    passed_tests = sum(item["tests_passed"] for item in results)
+    failed_tests = sum(item["tests_failed"] for item in results)
+
+    if failed_tests:
+        return f"Jest White-box: {passed_tests}/{total_tests} tests pass ({failed_tests} failed)"
+
+    return f"Jest White-box: {passed_tests}/{total_tests} tests pass"
+
+
+def build_jira_summary(status, action_results):
+    if status != "PASS":
+        return "Chưa chuyển Done vì bước xác minh còn lỗi."
+    if not action_results:
+        return "Không yêu cầu chuyển trạng thái Jira."
+
+    failed = [item for item in action_results if str(item[1]).startswith("failed:")]
+    dry_run = [item for item in action_results if "dry-run" in str(item[1])]
+    if failed:
+        return f"Test đã pass, nhưng {len(failed)} issue chưa chuyển Done được. Xem GitHub Run để xử lý."
+    if dry_run:
+        return "Dry-run: chỉ kiểm tra, chưa comment hoặc chuyển trạng thái Jira."
+    return f"Đã chuyển hoặc xác nhận Done cho {len(action_results)} issue liên quan."
+
+
 def build_comment(status, bug_keys, parent_keys, action_results):
     repo = os.environ.get("GITHUB_REPOSITORY", "unknown-repo")
     run_id = os.environ.get("GITHUB_RUN_ID", "unknown-run")
@@ -170,54 +226,69 @@ def build_comment(status, bug_keys, parent_keys, action_results):
 
     newman_results, newman_failures = parse_newman_reports()
     jest_results, jest_failures = parse_jest_reports()
+    newman_summary = build_newman_summary(newman_results)
+    jest_summary = build_jest_summary(jest_results)
+    jira_summary = build_jira_summary(status, action_results)
 
-    lines = [
-        f"[Bug Fix Verification - {status}]",
-        "",
-        f"Result: {'all selected verification checks passed' if status == 'PASS' else 'verification failed; Jira issues were not transitioned to Done'}.",
-        "",
-        "Scope:",
-        f"- Bug subtasks: {', '.join(bug_keys)}",
-        f"- Parent tasks: {', '.join(parent_keys) if parent_keys else 'none'}",
-        "",
-        "GitHub evidence:",
-        f"- Branch: {branch}",
-        f"- Actor: {actor}",
-        f"- Commit: {sha}",
-        f"- Run: {run_url}",
-    ]
+    if status == "PASS":
+        lines = [
+            "✅ *[Bug Fix Verification]* **Xác minh sửa lỗi tự động thành công!**",
+            "",
+            "Các bug trong phạm vi đã được chạy lại bằng bộ test tự động và kết quả đều PASS.",
+            "",
+            "**📊 Thông tin chi tiết:**",
+            f"* 💻 **Nhánh chạy:** `{branch}`",
+            f"* 👤 **Người kích hoạt:** `{actor}`",
+            f"* 🔗 **GitHub Run:** [#{run_id}]({run_url})",
+            f"* 🧾 **Commit:** `{sha}`",
+            "",
+            "**📌 Phạm vi xác minh:**",
+            f"* Bug subtask: `{join_keys(bug_keys)}`",
+            f"* Task cha: `{join_keys(parent_keys)}`",
+            "",
+            "**📋 Kết quả kiểm thử:**",
+        ]
+    else:
+        lines = [
+            "❌ *[Bug Fix Verification]* **Xác minh sửa lỗi tự động thất bại!**",
+            "",
+            "Workflow đã chạy lại test nhưng vẫn còn lỗi, nên Jira không chuyển Done.",
+            "",
+            "**📊 Thông tin chi tiết:**",
+            f"* 💻 **Nhánh chạy:** `{branch}`",
+            f"* 👤 **Người kích hoạt:** `{actor}`",
+            f"* 🔗 **GitHub Run:** [#{run_id}]({run_url})",
+            f"* 🧾 **Commit:** `{sha}`",
+            "",
+            "**📌 Phạm vi xác minh:**",
+            f"* Bug subtask: `{join_keys(bug_keys)}`",
+            f"* Task cha: `{join_keys(parent_keys)}`",
+            "",
+            "**📋 Kết quả kiểm thử:**",
+        ]
 
-    if newman_results:
-        lines.extend(["", "Newman verification:"])
-        for item in newman_results:
-            lines.append(
-                f"- {item['file']}: {item['requests_total']} requests, "
-                f"{item['assertions_total']} assertions, "
-                f"{item['assertions_failed']} failed assertions"
-            )
-
-    if jest_results:
-        lines.extend(["", "Jest verification:"])
-        for item in jest_results:
-            lines.append(
-                f"- {item['file']}: {item['tests_passed']}/{item['tests_total']} tests passed, "
-                f"{item['tests_failed']} failed"
-            )
+    if newman_summary:
+        lines.append(f"* {newman_summary}")
+    if jest_summary:
+        lines.append(f"* {jest_summary}")
+    if not newman_summary and not jest_summary:
+        lines.append("* Không tìm thấy file báo cáo test trong workflow.")
 
     failures = newman_failures + jest_failures
     if failures:
-        lines.extend(["", "Failure details:"])
-        for failure in failures[:10]:
-            lines.append(f"- {failure}")
-        if len(failures) > 10:
-            lines.append(f"- ... {len(failures) - 10} more failure(s)")
+        lines.extend(["", "**❗ Lỗi chính:**"])
+        for failure in failures[:5]:
+            lines.append(f"* {failure}")
+        if len(failures) > 5:
+            lines.append(f"* ... còn {len(failures) - 5} lỗi khác, xem chi tiết trong GitHub Run.")
 
-    if action_results:
-        lines.extend(["", "Jira actions:"])
-        for key, result in action_results:
-            lines.append(f"- {key}: {result}")
-
-    lines.extend(["", "Generated automatically by GitHub Actions Bug Fix Verification."])
+    lines.extend([
+        "",
+        f"**🔁 Jira:** {jira_summary}",
+        "",
+        "---",
+        "*Báo cáo tự động được gửi từ GitHub Actions Bug Fix Verification.*",
+    ])
     return "\n".join(lines)
 
 
