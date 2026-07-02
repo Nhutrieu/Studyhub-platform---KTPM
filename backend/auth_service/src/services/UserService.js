@@ -104,7 +104,13 @@ export class UserService {
       created_at: new Date(),
     });
 
-    await this.auditRepo.logAction({ actor_user_id: user_id, action: "ADD_EMAIL", target_user_id: user_id, created_at: new Date() });
+    await this.auditRepo.logAction({
+      id: uuidv4(),
+      actor_user_id: user_id,
+      action: "ADD_EMAIL",
+      target_user_id: user_id,
+      created_at: new Date()
+    });
     return created_email;
   }
 
@@ -118,7 +124,13 @@ export class UserService {
     if (!user_id || !email_id) throw new Error("Missing parameters");
 
     const updated_email = await this.userEmailRepo.markPrimary(email_id, user_id);
-    await this.auditRepo.logAction({ actor_user_id: user_id, action: "SET_PRIMARY_EMAIL", target_user_id: user_id, created_at: new Date() });
+    await this.auditRepo.logAction({
+      id: uuidv4(),
+      actor_user_id: user_id,
+      action: "SET_PRIMARY_EMAIL",
+      target_user_id: user_id,
+      created_at: new Date()
+    });
     return updated_email;
   }
 
