@@ -260,7 +260,7 @@ export class AdminService {
    * @returns {Promise<boolean>}
    */
   async updateRole(user_id, role_name, admin_id) {
-    // SH-226: Tu dong tao role moderator va thu hoi role cu truoc khi gan
+    // SH-226: Tu dong tao role moderator va thu hoi role cu truoc khi gan (da kiem chung)
     if (!user_id || !role_name || !admin_id)
       throw new Error("Missing parameters");
     let role = await this.roleRepo.findByName(role_name);
