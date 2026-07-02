@@ -1,0 +1,433 @@
+{
+  "info": {
+    "name": "SH-87: OAuth Login (Google)",
+    "_postman_id": "f1e9805f-69e9-4131-b082-559af31c5948",
+    "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+  },
+  "item": [
+    {
+      "name": "✅ Đăng nhập/đăng ký qua OAuth (Google)",
+      "request": {
+        "method": "POST",
+        "header": [
+          {
+            "key": "Content-Type",
+            "value": "application/json"
+          }
+        ],
+        "url": {
+          "raw": "{{authBaseUrl}}/oauth/login",
+          "host": [
+            "{{authBaseUrl}}"
+          ],
+          "path": [
+            "oauth",
+            "login"
+          ]
+        },
+        "body": {
+          "mode": "raw",
+          "raw": "{\n  \"provider_name\": \"google\",\n  \"provider_user\": {\n    \"id\": \"google-uid-123456\",\n    \"email\": \"oauthuser@gmail.com\",\n    \"name\": \"OAuth User\"\n  }\n}"
+        }
+      },
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "exec": [
+              "pm.test('Status 200', () => pm.response.to.have.status(200));",
+              "const json = pm.response.json();",
+              "pm.test('Có accessToken và refreshToken', () => { pm.expect(json).to.have.property('accessToken'); pm.expect(json).to.have.property('refreshToken'); });"
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "name": "✅ OAuth login lại với cùng provider_user (không tạo user mới)",
+      "request": {
+        "method": "POST",
+        "header": [
+          {
+            "key": "Content-Type",
+            "value": "application/json"
+          }
+        ],
+        "url": {
+          "raw": "{{authBaseUrl}}/oauth/login",
+          "host": [
+            "{{authBaseUrl}}"
+          ],
+          "path": [
+            "oauth",
+            "login"
+          ]
+        },
+        "body": {
+          "mode": "raw",
+          "raw": "{\n  \"provider_name\": \"google\",\n  \"provider_user\": {\n    \"id\": \"google-uid-123456\",\n    \"email\": \"oauthuser@gmail.com\",\n    \"name\": \"OAuth User\"\n  }\n}"
+        }
+      },
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "exec": [
+              "pm.test('Status 200', () => pm.response.to.have.status(200));"
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "name": "❌ OAuth login - thiếu provider_name",
+      "request": {
+        "method": "POST",
+        "header": [
+          {
+            "key": "Content-Type",
+            "value": "application/json"
+          }
+        ],
+        "url": {
+          "raw": "{{authBaseUrl}}/oauth/login",
+          "host": [
+            "{{authBaseUrl}}"
+          ],
+          "path": [
+            "oauth",
+            "login"
+          ]
+        },
+        "body": {
+          "mode": "raw",
+          "raw": "{\n  \"provider_user\": {\n    \"id\": \"x\",\n    \"email\": \"x@gmail.com\"\n  }\n}"
+        }
+      },
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "exec": [
+              "pm.test('Status 400', () => pm.response.to.have.status(400));"
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "name": "❌ OAuth login - thiếu provider_user",
+      "request": {
+        "method": "POST",
+        "header": [
+          {
+            "key": "Content-Type",
+            "value": "application/json"
+          }
+        ],
+        "url": {
+          "raw": "{{authBaseUrl}}/oauth/login",
+          "host": [
+            "{{authBaseUrl}}"
+          ],
+          "path": [
+            "oauth",
+            "login"
+          ]
+        },
+        "body": {
+          "mode": "raw",
+          "raw": "{\n  \"provider_name\": \"google\"\n}"
+        }
+      },
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "exec": [
+              "pm.test('Status 400', () => pm.response.to.have.status(400));"
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "name": "❌ OAuth login - email OAuth trùng với tài khoản thường",
+      "request": {
+        "method": "POST",
+        "header": [
+          {
+            "key": "Content-Type",
+            "value": "application/json"
+          }
+        ],
+        "url": {
+          "raw": "{{authBaseUrl}}/oauth/login",
+          "host": [
+            "{{authBaseUrl}}"
+          ],
+          "path": [
+            "oauth",
+            "login"
+          ]
+        },
+        "body": {
+          "mode": "raw",
+          "raw": "{\n  \"provider_name\": \"google\",\n  \"provider_user\": {\n    \"id\": \"google-uid-999\",\n    \"email\": \"nguyenvana@example.com\",\n    \"name\": \"Trung\"\n  }\n}"
+        }
+      },
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "exec": [
+              "pm.test('Status 400', () => pm.response.to.have.status(400));"
+            ]
+          }
+        }
+      ]
+    }
+  ],
+  "variable": [
+    {
+      "key": "authBaseUrl",
+      "value": "http://localhost:3000/api/v1/auth",
+      "type": "string"
+    },
+    {
+      "key": "userBaseUrl",
+      "value": "http://localhost:3001/api/v1/user",
+      "type": "string"
+    },
+    {
+      "key": "groupBaseUrl",
+      "value": "http://localhost:3002/api/v1/group",
+      "type": "string"
+    },
+    {
+      "key": "documentBaseUrl",
+      "value": "http://localhost:3003/api/v1/document",
+      "type": "string"
+    },
+    {
+      "key": "notificationBaseUrl",
+      "value": "http://localhost:3005/api/v1/notification",
+      "type": "string"
+    },
+    {
+      "key": "chatBaseUrl",
+      "value": "http://localhost:3006/api/v1/chat",
+      "type": "string"
+    },
+    {
+      "key": "accessToken",
+      "value": "",
+      "type": "string"
+    },
+    {
+      "key": "refreshToken",
+      "value": "",
+      "type": "string"
+    },
+    {
+      "key": "revokedRefreshToken",
+      "value": "",
+      "type": "string"
+    },
+    {
+      "key": "adminAccessToken",
+      "value": "{{REPLACE_WITH_REAL_ADMIN_TOKEN}}",
+      "type": "string"
+    },
+    {
+      "key": "verificationToken",
+      "value": "",
+      "type": "string"
+    },
+    {
+      "key": "resetToken",
+      "value": "",
+      "type": "string"
+    },
+    {
+      "key": "secondaryEmailId",
+      "value": "",
+      "type": "string"
+    },
+    {
+      "key": "userId",
+      "value": "",
+      "type": "string"
+    },
+    {
+      "key": "anotherUserId",
+      "value": "{{REPLACE_WITH_REAL_USER_ID}}",
+      "type": "string"
+    },
+    {
+      "key": "anotherUserAccessToken",
+      "value": "{{REPLACE_WITH_REAL_TOKEN_OF_anotherUserId}}",
+      "type": "string"
+    },
+    {
+      "key": "outsiderToken",
+      "value": "{{REPLACE_WITH_TOKEN_OF_USER_NOT_IN_ANY_GROUP_DOC}}",
+      "type": "string"
+    },
+    {
+      "key": "deletableUserId",
+      "value": "{{REPLACE_WITH_A_USER_ID_SAFE_TO_DELETE}}",
+      "type": "string"
+    },
+    {
+      "key": "blockedUserEmail",
+      "value": "{{REPLACE_WITH_EMAIL_OF_AN_ALREADY_BLOCKED_USER}}",
+      "type": "string"
+    },
+    {
+      "key": "privateUserId",
+      "value": "{{REPLACE_WITH_USER_ID_WHOSE_PROFILE_IS_PRIVATE}}",
+      "type": "string"
+    },
+    {
+      "key": "otherUserSocialLinkId",
+      "value": "{{REPLACE_WITH_SOCIAL_LINK_ID_OF_ANOTHER_USER}}",
+      "type": "string"
+    },
+    {
+      "key": "socialLinkId",
+      "value": "",
+      "type": "string"
+    },
+    {
+      "key": "groupId",
+      "value": "{{REPLACE_WITH_REAL_PUBLIC_GROUP_ID}}",
+      "type": "string"
+    },
+    {
+      "key": "privateGroupId",
+      "value": "{{REPLACE_WITH_REAL_PRIVATE_GROUP_ID}}",
+      "type": "string"
+    },
+    {
+      "key": "emptyGroupId",
+      "value": "{{REPLACE_WITH_GROUP_ID_SAFE_TO_DELETE}}",
+      "type": "string"
+    },
+    {
+      "key": "joinRequestId",
+      "value": "",
+      "type": "string"
+    },
+    {
+      "key": "joinRequestId2",
+      "value": "{{REPLACE_WITH_ANOTHER_PENDING_JOIN_REQUEST_ID}}",
+      "type": "string"
+    },
+    {
+      "key": "groupOwnerToken",
+      "value": "{{REPLACE_WITH_TOKEN_OF_GROUP_OWNER}}",
+      "type": "string"
+    },
+    {
+      "key": "groupOwnerUserId",
+      "value": "{{REPLACE_WITH_USER_ID_OF_GROUP_OWNER}}",
+      "type": "string"
+    },
+    {
+      "key": "groupManagerNotOwnerToken",
+      "value": "{{REPLACE_WITH_TOKEN_OF_A_MANAGER_WHO_IS_NOT_OWNER}}",
+      "type": "string"
+    },
+    {
+      "key": "memberToLeaveToken",
+      "value": "{{REPLACE_WITH_TOKEN_OF_A_REGULAR_MEMBER_TO_TEST_LEAVE}}",
+      "type": "string"
+    },
+    {
+      "key": "memberToKickId",
+      "value": "{{REPLACE_WITH_USER_ID_OF_A_MEMBER_TO_KICK}}",
+      "type": "string"
+    },
+    {
+      "key": "documentId",
+      "value": "",
+      "type": "string"
+    },
+    {
+      "key": "privateDocumentId",
+      "value": "{{REPLACE_WITH_REAL_PRIVATE_DOCUMENT_ID}}",
+      "type": "string"
+    },
+    {
+      "key": "deletableDocumentId",
+      "value": "{{REPLACE_WITH_DOCUMENT_ID_SAFE_TO_DELETE}}",
+      "type": "string"
+    },
+    {
+      "key": "pendingDocumentId",
+      "value": "{{REPLACE_WITH_DOCUMENT_ID_PENDING_APPROVAL}}",
+      "type": "string"
+    },
+    {
+      "key": "pendingDocumentId2",
+      "value": "{{REPLACE_WITH_ANOTHER_DOCUMENT_ID_PENDING_APPROVAL}}",
+      "type": "string"
+    },
+    {
+      "key": "commentId",
+      "value": "",
+      "type": "string"
+    },
+    {
+      "key": "otherUserCommentId",
+      "value": "{{REPLACE_WITH_COMMENT_ID_OF_ANOTHER_USER}}",
+      "type": "string"
+    },
+    {
+      "key": "notificationId",
+      "value": "",
+      "type": "string"
+    },
+    {
+      "key": "otherUserNotificationId",
+      "value": "{{REPLACE_WITH_NOTIFICATION_ID_OF_ANOTHER_USER}}",
+      "type": "string"
+    },
+    {
+      "key": "deletableNotificationId",
+      "value": "{{REPLACE_WITH_NOTIFICATION_ID_SAFE_TO_DELETE}}",
+      "type": "string"
+    },
+    {
+      "key": "conversationId",
+      "value": "",
+      "type": "string"
+    },
+    {
+      "key": "groupConversationId",
+      "value": "",
+      "type": "string"
+    },
+    {
+      "key": "messageId",
+      "value": "",
+      "type": "string"
+    },
+    {
+      "key": "otherUserMessageId",
+      "value": "{{REPLACE_WITH_MESSAGE_ID_OF_ANOTHER_USER}}",
+      "type": "string"
+    },
+    {
+      "key": "regUsername",
+      "value": "",
+      "type": "string"
+    },
+    {
+      "key": "regEmail",
+      "value": "",
+      "type": "string"
+    }
+  ]
+}
