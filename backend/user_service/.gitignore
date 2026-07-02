@@ -5,3 +5,5 @@ node_modules/
 database/seeds/*.sql
 database/schemas/*.sql
 .gitkeep
+coverage/
+jest-report.json

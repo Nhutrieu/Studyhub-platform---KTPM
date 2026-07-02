@@ -1,0 +1,285 @@
+{
+  "info": {
+    "name": "StudyHub - SH-140 - Kiểm thử danh sách thông báo (BVA)",
+    "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+  },
+  "variable": [
+    {
+      "key": "authBaseUrl",
+      "value": "http://localhost:8000/api/v1/auth"
+    },
+    {
+      "key": "notificationBaseUrl",
+      "value": "http://localhost:8000/api/v1/notification"
+    },
+    {
+      "key": "gatewayUrl",
+      "value": "http://localhost:8000/api/v1"
+    },
+    {
+      "key": "userEmail",
+      "value": "user1@example.com"
+    },
+    {
+      "key": "adminEmail",
+      "value": "admin@example.com"
+    },
+    {
+      "key": "password",
+      "value": "11111111"
+    }
+  ],
+  "item": [
+    {
+      "name": "🔑 Đăng nhập User thường (Lấy Access Token)",
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "exec": [
+              "pm.test(\"Status 200 - Đăng nhập thành công\", function () {",
+              "    pm.response.to.have.status(200);",
+              "    const json = pm.response.json();",
+              "    const resData = json.data || json;",
+              "    if(resData.accessToken || resData.access_token) {",
+              "        pm.collectionVariables.set(\"accessToken\", resData.accessToken || resData.access_token);",
+              "    }",
+              "    if(resData.user && resData.user.id) {",
+              "        pm.collectionVariables.set(\"userId\", resData.user.id);",
+              "    }",
+              "});"
+            ],
+            "type": "text/javascript"
+          }
+        }
+      ],
+      "request": {
+        "method": "POST",
+        "header": [
+          {
+            "key": "Content-Type",
+            "value": "application/json"
+          }
+        ],
+        "body": {
+          "mode": "raw",
+          "raw": "{\n  \"email\": \"{{userEmail}}\",\n  \"password\": \"{{password}}\"\n}"
+        },
+        "url": {
+          "raw": "{{authBaseUrl}}/login",
+          "host": [
+            "{{authBaseUrl}}"
+          ],
+          "path": [
+            "login"
+          ]
+        }
+      }
+    },
+    {
+      "name": "✅ Hợp lệ Biên Min (limit=1, offset=0)",
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "exec": [
+              "pm.test(\"Status 200\", () => pm.response.to.have.status(200));"
+            ]
+          }
+        }
+      ],
+      "request": {
+        "method": "GET",
+        "header": [
+          {
+            "key": "Authorization",
+            "value": "Bearer {{accessToken}}"
+          }
+        ],
+        "url": {
+          "raw": "{{notificationBaseUrl}}/?limit=1&offset=0",
+          "host": [
+            "{{notificationBaseUrl}}"
+          ],
+          "path": [
+            ""
+          ],
+          "query": [
+            {
+              "key": "limit",
+              "value": "1"
+            },
+            {
+              "key": "offset",
+              "value": "0"
+            }
+          ]
+        }
+      }
+    },
+    {
+      "name": "✅ Hợp lệ Biên Max (limit=100, offset=1000)",
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "exec": [
+              "pm.test(\"Status 200\", () => pm.response.to.have.status(200));"
+            ]
+          }
+        }
+      ],
+      "request": {
+        "method": "GET",
+        "header": [
+          {
+            "key": "Authorization",
+            "value": "Bearer {{accessToken}}"
+          }
+        ],
+        "url": {
+          "raw": "{{notificationBaseUrl}}/?limit=100&offset=1000",
+          "host": [
+            "{{notificationBaseUrl}}"
+          ],
+          "path": [
+            ""
+          ],
+          "query": [
+            {
+              "key": "limit",
+              "value": "100"
+            },
+            {
+              "key": "offset",
+              "value": "1000"
+            }
+          ]
+        }
+      }
+    },
+    {
+      "name": "❌ Không hợp lệ dưới Min (limit=0)",
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "exec": [
+              "pm.test(\"Status 400\", () => pm.response.to.have.status(400));"
+            ]
+          }
+        }
+      ],
+      "request": {
+        "method": "GET",
+        "header": [
+          {
+            "key": "Authorization",
+            "value": "Bearer {{accessToken}}"
+          }
+        ],
+        "url": {
+          "raw": "{{notificationBaseUrl}}/?limit=0&offset=0",
+          "host": [
+            "{{notificationBaseUrl}}"
+          ],
+          "path": [
+            ""
+          ],
+          "query": [
+            {
+              "key": "limit",
+              "value": "0"
+            },
+            {
+              "key": "offset",
+              "value": "0"
+            }
+          ]
+        }
+      }
+    },
+    {
+      "name": "❌ Không hợp lệ vượt Max (limit=101)",
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "exec": [
+              "pm.test(\"Status 400\", () => pm.response.to.have.status(400));"
+            ]
+          }
+        }
+      ],
+      "request": {
+        "method": "GET",
+        "header": [
+          {
+            "key": "Authorization",
+            "value": "Bearer {{accessToken}}"
+          }
+        ],
+        "url": {
+          "raw": "{{notificationBaseUrl}}/?limit=101&offset=0",
+          "host": [
+            "{{notificationBaseUrl}}"
+          ],
+          "path": [
+            ""
+          ],
+          "query": [
+            {
+              "key": "limit",
+              "value": "101"
+            },
+            {
+              "key": "offset",
+              "value": "0"
+            }
+          ]
+        }
+      }
+    },
+    {
+      "name": "❌ Không hợp lệ dưới Min (offset=-1)",
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "exec": [
+              "pm.test(\"Status 400\", () => pm.response.to.have.status(400));"
+            ]
+          }
+        }
+      ],
+      "request": {
+        "method": "GET",
+        "header": [
+          {
+            "key": "Authorization",
+            "value": "Bearer {{accessToken}}"
+          }
+        ],
+        "url": {
+          "raw": "{{notificationBaseUrl}}/?limit=10&offset=-1",
+          "host": [
+            "{{notificationBaseUrl}}"
+          ],
+          "path": [
+            ""
+          ],
+          "query": [
+            {
+              "key": "limit",
+              "value": "10"
+            },
+            {
+              "key": "offset",
+              "value": "-1"
+            }
+          ]
+        }
+      }
+    }
+  ]
+}
