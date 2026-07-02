@@ -127,6 +127,11 @@ describe('AuthService - Unit Test', () => {
         .rejects.toThrow('Username already exists');
     });
 
+    it('should throw error if email format is invalid', async () => {
+      await expect(authService.register({ user_name: 'free', email: 'invalid-email', password: '1', display_name: '1' }))
+        .rejects.toThrow('Invalid email format');
+    });
+
     it('should throw error if email already exists', async () => {
       userRepoMock.findByUserName.mockResolvedValue(null);
       userEmailRepoMock.findByEmail.mockResolvedValue({ id: '1' });

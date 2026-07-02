@@ -75,7 +75,7 @@
         },
         "body": {
           "mode": "raw",
-          "raw": "{\n  \"user_name\": \"nguyenvana2\",\n  \"email\": \"nguyenvana@example.com\",\n  \"password\": \"Password@123\",\n  \"display_name\": \"Trung\"\n}"
+          "raw": "{\n  \"user_name\": \"nguyenvana2\",\n  \"email\": \"{{regEmail}}\",\n  \"password\": \"Password@123\",\n  \"display_name\": \"Trung\"\n}"
         }
       },
       "event": [
@@ -110,7 +110,7 @@
         },
         "body": {
           "mode": "raw",
-          "raw": "{\n  \"user_name\": \"nguyenvana\",\n  \"email\": \"khac@example.com\",\n  \"password\": \"Password@123\",\n  \"display_name\": \"Khac\"\n}"
+          "raw": "{\n  \"user_name\": \"{{regUsername}}\",\n  \"email\": \"khac@example.com\",\n  \"password\": \"Password@123\",\n  \"display_name\": \"Khac\"\n}"
         }
       },
       "event": [

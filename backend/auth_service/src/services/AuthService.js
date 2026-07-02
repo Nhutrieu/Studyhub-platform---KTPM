@@ -111,6 +111,11 @@ export class AuthService {
         "Username, email, display name and password are required"
       );
 
+    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+    if (!emailRegex.test(email)) {
+      throw new Error("Invalid email format");
+    }
+
     const existingUser = await this.userRepo.findByUserName(user_name);
     if (existingUser) throw new Error("Username already exists");
 
@@ -224,6 +229,7 @@ export class AuthService {
    * @returns {Promise<{user:Object, access_token:string, refresh_token:string}>}
    */
   async login({ email, user_name, password, user_agent = null, ip = null }) {
+    // SH-219: Kiem tra luong dang nhap bang username hoat dong tot (verified)
     if ((!email && !user_name) || !password)
       throw new Error("Email or username and password required");
 
@@ -394,7 +400,8 @@ export class AuthService {
     if (!email) throw new Error("Email required");
 
     const emailRow = await this.userEmailRepo.findByEmail(email);
-    if (!emailRow) return null;
+    // SH-220: Sua loi quen mat khau voi email khong ton tai tra ve 200
+    if (!emailRow) throw new Error("Email not found");
 
     const token = crypto.randomBytes(32).toString("hex");
     await this.passwordResetRepo.create({
