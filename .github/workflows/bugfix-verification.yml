@@ -41,6 +41,14 @@ on:
         options:
           - "true"
           - "false"
+      docker_profile:
+        description: "Docker startup profile for local Newman verification"
+        required: true
+        default: "full"
+        type: choice
+        options:
+          - "full"
+          - "notification"
       api_base_url:
         description: "Optional API base URL. Empty uses secret API_BASE_URL or local Docker http://localhost:8000"
         required: false
@@ -90,6 +98,7 @@ jobs:
           JEST_SERVICE_DIR_INPUT: ${{ inputs.jest_service_dir }}
           JEST_TEST_FILES_INPUT: ${{ inputs.jest_test_files }}
           START_DOCKER_INPUT: ${{ inputs.start_docker }}
+          DOCKER_PROFILE_INPUT: ${{ inputs.docker_profile }}
           TRANSITION_BUGS_INPUT: ${{ inputs.transition_bugs }}
           TRANSITION_PARENTS_INPUT: ${{ inputs.transition_parents }}
           DRY_RUN_INPUT: ${{ inputs.dry_run }}
@@ -108,6 +117,7 @@ jobs:
           jest_service_dir = os.environ.get("JEST_SERVICE_DIR_INPUT", "").strip()
           jest_test_files = os.environ.get("JEST_TEST_FILES_INPUT", "").strip()
           start_docker = os.environ.get("START_DOCKER_INPUT", "true").strip() or "true"
+          docker_profile = os.environ.get("DOCKER_PROFILE_INPUT", "full").strip() or "full"
           transition_bugs = os.environ.get("TRANSITION_BUGS_INPUT", "true").strip() or "true"
           transition_parents = os.environ.get("TRANSITION_PARENTS_INPUT", "false").strip() or "false"
           dry_run = os.environ.get("DRY_RUN_INPUT", "false").strip() or "false"
@@ -115,6 +125,7 @@ jobs:
           if event_name != "workflow_dispatch":
               bug_keys = bug_keys or "SH-000"
               start_docker = "false"
+              docker_profile = "full"
               transition_bugs = "false"
               transition_parents = "false"
               dry_run = "true"
@@ -143,6 +154,7 @@ jobs:
               fh.write(f"JEST_SERVICE_DIR_EFFECTIVE={jest_service_dir}\n")
               fh.write(f"JEST_TEST_FILES_EFFECTIVE={jest_test_files}\n")
               fh.write(f"START_DOCKER_EFFECTIVE={start_docker}\n")
+              fh.write(f"DOCKER_PROFILE_EFFECTIVE={docker_profile}\n")
               fh.write(f"TRANSITION_BUGS_EFFECTIVE={transition_bugs}\n")
               fh.write(f"TRANSITION_PARENTS_EFFECTIVE={transition_parents}\n")
               fh.write(f"DRY_RUN_EFFECTIVE={dry_run}\n")
@@ -156,6 +168,15 @@ jobs:
                   print("Postman verification requires api_base_url, API_BASE_URL secret, or start_docker=true.", file=sys.stderr)
                   sys.exit(1)
               fh.write(f"API_URL={api_url}\n")
+              fh.write(f"GATEWAY_URL={api_url}/api/v1\n")
+              if start_docker == "true" and docker_profile == "notification":
+                  fh.write("AUTH_BASE_URL=http://localhost:3000/api/v1/auth\n")
+                  fh.write("NOTIFICATION_BASE_URL=http://localhost:3005/api/v1/notification\n")
+                  fh.write("CHAT_BASE_URL=http://localhost:3006/api/v1/chat\n")
+              else:
+                  fh.write(f"AUTH_BASE_URL={api_url}/api/v1/auth\n")
+                  fh.write(f"NOTIFICATION_BASE_URL={api_url}/api/v1/notification\n")
+                  fh.write(f"CHAT_BASE_URL={api_url}/api/v1/chat\n")
           PY
 
       - name: Setup Node.js
@@ -188,9 +209,14 @@ jobs:
 
       - name: Start Docker Compose
         if: env.HAS_POSTMAN == 'true' && env.START_DOCKER_EFFECTIVE == 'true'
+        timeout-minutes: 20
         run: |
           cd deployment/docker
-          docker compose up -d --build
+          if [ "$DOCKER_PROFILE_EFFECTIVE" = "notification" ]; then
+            docker compose up -d --build auth-service notification-service
+          else
+            docker compose up -d --build
+          fi
           echo "Waiting for backend services to boot..."
           sleep 45
 
@@ -210,10 +236,10 @@ jobs:
 
             report_name=$(basename "$file" .json)
             newman run "$file" \
-              --env-var "gatewayUrl=$API_URL/api/v1" \
-              --env-var "authBaseUrl=$API_URL/api/v1/auth" \
-              --env-var "chatBaseUrl=$API_URL/api/v1/chat" \
-              --env-var "notificationBaseUrl=$API_URL/api/v1/notification" \
+              --env-var "gatewayUrl=$GATEWAY_URL" \
+              --env-var "authBaseUrl=$AUTH_BASE_URL" \
+              --env-var "chatBaseUrl=$CHAT_BASE_URL" \
+              --env-var "notificationBaseUrl=$NOTIFICATION_BASE_URL" \
               --env-var "userEmail=admin@example.com" \
               --env-var "password=11111111" \
               -r json --reporter-json-export "newman-reports/${report_name}.json" || ANY_FAIL=true
