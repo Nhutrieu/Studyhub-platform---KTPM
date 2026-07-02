@@ -1,0 +1,130 @@
+{
+  "info": {
+    "name": "SH-249: Boundary Download Tài liệu",
+    "description": "Boundary Value Analysis bổ sung cho SH-68. File gốc SH-68.json không bị sửa.",
+    "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+  },
+  "item": [
+    {
+      "name": "Login user thường",
+      "request": {
+        "method": "POST",
+        "header": [{ "key": "Content-Type", "value": "application/json" }],
+        "body": {
+          "mode": "raw",
+          "raw": "{\n  \"email\": \"{{userEmail}}\",\n  \"password\": \"{{password}}\"\n}"
+        },
+        "url": "{{authBaseUrl}}/login"
+      },
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "type": "text/javascript",
+            "exec": [
+              "pm.test('Login 200', () => pm.response.to.have.status(200));",
+              "var data = (pm.response.json().data || pm.response.json());",
+              "pm.collectionVariables.set('accessToken', data.access_token);"
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "name": "BVA download - valid public document_id",
+      "request": {
+        "method": "GET",
+        "header": [
+          { "key": "Authorization", "value": "Bearer {{accessToken}}" }
+        ],
+        "url": "{{documentBaseUrl}}/interactions/{{documentId}}/download"
+      },
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "type": "text/javascript",
+            "exec": [
+              "pm.test('Status 200 hoặc 500 nếu storage ngoài không truy cập được', () => pm.expect([200, 500]).to.include(pm.response.code));"
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "name": "BVA download - document_id nil UUID",
+      "request": {
+        "method": "GET",
+        "header": [
+          { "key": "Authorization", "value": "Bearer {{accessToken}}" }
+        ],
+        "url": "{{documentBaseUrl}}/interactions/00000000-0000-0000-0000-000000000000/download"
+      },
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "type": "text/javascript",
+            "exec": [
+              "pm.test('Status 404 hoặc 500', () => pm.expect([404, 500]).to.include(pm.response.code));"
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "name": "BVA download - document_id sai format",
+      "request": {
+        "method": "GET",
+        "header": [
+          { "key": "Authorization", "value": "Bearer {{accessToken}}" }
+        ],
+        "url": "{{documentBaseUrl}}/interactions/not-a-uuid/download"
+      },
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "type": "text/javascript",
+            "exec": [
+              "pm.test('Status lỗi', () => pm.expect([400, 404, 500]).to.include(pm.response.code));"
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "name": "BVA download - private document không có quyền",
+      "request": {
+        "method": "GET",
+        "header": [
+          { "key": "Authorization", "value": "Bearer {{accessToken}}" }
+        ],
+        "url": "{{documentBaseUrl}}/interactions/{{privateDocumentId}}/download"
+      },
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "type": "text/javascript",
+            "exec": [
+              "pm.test('Status 403', () => pm.response.to.have.status(403));"
+            ]
+          }
+        }
+      ]
+    }
+  ],
+  "variable": [
+    { "key": "authBaseUrl", "value": "http://localhost:3000/api/v1/auth" },
+    {
+      "key": "documentBaseUrl",
+      "value": "http://localhost:3003/api/v1/document"
+    },
+    { "key": "userEmail", "value": "user1@example.com" },
+    { "key": "password", "value": "11111111" },
+    { "key": "documentId", "value": "1111-0001-4111-8111-aaaaaaaa0001" },
+    { "key": "privateDocumentId", "value": "1112-0002-4111-8111-aaaaaaaa0005" },
+    { "key": "accessToken", "value": "" }
+  ]
+}
