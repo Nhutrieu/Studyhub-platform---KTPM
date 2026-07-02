@@ -1,6 +1,6 @@
-# Huong Dan Su Dung Bug Fix Verification Automation
+# Huong Dan Su Dung Xac Minh Bug Fix Tu Dong
 
-Tai lieu nay huong dan thanh vien trong nhom dung workflow `Bug Fix Verification + Jira`
+Tai lieu nay huong dan thanh vien trong nhom dung workflow `Xac minh bug fix + Jira`
 de xac minh bug da duoc sua, tu dong comment bang chung len Jira va chuyen cac bug/task
 sang Done khi bo test da PASS.
 
@@ -21,7 +21,7 @@ Luong chuan:
 Bug Jira da duoc tao
 -> Dev fix code tren nhanh rieng
 -> Push code va tao PR vao main
--> Chay Bug Fix Verification + Jira
+-> Chay Xac minh bug fix + Jira
 -> PASS: Jira tu comment bang chung va chuyen Done
 -> FAIL: Jira comment that bai, workflow do, khong chuyen Done
 ```
@@ -57,7 +57,7 @@ Khong paste Jira API token vao input workflow.
 
 1. Vao repo GitHub.
 2. Mo tab `Actions`.
-3. Chon workflow `Bug Fix Verification + Jira`.
+3. Chon workflow `Xac minh bug fix + Jira`.
 4. Bam `Run workflow`.
 5. O muc branch, chon nhanh dang chua code fix bug.
 6. Dien input theo cac muc ben duoi.
@@ -69,7 +69,7 @@ Khong paste Jira API token vao input workflow.
 
 Danh sach bug subtask can xac minh, ngan cach bang dau phay hoac xuong dong.
 Nen nhap bang dau phay de ten run tren GitHub Actions hien gon, vi du
-`Verify bug fix: SH-102,SH-103,SH-146`.
+`Xac minh bug fix: SH-102,SH-103,SH-146`.
 
 Vi du:
 
@@ -271,7 +271,7 @@ Ket qua mong doi:
 Khi PASS, workflow tu dong comment len tung issue theo dang:
 
 ```text
-[Bug Fix Verification] Xac minh sua loi tu dong thanh cong!
+[Xac minh bug fix] Xac minh sua loi tu dong thanh cong!
 
 Issue nay da duoc chay lai bang bo test tu dong va ket qua PASS.
 
@@ -300,15 +300,16 @@ Voi task cha, phan `Pham vi xac minh` se la:
 - Bug da xac minh: SH-...
 ```
 
-Workflow se tu xoa cac comment cu co nhan `Bug Fix Verification` tren cung issue truoc khi
-post comment moi. No khong xoa comment cua cac workflow cu nhu `[API Automation]`.
+Workflow se tu xoa cac comment cu co nhan `Bug Fix Verification` hoac `Xac minh bug fix`
+tren cung issue truoc khi post comment moi. No khong xoa comment cua cac workflow cu nhu
+`[API Automation]`.
 
 ## 7. Cach kiem tra sau khi chay
 
 Sau khi workflow chay xong:
 
 1. Mo GitHub Actions run.
-   Ten run manual se co dang `Verify bug fix: SH-102,SH-103,...` de de truy vet
+   Ten run manual se co dang `Xac minh bug fix: SH-102,SH-103,...` de de truy vet
    tren danh sach Actions.
 2. Kiem tra cac step sau phai xanh:
    - `Run Newman Verification` neu co Postman input
@@ -388,7 +389,7 @@ SH-103 -> SH-37
 
 1. Khong sua tay comment Jira ma workflow da tao, tru khi bat buoc phai dinh chinh.
 2. Neu chay sai input, chay lai workflow dung input. Workflow se tu don comment
-   `Bug Fix Verification` cu tren cac issue duoc nhap.
+   `Bug Fix Verification` hoac `Xac minh bug fix` cu tren cac issue duoc nhap.
 3. Moi lan verify bug fix nen co PR de nguoi cham co the xem code da sua.
 4. Khong dong bug Jira neu workflow verify con FAIL.
 5. Khong dua API token/Jira token vao commit, comment, input workflow hoac anh chup man hinh.

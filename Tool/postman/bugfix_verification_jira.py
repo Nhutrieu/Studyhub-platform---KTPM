@@ -8,6 +8,8 @@ import sys
 import urllib.error
 import urllib.request
 
+BUGFIX_COMMENT_MARKERS = ("Bug Fix Verification", "Xac minh bug fix")
+
 
 def split_values(raw):
     return [item.strip() for item in re.split(r"[\s,;]+", raw or "") if item.strip()]
@@ -133,7 +135,7 @@ class JiraClient:
         deleted = 0
         for comment in self.list_comments(key):
             body_text = adf_to_text(comment.get("body", ""))
-            if "Bug Fix Verification" not in body_text:
+            if not any(marker in body_text for marker in BUGFIX_COMMENT_MARKERS):
                 continue
             self.delete_comment(key, comment["id"])
             deleted += 1
@@ -278,18 +280,17 @@ def build_jest_summary(results):
 
 def build_jira_summary(status, action_results):
     if status != "PASS":
-        return "Chưa chuyển Done vì bước xác minh còn lỗi."
+        return "Chua chuyen Done vi buoc xac minh con loi."
     if not action_results:
-        return "Không yêu cầu chuyển trạng thái Jira."
+        return "Khong yeu cau chuyen trang thai Jira."
 
     failed = [item for item in action_results if str(item[1]).startswith("failed:")]
     dry_run = [item for item in action_results if "dry-run" in str(item[1])]
     if failed:
-        return f"Test đã pass, nhưng {len(failed)} issue chưa chuyển Done được. Xem GitHub Run để xử lý."
+        return f"Test da pass, nhung {len(failed)} issue chua chuyen Done duoc. Xem GitHub Run de xu ly."
     if dry_run:
-        return "Dry-run: chỉ kiểm tra, chưa comment hoặc chuyển trạng thái Jira."
-    return f"Đã chuyển hoặc xác nhận Done cho {len(action_results)} issue liên quan."
-
+        return "Dry-run: chi kiem tra, chua comment hoac chuyen trang thai Jira."
+    return f"Da chuyen hoac xac nhan Done cho {len(action_results)} issue lien quan."
 
 def report_key(filename):
     return os.path.splitext(os.path.basename(filename))[0].upper()
@@ -351,20 +352,20 @@ def build_comment(status, issue_key, issue_kind, bug_key, parent_key, action_res
     jest_summary = build_jest_summary(jest_results)
 
     if status != "PASS":
-        jira_summary = "Chưa chuyển Done vì bước xác minh còn lỗi."
+        jira_summary = "Chua chuyen Done vi buoc xac minh con loi."
     elif action_result and "dry-run" in action_result:
-        jira_summary = "Dry-run: chỉ kiểm tra, chưa comment hoặc chuyển trạng thái Jira."
+        jira_summary = "Dry-run: chi kiem tra, chua comment hoac chuyen trang thai Jira."
     elif action_result and action_result.startswith("failed:"):
-        jira_summary = "Test đã pass, nhưng issue này chưa chuyển Done được. Xem GitHub Run để xử lý."
+        jira_summary = "Test da pass, nhung issue nay chua chuyen Done duoc. Xem GitHub Run de xu ly."
     elif action_result:
-        jira_summary = "Đã chuyển hoặc xác nhận Done cho issue này."
+        jira_summary = "Da chuyen hoac xac nhan Done cho issue nay."
     else:
-        jira_summary = "Không yêu cầu chuyển trạng thái Jira."
+        jira_summary = "Khong yeu cau chuyen trang thai Jira."
 
     if issue_kind == "parent":
         scope_lines = [
             f"Task cha: {issue_key}",
-            f"Bug đã xác minh: {bug_key or 'none'}",
+            f"Bug da xac minh: {bug_key or 'none'}",
         ]
     else:
         scope_lines = [
@@ -374,39 +375,39 @@ def build_comment(status, issue_key, issue_kind, bug_key, parent_key, action_res
 
     if status == "PASS":
         lines = [
-            "[Bug Fix Verification] Xác minh sửa lỗi tự động thành công!",
+            "[Xac minh bug fix] Xac minh sua loi tu dong thanh cong!",
             "",
-            "Issue này đã được chạy lại bằng bộ test tự động và kết quả PASS.",
+            "Issue nay da duoc chay lai bang bo test tu dong va ket qua PASS.",
             "",
-            "Thông tin chi tiết:",
-            f"* Nhánh chạy: {branch}",
-            f"* Người kích hoạt: {actor}",
+            "Thong tin chi tiet:",
+            f"* Nhanh chay: {branch}",
+            f"* Nguoi kich hoat: {actor}",
             f"* GitHub Run: [#{run_id}]({run_url})",
-            format_link_line("Commit chạy test", sha, commit_url),
-            format_link_line("Thay đổi code", code_label, code_url),
+            format_link_line("Commit chay test", sha, commit_url),
+            format_link_line("Thay doi code", code_label, code_url),
             "",
-            "Phạm vi xác minh:",
+            "Pham vi xac minh:",
             *[f"* {line}" for line in scope_lines],
             "",
-            "Kết quả kiểm thử:",
+            "Ket qua kiem thu:",
         ]
     else:
         lines = [
-            "[Bug Fix Verification] Xác minh sửa lỗi tự động thất bại!",
+            "[Xac minh bug fix] Xac minh sua loi tu dong that bai!",
             "",
-            "Workflow đã chạy lại test nhưng vẫn còn lỗi, nên Jira không chuyển Done.",
+            "Workflow da chay lai test nhung van con loi, nen Jira khong chuyen Done.",
             "",
-            "Thông tin chi tiết:",
-            f"* Nhánh chạy: {branch}",
-            f"* Người kích hoạt: {actor}",
+            "Thong tin chi tiet:",
+            f"* Nhanh chay: {branch}",
+            f"* Nguoi kich hoat: {actor}",
             f"* GitHub Run: [#{run_id}]({run_url})",
-            format_link_line("Commit chạy test", sha, commit_url),
-            format_link_line("Thay đổi code", code_label, code_url),
+            format_link_line("Commit chay test", sha, commit_url),
+            format_link_line("Thay doi code", code_label, code_url),
             "",
-            "Phạm vi xác minh:",
+            "Pham vi xac minh:",
             *[f"* {line}" for line in scope_lines],
             "",
-            "Kết quả kiểm thử:",
+            "Ket qua kiem thu:",
         ]
 
     if newman_summary:
@@ -414,25 +415,24 @@ def build_comment(status, issue_key, issue_kind, bug_key, parent_key, action_res
     if jest_summary:
         lines.append(f"* {jest_summary}")
     if not newman_summary and not jest_summary:
-        lines.append("* Không tìm thấy file báo cáo test trong workflow.")
+        lines.append("* Khong tim thay file bao cao test trong workflow.")
 
     failures = newman_failures + jest_failures
     if failures:
-        lines.extend(["", "Lỗi chính:"])
+        lines.extend(["", "Loi chinh:"])
         for failure in failures[:5]:
             lines.append(f"* {failure}")
         if len(failures) > 5:
-            lines.append(f"* ... còn {len(failures) - 5} lỗi khác, xem chi tiết trong GitHub Run.")
+            lines.append(f"* ... con {len(failures) - 5} loi khac, xem chi tiet trong GitHub Run.")
 
     lines.extend([
         "",
         f"Jira: {jira_summary}",
         "",
         "---",
-        "Báo cáo tự động được gửi từ GitHub Actions Bug Fix Verification.",
+        "Bao cao tu dong duoc gui tu GitHub Actions Xac minh bug fix.",
     ])
     return "\n".join(lines)
-
 
 def main():
     parser = argparse.ArgumentParser()
@@ -463,11 +463,11 @@ def main():
             if not key:
                 continue
             if args.dry_run:
-                print(f"dry-run: would delete old Bug Fix Verification comments from {key}")
+                print(f"dry-run: would delete old xac minh bug fix comments from {key}")
                 continue
             try:
                 deleted = jira.cleanup_bugfix_comments(key)
-                print(f"cleanup {key}: deleted {deleted} old Bug Fix Verification comment(s)")
+                print(f"cleanup {key}: deleted {deleted} old xac minh bug fix comment(s)")
             except Exception as exc:
                 print(f"cleanup {key}: failed: {exc}", file=sys.stderr)
 
