@@ -5,6 +5,53 @@
   },
   "item": [
     {
+      "name": "🔑 Register User (Pre-requisite)",
+      "event": [
+        {
+          "listen": "prerequest",
+          "script": {
+            "exec": [
+              "const randStr = Math.random().toString(36).substring(2, 10);",
+              "pm.collectionVariables.set('bvaUser', 'bva' + randStr);",
+              "pm.collectionVariables.set('bvaEmail', 'bva' + randStr + '@test.com');"
+            ],
+            "type": "text/javascript"
+          }
+        },
+        {
+          "listen": "test",
+          "script": {
+            "exec": [
+              "pm.test('Prereq Register Status 201', () => pm.response.to.have.status(201));"
+            ],
+            "type": "text/javascript"
+          }
+        }
+      ],
+      "request": {
+        "method": "POST",
+        "header": [
+          {
+            "key": "Content-Type",
+            "value": "application/json"
+          }
+        ],
+        "body": {
+          "mode": "raw",
+          "raw": "{\n  \"user_name\": \"{{bvaUser}}\",\n  \"email\": \"{{bvaEmail}}\",\n  \"password\": \"11111111\"\n}"
+        },
+        "url": {
+          "raw": "{{authBaseUrl}}/register",
+          "host": [
+            "{{authBaseUrl}}"
+          ],
+          "path": [
+            "register"
+          ]
+        }
+      }
+    },
+    {
       "name": "🔑 User Login (Pre-requisite)",
       "request": {
         "method": "POST",
@@ -16,7 +63,7 @@
         ],
         "body": {
           "mode": "raw",
-          "raw": "{\n  \"user_name\": \"user1\",\n  \"password\": \"11111111\"\n}"
+          "raw": "{\n  \"user_name\": \"{{bvaUser}}\",\n  \"password\": \"11111111\"\n}"
         },
         "url": {
           "raw": "{{authBaseUrl}}/login",
@@ -175,6 +222,16 @@
     },
     {
       "key": "userId",
+      "value": "",
+      "type": "string"
+    },
+    {
+      "key": "bvaUser",
+      "value": "",
+      "type": "string"
+    },
+    {
+      "key": "bvaEmail",
       "value": "",
       "type": "string"
     }
