@@ -400,7 +400,7 @@ export class AuthService {
     if (!email) throw new Error("Email required");
 
     const emailRow = await this.userEmailRepo.findByEmail(email);
-    // SH-220: Sua loi quen mat khau voi email khong ton tai tra ve 200
+    // SH-220: Sua loi quen mat khau voi email khong ton tai tra ve 200 (da kiem chung)
     if (!emailRow) throw new Error("Email not found");
 
     const token = crypto.randomBytes(32).toString("hex");
