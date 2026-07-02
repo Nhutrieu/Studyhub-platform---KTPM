@@ -13,17 +13,71 @@ def split_values(raw):
     return [item.strip() for item in re.split(r"[\s,;]+", raw or "") if item.strip()]
 
 
+def inline_nodes(text):
+    nodes = []
+    pattern = re.compile(r"\[([^\]]+)\]\((https?://[^)]+)\)")
+    pos = 0
+    for match in pattern.finditer(text):
+        if match.start() > pos:
+            nodes.append({"type": "text", "text": text[pos:match.start()]})
+        nodes.append({
+            "type": "text",
+            "text": match.group(1),
+            "marks": [{"type": "link", "attrs": {"href": match.group(2)}}],
+        })
+        pos = match.end()
+    if pos < len(text):
+        nodes.append({"type": "text", "text": text[pos:]})
+    return nodes or [{"type": "text", "text": ""}]
+
+
+def paragraph(text=""):
+    if text:
+        return {"type": "paragraph", "content": inline_nodes(text)}
+    return {"type": "paragraph", "content": []}
+
+
 def adf_doc(text):
     paragraphs = []
+    pending_bullets = []
+
+    def flush_bullets():
+        nonlocal pending_bullets
+        if not pending_bullets:
+            return
+        paragraphs.append({
+            "type": "bulletList",
+            "content": [
+                {"type": "listItem", "content": [paragraph(item)]}
+                for item in pending_bullets
+            ],
+        })
+        pending_bullets = []
+
     for line in text.strip().splitlines():
-        if line.strip():
-            paragraphs.append({
-                "type": "paragraph",
-                "content": [{"type": "text", "text": line.rstrip()}],
-            })
+        clean = line.rstrip()
+        if clean.startswith("* "):
+            pending_bullets.append(clean[2:])
+        elif clean.strip():
+            flush_bullets()
+            paragraphs.append(paragraph(clean))
         else:
-            paragraphs.append({"type": "paragraph", "content": []})
+            flush_bullets()
+            paragraphs.append(paragraph())
+
+    flush_bullets()
     return {"type": "doc", "version": 1, "content": paragraphs}
+
+
+def adf_to_text(node):
+    if isinstance(node, dict):
+        text = node.get("text", "")
+        for child in node.get("content", []):
+            text += adf_to_text(child)
+        return text
+    if isinstance(node, list):
+        return "".join(adf_to_text(item) for item in node)
+    return ""
 
 
 class JiraClient:
@@ -67,6 +121,23 @@ class JiraClient:
 
     def add_comment(self, key, text):
         self.request("POST", f"/rest/api/3/issue/{key}/comment", {"body": adf_doc(text)})
+
+    def list_comments(self, key):
+        data = self.request("GET", f"/rest/api/3/issue/{key}/comment?maxResults=100")
+        return data.get("comments", [])
+
+    def delete_comment(self, key, comment_id):
+        self.request("DELETE", f"/rest/api/3/issue/{key}/comment/{comment_id}")
+
+    def cleanup_bugfix_comments(self, key):
+        deleted = 0
+        for comment in self.list_comments(key):
+            body_text = adf_to_text(comment.get("body", ""))
+            if "Bug Fix Verification" not in body_text:
+                continue
+            self.delete_comment(key, comment["id"])
+            deleted += 1
+        return deleted
 
     def transition_to_done(self, key):
         status = self.get_issue_status(key)
@@ -174,15 +245,19 @@ def build_newman_summary(results):
     failed_assertions = sum(item["assertions_failed"] for item in results)
     passed_assertions = max(total_assertions - failed_assertions, 0)
 
+    label = f"{len(results)} collections"
+    if len(results) == 1:
+        label = results[0]["file"]
+
     if failed_requests or failed_assertions:
         return (
-            f"Newman API: {len(results)} collections, {total_requests} requests, "
+            f"Newman API: {label}, {total_requests} requests, "
             f"{passed_assertions}/{total_assertions} assertions pass "
             f"({failed_assertions} failed assertions)"
         )
 
     return (
-        f"Newman API: {len(results)} collections, {total_requests} requests, "
+        f"Newman API: {label}, {total_requests} requests, "
         f"{total_assertions} assertions pass"
     )
 
@@ -216,7 +291,35 @@ def build_jira_summary(status, action_results):
     return f"Đã chuyển hoặc xác nhận Done cho {len(action_results)} issue liên quan."
 
 
-def build_comment(status, bug_keys, parent_keys, action_results):
+def report_key(filename):
+    return os.path.splitext(os.path.basename(filename))[0].upper()
+
+
+def find_parent_reports(newman_results, parent_key):
+    if not parent_key:
+        return newman_results
+    matched = [item for item in newman_results if report_key(item["file"]) == parent_key.upper()]
+    return matched or newman_results
+
+
+def build_pairs(bug_keys, parent_keys):
+    pairs = []
+    for index, bug_key in enumerate(bug_keys):
+        parent_key = parent_keys[index] if index < len(parent_keys) else ""
+        pairs.append((bug_key, parent_key))
+    return pairs
+
+
+def build_parent_map(pairs):
+    parent_map = {}
+    for bug_key, parent_key in pairs:
+        if not parent_key:
+            continue
+        parent_map.setdefault(parent_key, []).append(bug_key)
+    return parent_map
+
+
+def build_comment(status, issue_key, issue_kind, bug_key, parent_key, action_result=None):
     repo = os.environ.get("GITHUB_REPOSITORY", "unknown-repo")
     run_id = os.environ.get("GITHUB_RUN_ID", "unknown-run")
     branch = os.environ.get("GITHUB_REF_NAME", "unknown-branch")
@@ -226,45 +329,65 @@ def build_comment(status, bug_keys, parent_keys, action_results):
 
     newman_results, newman_failures = parse_newman_reports()
     jest_results, jest_failures = parse_jest_reports()
-    newman_summary = build_newman_summary(newman_results)
+    scoped_newman_results = find_parent_reports(newman_results, parent_key)
+    newman_summary = build_newman_summary(scoped_newman_results)
     jest_summary = build_jest_summary(jest_results)
-    jira_summary = build_jira_summary(status, action_results)
+
+    if status != "PASS":
+        jira_summary = "Chưa chuyển Done vì bước xác minh còn lỗi."
+    elif action_result and "dry-run" in action_result:
+        jira_summary = "Dry-run: chỉ kiểm tra, chưa comment hoặc chuyển trạng thái Jira."
+    elif action_result and action_result.startswith("failed:"):
+        jira_summary = "Test đã pass, nhưng issue này chưa chuyển Done được. Xem GitHub Run để xử lý."
+    elif action_result:
+        jira_summary = "Đã chuyển hoặc xác nhận Done cho issue này."
+    else:
+        jira_summary = "Không yêu cầu chuyển trạng thái Jira."
+
+    if issue_kind == "parent":
+        scope_lines = [
+            f"Task cha: {issue_key}",
+            f"Bug đã xác minh: {bug_key or 'none'}",
+        ]
+    else:
+        scope_lines = [
+            f"Bug subtask: {issue_key}",
+            f"Task cha: {parent_key or 'none'}",
+        ]
 
     if status == "PASS":
         lines = [
-            "✅ *[Bug Fix Verification]* **Xác minh sửa lỗi tự động thành công!**",
+            "[Bug Fix Verification] Xác minh sửa lỗi tự động thành công!",
             "",
-            "Các bug trong phạm vi đã được chạy lại bằng bộ test tự động và kết quả đều PASS.",
+            "Issue này đã được chạy lại bằng bộ test tự động và kết quả PASS.",
             "",
-            "**📊 Thông tin chi tiết:**",
-            f"* 💻 **Nhánh chạy:** `{branch}`",
-            f"* 👤 **Người kích hoạt:** `{actor}`",
-            f"* 🔗 **GitHub Run:** [#{run_id}]({run_url})",
-            f"* 🧾 **Commit:** `{sha}`",
+            "Thông tin chi tiết:",
+            f"* Nhánh chạy: {branch}",
+            f"* Người kích hoạt: {actor}",
+            f"* GitHub Run: [#{run_id}]({run_url})",
+            f"* Commit: {sha}",
             "",
-            "**📌 Phạm vi xác minh:**",
-            f"* Bug subtask: `{join_keys(bug_keys)}`",
-            f"* Task cha: `{join_keys(parent_keys)}`",
+            "Phạm vi xác minh:",
+            *[f"* {line}" for line in scope_lines],
             "",
-            "**📋 Kết quả kiểm thử:**",
+            "Kết quả kiểm thử:",
         ]
     else:
         lines = [
-            "❌ *[Bug Fix Verification]* **Xác minh sửa lỗi tự động thất bại!**",
+            "[Bug Fix Verification] Xác minh sửa lỗi tự động thất bại!",
             "",
             "Workflow đã chạy lại test nhưng vẫn còn lỗi, nên Jira không chuyển Done.",
             "",
-            "**📊 Thông tin chi tiết:**",
-            f"* 💻 **Nhánh chạy:** `{branch}`",
-            f"* 👤 **Người kích hoạt:** `{actor}`",
-            f"* 🔗 **GitHub Run:** [#{run_id}]({run_url})",
-            f"* 🧾 **Commit:** `{sha}`",
+            "Thông tin chi tiết:",
+            f"* Nhánh chạy: {branch}",
+            f"* Người kích hoạt: {actor}",
+            f"* GitHub Run: [#{run_id}]({run_url})",
+            f"* Commit: {sha}",
             "",
-            "**📌 Phạm vi xác minh:**",
-            f"* Bug subtask: `{join_keys(bug_keys)}`",
-            f"* Task cha: `{join_keys(parent_keys)}`",
+            "Phạm vi xác minh:",
+            *[f"* {line}" for line in scope_lines],
             "",
-            "**📋 Kết quả kiểm thử:**",
+            "Kết quả kiểm thử:",
         ]
 
     if newman_summary:
@@ -276,7 +399,7 @@ def build_comment(status, bug_keys, parent_keys, action_results):
 
     failures = newman_failures + jest_failures
     if failures:
-        lines.extend(["", "**❗ Lỗi chính:**"])
+        lines.extend(["", "Lỗi chính:"])
         for failure in failures[:5]:
             lines.append(f"* {failure}")
         if len(failures) > 5:
@@ -284,10 +407,10 @@ def build_comment(status, bug_keys, parent_keys, action_results):
 
     lines.extend([
         "",
-        f"**🔁 Jira:** {jira_summary}",
+        f"Jira: {jira_summary}",
         "",
         "---",
-        "*Báo cáo tự động được gửi từ GitHub Actions Bug Fix Verification.*",
+        "Báo cáo tự động được gửi từ GitHub Actions Bug Fix Verification.",
     ])
     return "\n".join(lines)
 
@@ -299,6 +422,7 @@ def main():
     parser.add_argument("--parent-keys", default="")
     parser.add_argument("--transition-bugs", choices=["true", "false"], default="true")
     parser.add_argument("--transition-parents", choices=["true", "false"], default="false")
+    parser.add_argument("--cleanup-old-comments", choices=["true", "false"], default="true")
     parser.add_argument("--dry-run", action="store_true")
     args = parser.parse_args()
 
@@ -310,6 +434,23 @@ def main():
     action_results = []
     transition_errors = []
     jira = None if args.dry_run else JiraClient()
+    pairs = build_pairs(bug_keys, parent_keys)
+    parent_map = build_parent_map(pairs)
+    action_result_by_key = {}
+
+    cleanup_targets = sorted(set(bug_keys + parent_keys))
+    if args.cleanup_old_comments == "true":
+        for key in cleanup_targets:
+            if not key:
+                continue
+            if args.dry_run:
+                print(f"dry-run: would delete old Bug Fix Verification comments from {key}")
+                continue
+            try:
+                deleted = jira.cleanup_bugfix_comments(key)
+                print(f"cleanup {key}: deleted {deleted} old Bug Fix Verification comment(s)")
+            except Exception as exc:
+                print(f"cleanup {key}: failed: {exc}", file=sys.stderr)
 
     if args.status == "PASS" and args.transition_bugs == "true":
         for key in bug_keys:
@@ -319,6 +460,7 @@ def main():
                 result = f"failed: {exc}"
                 transition_errors.append((key, exc))
             action_results.append((key, result))
+            action_result_by_key[key] = result
 
     if args.status == "PASS" and args.transition_parents == "true":
         for key in parent_keys:
@@ -328,20 +470,43 @@ def main():
                 result = f"failed: {exc}"
                 transition_errors.append((key, exc))
             action_results.append((key, result))
+            action_result_by_key[key] = result
 
-    comment = build_comment(args.status, bug_keys, parent_keys, action_results)
+    comments = []
+    for bug_key, parent_key in pairs:
+        comments.append((
+            bug_key,
+            build_comment(
+                args.status,
+                issue_key=bug_key,
+                issue_kind="bug",
+                bug_key=bug_key,
+                parent_key=parent_key,
+                action_result=action_result_by_key.get(bug_key),
+            ),
+        ))
 
-    if args.dry_run:
-        print(comment)
-        return
-
-    for key in bug_keys:
-        jira.add_comment(key, comment)
     if args.status == "PASS":
-        for key in parent_keys:
-            jira.add_comment(key, comment)
+        for parent_key, related_bugs in parent_map.items():
+            comments.append((
+                parent_key,
+                build_comment(
+                    args.status,
+                    issue_key=parent_key,
+                    issue_kind="parent",
+                    bug_key=join_keys(related_bugs),
+                    parent_key=parent_key,
+                    action_result=action_result_by_key.get(parent_key),
+                ),
+            ))
 
-    print(comment)
+    for key, comment in comments:
+        print(f"\n--- Jira comment for {key} ---")
+        print(comment)
+        if args.dry_run:
+            continue
+        jira.add_comment(key, comment)
+
     if transition_errors:
         raise SystemExit(1)
 
