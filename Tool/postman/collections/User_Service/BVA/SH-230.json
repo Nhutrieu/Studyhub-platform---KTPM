@@ -1,0 +1,330 @@
+{
+  "info": {
+    "name": "StudyHub - SH-230 - BVA Thêm liên kết mạng xã hội",
+    "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+  },
+  "item": [
+    {
+      "name": "🔑 User Login (Pre-requisite)",
+      "request": {
+        "method": "POST",
+        "header": [
+          {
+            "key": "Content-Type",
+            "value": "application/json"
+          }
+        ],
+        "body": {
+          "mode": "raw",
+          "raw": "{\n  \"user_name\": \"user1\",\n  \"password\": \"11111111\"\n}"
+        },
+        "url": {
+          "raw": "{{authBaseUrl}}/login",
+          "host": [
+            "{{authBaseUrl}}"
+          ],
+          "path": [
+            "login"
+          ]
+        }
+      },
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "exec": [
+              "const json = pm.response.json();",
+              "const target = json.data || json;",
+              "if (target.access_token) pm.collectionVariables.set('accessToken', target.access_token);",
+              "if (target.user && target.user.id) pm.collectionVariables.set('userId', target.user.id);"
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "name": "✅ Hợp lệ Biên Min url (url=10 ký tự)",
+      "request": {
+        "method": "POST",
+        "header": [
+          {
+            "key": "Authorization",
+            "value": "Bearer {{accessToken}}"
+          },
+          {
+            "key": "Content-Type",
+            "value": "application/json"
+          }
+        ],
+        "body": {
+          "mode": "raw",
+          "raw": "{\n  \"platform\": \"facebook\",\n  \"url\": \"http://a.co\"\n}"
+        },
+        "url": {
+          "raw": "{{userBaseUrl}}/profile/{{userId}}/social",
+          "host": [
+            "{{userBaseUrl}}"
+          ],
+          "path": [
+            "profile",
+            "{{userId}}",
+            "social"
+          ]
+        }
+      },
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "exec": [
+              "pm.test('Status 200', () => pm.response.to.have.status(200));",
+              "const json = pm.response.json();",
+              "const target = json.data || json;",
+              "if (target.id) pm.collectionVariables.set('socialLinkId', target.id);"
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "name": "🗑️ Dọn dẹp Social Link (Pre-requisite)",
+      "request": {
+        "method": "DELETE",
+        "header": [
+          {
+            "key": "Authorization",
+            "value": "Bearer {{accessToken}}"
+          }
+        ],
+        "url": {
+          "raw": "{{userBaseUrl}}/profile/social/{{socialLinkId}}",
+          "host": [
+            "{{userBaseUrl}}"
+          ],
+          "path": [
+            "profile",
+            "social",
+            "{{socialLinkId}}"
+          ]
+        }
+      }
+    },
+    {
+      "name": "✅ Hợp lệ Biên Max url (url=255 ký tự)",
+      "request": {
+        "method": "POST",
+        "header": [
+          {
+            "key": "Authorization",
+            "value": "Bearer {{accessToken}}"
+          },
+          {
+            "key": "Content-Type",
+            "value": "application/json"
+          }
+        ],
+        "body": {
+          "mode": "raw",
+          "raw": "{\n  \"platform\": \"facebook\",\n  \"url\": \"http://a.co/aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa\"\n}"
+        },
+        "url": {
+          "raw": "{{userBaseUrl}}/profile/{{userId}}/social",
+          "host": [
+            "{{userBaseUrl}}"
+          ],
+          "path": [
+            "profile",
+            "{{userId}}",
+            "social"
+          ]
+        }
+      },
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "exec": [
+              "pm.test('Status 200', () => pm.response.to.have.status(200));",
+              "const json = pm.response.json();",
+              "const target = json.data || json;",
+              "if (target.id) pm.collectionVariables.set('socialLinkId', target.id);"
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "name": "🗑️ Dọn dẹp Social Link 2 (Pre-requisite)",
+      "request": {
+        "method": "DELETE",
+        "header": [
+          {
+            "key": "Authorization",
+            "value": "Bearer {{accessToken}}"
+          }
+        ],
+        "url": {
+          "raw": "{{userBaseUrl}}/profile/social/{{socialLinkId}}",
+          "host": [
+            "{{userBaseUrl}}"
+          ],
+          "path": [
+            "profile",
+            "social",
+            "{{socialLinkId}}"
+          ]
+        }
+      }
+    },
+    {
+      "name": "❌ Không hợp lệ dưới Min url (url=9 ký tự)",
+      "request": {
+        "method": "POST",
+        "header": [
+          {
+            "key": "Authorization",
+            "value": "Bearer {{accessToken}}"
+          },
+          {
+            "key": "Content-Type",
+            "value": "application/json"
+          }
+        ],
+        "body": {
+          "mode": "raw",
+          "raw": "{\n  \"platform\": \"facebook\",\n  \"url\": \"http://a.c\"\n}"
+        },
+        "url": {
+          "raw": "{{userBaseUrl}}/profile/{{userId}}/social",
+          "host": [
+            "{{userBaseUrl}}"
+          ],
+          "path": [
+            "profile",
+            "{{userId}}",
+            "social"
+          ]
+        }
+      },
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "exec": [
+              "pm.test('Status 400', () => pm.response.to.have.status(400));"
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "name": "❌ Không hợp lệ vượt Max url (url=256 ký tự)",
+      "request": {
+        "method": "POST",
+        "header": [
+          {
+            "key": "Authorization",
+            "value": "Bearer {{accessToken}}"
+          },
+          {
+            "key": "Content-Type",
+            "value": "application/json"
+          }
+        ],
+        "body": {
+          "mode": "raw",
+          "raw": "{\n  \"platform\": \"facebook\",\n  \"url\": \"http://a.co/aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa\"\n}"
+        },
+        "url": {
+          "raw": "{{userBaseUrl}}/profile/{{userId}}/social",
+          "host": [
+            "{{userBaseUrl}}"
+          ],
+          "path": [
+            "profile",
+            "{{userId}}",
+            "social"
+          ]
+        }
+      },
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "exec": [
+              "pm.test('Status 400', () => pm.response.to.have.status(400));"
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "name": "❌ Không hợp lệ platform (platform=instagram)",
+      "request": {
+        "method": "POST",
+        "header": [
+          {
+            "key": "Authorization",
+            "value": "Bearer {{accessToken}}"
+          },
+          {
+            "key": "Content-Type",
+            "value": "application/json"
+          }
+        ],
+        "body": {
+          "mode": "raw",
+          "raw": "{\n  \"platform\": \"instagram\",\n  \"url\": \"http://github.com/user\"\n}"
+        },
+        "url": {
+          "raw": "{{userBaseUrl}}/profile/{{userId}}/social",
+          "host": [
+            "{{userBaseUrl}}"
+          ],
+          "path": [
+            "profile",
+            "{{userId}}",
+            "social"
+          ]
+        }
+      },
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "exec": [
+              "pm.test('Status 400', () => pm.response.to.have.status(400));"
+            ]
+          }
+        }
+      ]
+    }
+  ],
+  "variable": [
+    {
+      "key": "authBaseUrl",
+      "value": "http://localhost:3000/api/v1/auth",
+      "type": "string"
+    },
+    {
+      "key": "userBaseUrl",
+      "value": "http://localhost:3001/api/v1/user",
+      "type": "string"
+    },
+    {
+      "key": "accessToken",
+      "value": "",
+      "type": "string"
+    },
+    {
+      "key": "userId",
+      "value": "",
+      "type": "string"
+    },
+    {
+      "key": "socialLinkId",
+      "value": "",
+      "type": "string"
+    }
+  ]
+}
