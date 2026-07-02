@@ -68,7 +68,7 @@ def run_newman_for_collections(collections, base_url):
             "--reporter-json-export", temp_report_json
         ]
         print(f"Running Newman for: {os.path.basename(coll)} ...")
-        subprocess.run(cmd)
+        subprocess.run(cmd, cwd=BASE_DIR)
         if os.path.exists(temp_report_json):
             success = True
             try:

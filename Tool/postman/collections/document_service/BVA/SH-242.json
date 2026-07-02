@@ -1,0 +1,68 @@
+{
+  "info": {
+    "name": "BVA-SH-61: Boundary Feed & Search Tài liệu",
+    "description": "Boundary Value Analysis bổ sung cho SH-61. File gốc SH-61.json không bị sửa.",
+    "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+  },
+  "item": [
+    {
+      "name": "Login user thường",
+      "request": {
+        "method": "POST",
+        "header": [{ "key": "Content-Type", "value": "application/json" }],
+        "body": { "mode": "raw", "raw": "{\n  \"email\": \"{{userEmail}}\",\n  \"password\": \"{{password}}\"\n}" },
+        "url": "{{authBaseUrl}}/login"
+      },
+      "event": [{ "listen": "test", "script": { "type": "text/javascript", "exec": ["pm.test('Login 200', () => pm.response.to.have.status(200));", "var json = pm.response.json();", "var data = json.data || json;", "pm.collectionVariables.set('accessToken', data.access_token);"] } }]
+    },
+    {
+      "name": "BVA feed public - limit min = 1, offset min = 0",
+      "request": { "method": "GET", "url": "{{documentBaseUrl}}/feed/public?limit=1&offset=0" },
+      "event": [{ "listen": "test", "script": { "type": "text/javascript", "exec": ["pm.test('Status 200', () => pm.response.to.have.status(200));", "pm.test('Array response and size <= 1', () => pm.expect(pm.response.json().length).to.be.at.most(1));"] } }]
+    },
+    {
+      "name": "BVA feed public - limit = 0",
+      "request": { "method": "GET", "url": "{{documentBaseUrl}}/feed/public?limit=0&offset=0" },
+      "event": [{ "listen": "test", "script": { "type": "text/javascript", "exec": ["pm.test('Status 200 hoặc 400', () => pm.expect([200, 400]).to.include(pm.response.code));"] } }]
+    },
+    {
+      "name": "BVA feed public - offset âm = -1",
+      "request": { "method": "GET", "url": "{{documentBaseUrl}}/feed/public?limit=20&offset=-1" },
+      "event": [{ "listen": "test", "script": { "type": "text/javascript", "exec": ["pm.test('Status 200 hoặc 400', () => pm.expect([200, 400]).to.include(pm.response.code));"] } }]
+    },
+    {
+      "name": "BVA search - query rỗng",
+      "request": {
+        "method": "GET",
+        "header": [{ "key": "Authorization", "value": "Bearer {{accessToken}}" }],
+        "url": "{{documentBaseUrl}}/search?query=&limit=10&offset=0"
+      },
+      "event": [{ "listen": "test", "script": { "type": "text/javascript", "exec": ["pm.test('Status 200', () => pm.response.to.have.status(200));", "pm.test('Empty query returns array', () => pm.expect(pm.response.json()).to.be.an('array'));"] } }]
+    },
+    {
+      "name": "BVA search - query 1 ký tự, limit min = 1",
+      "request": {
+        "method": "GET",
+        "header": [{ "key": "Authorization", "value": "Bearer {{accessToken}}" }],
+        "url": "{{documentBaseUrl}}/search?query=a&limit=1&offset=0"
+      },
+      "event": [{ "listen": "test", "script": { "type": "text/javascript", "exec": ["pm.test('Status 200', () => pm.response.to.have.status(200));", "pm.test('Array response and size <= 1', () => pm.expect(pm.response.json().length).to.be.at.most(1));"] } }]
+    },
+    {
+      "name": "BVA search - limit vượt lớn = 101",
+      "request": {
+        "method": "GET",
+        "header": [{ "key": "Authorization", "value": "Bearer {{accessToken}}" }],
+        "url": "{{documentBaseUrl}}/search?query=document&limit=101&offset=0"
+      },
+      "event": [{ "listen": "test", "script": { "type": "text/javascript", "exec": ["pm.test('Status 200 hoặc 400', () => pm.expect([200, 400]).to.include(pm.response.code));"] } }]
+    }
+  ],
+  "variable": [
+    { "key": "authBaseUrl", "value": "http://localhost:3000/api/v1/auth" },
+    { "key": "documentBaseUrl", "value": "http://localhost:3003/api/v1/document" },
+    { "key": "userEmail", "value": "user1@example.com" },
+    { "key": "password", "value": "11111111" },
+    { "key": "accessToken", "value": "" }
+  ]
+}

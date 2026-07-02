@@ -1,4 +1,5 @@
 import NotificationReceiver from "../models/NotificationReceiver.js";
+import mongoose from "mongoose";
 
 export class NotificationReceiverRepository {
     /**
@@ -60,6 +61,10 @@ export class NotificationReceiverRepository {
      * @returns {Promise<Object|null>}
      */
     async findById(id) {
+        if (!mongoose.Types.ObjectId.isValid(id)) {
+            return null;
+        }
+
         return NotificationReceiver.findById(id).populate("notification_id");
     }
 

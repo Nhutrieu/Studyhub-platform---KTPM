@@ -134,6 +134,7 @@
                   "        const json = res.json();",
                   "        if (json.data && json.data.length > 0) {",
                   "            pm.collectionVariables.set('notificationId', json.data[0].id);",
+                  "            pm.collectionVariables.set('deletableNotificationId', json.data[0].id);",
                   "        }",
                   "    }",
                   "});"
