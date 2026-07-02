@@ -134,6 +134,28 @@ describe('ProfileService - Unit Test', () => {
       });
       expect(result).toEqual({ user: updatedUser, details: updatedDetails });
     });
+
+    it('should reject an empty display_name', async () => {
+      await expect(profileService.updateProfile('user-123', {
+        display_name: '',
+        bio: 'Hello',
+        school: 'BK'
+      })).rejects.toThrow('display_name is too short');
+    });
+
+    it('should reject profile fields over their boundary lengths', async () => {
+      await expect(profileService.updateProfile('user-123', {
+        display_name: 'A'.repeat(51)
+      })).rejects.toThrow('display_name is too long');
+
+      await expect(profileService.updateProfile('user-123', {
+        bio: 'B'.repeat(201)
+      })).rejects.toThrow('bio is too long');
+
+      await expect(profileService.updateProfile('user-123', {
+        school: 'C'.repeat(101)
+      })).rejects.toThrow('school is too long');
+    });
   });
 
   describe('updateAvatar', () => {
@@ -255,6 +277,27 @@ describe('ProfileService - Unit Test', () => {
       expect(socialRepoMock.findByUserAndPlatform).toHaveBeenCalledWith('user-123', 'github');
       expect(socialRepoMock.createLink).toHaveBeenCalled();
       expect(result).toEqual({ id: 'link-123' });
+    });
+
+    it('should create social link from an explicit allowed platform and short URL', async () => {
+      socialRepoMock.findByUserAndPlatform.mockResolvedValue(null);
+      socialRepoMock.createLink.mockResolvedValue({ id: 'link-123' });
+
+      const result = await profileService.addSocialLink('user-123', 'http://a.co', 'facebook');
+
+      expect(socialRepoMock.findByUserAndPlatform).toHaveBeenCalledWith('user-123', 'facebook');
+      expect(socialRepoMock.createLink).toHaveBeenCalledWith(expect.objectContaining({
+        user_id: 'user-123',
+        platform: 'facebook',
+        url: 'http://a.co'
+      }));
+      expect(result).toEqual({ id: 'link-123' });
+    });
+
+    it('should reject social link boundary and unsupported platform inputs', async () => {
+      await expect(profileService.addSocialLink('user-123', 'http://a.c', 'facebook')).rejects.toThrow('Social link URL length is invalid');
+      await expect(profileService.addSocialLink('user-123', `${'http://a.co/'}${'a'.repeat(243)}`, 'facebook')).rejects.toThrow('Social link URL length is invalid');
+      await expect(profileService.addSocialLink('user-123', 'http://github.com/user', 'instagram')).rejects.toThrow('Unsupported social media platform');
     });
 
     it('should update social link if already exists', async () => {
