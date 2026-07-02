@@ -5,7 +5,8 @@ on:
     branches:
       - '**'
     paths:
-      - 'Tool/postman/**' # Thay thế bằng đường dẫn chứa file Postman của dự án mới
+      - 'Tool/postman/**' # Chỉ chạy khi có thay đổi trong bộ test Postman
+      - '.github/workflows/newman-jira.yml'
 
 jobs:
   api-testing:
@@ -17,7 +18,7 @@ jobs:
         with:
           fetch-depth: 2
 
-      # 1. Trích xuất mã ticket Jira từ commit message (ví dụ: FM-57)
+      # 1. Trích xuất mã ticket Jira từ commit message (ví dụ: SH-76)
       - name: Extract Jira Key from Commit
         run: |
           COMMIT_MSG=$(git log -1 --pretty=%B || true)
@@ -83,7 +84,7 @@ jobs:
 
           API_URL="${{ secrets.API_BASE_URL }}"
           if [ -z "$API_URL" ]; then
-            echo "ℹ️ secrets.API_BASE_URL chưa cấu hình. Đang chuyển hướng sang Docker Backend (http://localhost:8000)..."
+            echo "secrets.API_BASE_URL chưa cấu hình. Đang chuyển hướng sang Docker Backend (http://localhost:8000)..."
             API_URL="http://localhost:8000"
           fi
 
@@ -94,7 +95,14 @@ jobs:
           for file in $CHANGED_FILES; do
             if [ -f "$file" ]; then
               # Chạy Newman trỏ về link Staging hoặc Local Docker
-              newman run "$file" --env-var "gatewayUrl=$API_URL/api/v1" -r json --reporter-json-export "newman-reports/$(basename "$file" .json).json" || ANY_FAIL=true
+              newman run "$file" \
+                --env-var "gatewayUrl=$API_URL/api/v1" \
+                --env-var "authBaseUrl=$API_URL/api/v1/auth" \
+                --env-var "chatBaseUrl=$API_URL/api/v1/chat" \
+                --env-var "notificationBaseUrl=$API_URL/api/v1/notification" \
+                --env-var "userEmail=admin@example.com" \
+                --env-var "password=11111111" \
+                -r json --reporter-json-export "newman-reports/$(basename "$file" .json).json" || ANY_FAIL=true
             fi
           done
           IFS=$OLD_IFS
@@ -107,7 +115,7 @@ jobs:
             python Tool/postman/parse_newman_report.py --status PASS
           fi
 
-      # 4. Đăng nhập Jira & Hành động chuyển trạng thái/báo lỗi
+      # 4. Đăng nhập Jira & chuyển trạng thái/báo lỗi
       - name: Jira Login
         if: env.HAS_KEY == 'true'
         uses: atlassian/gajira-login@v3
@@ -121,7 +129,7 @@ jobs:
         uses: atlassian/gajira-create@v3
         with:
           project: ${{ secrets.JIRA_PROJECT_KEY }}
-          issuetype: Subtask # Sửa lại đúng chuẩn Jira của dự án
+          issuetype: Subtask # Đúng loại issue con trong Jira của dự án
           fields: '{"parent": {"key": "${{ env.JIRA_KEY }}"}}'
           summary: "${{ env.JIRA_BUG_SUMMARY }}"
           description: "${{ env.JIRA_BUG_DESCRIPTION }}"
@@ -139,9 +147,8 @@ jobs:
         with:
           issue: ${{ env.JIRA_KEY }}
           transition: "DONE"
-
-      - name: Fail workflow if Newman tests failed
-        if: env.NEWMAN_STATUS == 'FAIL'
+      - name: Fail workflow when Newman fails
+        if: env.HAS_KEY == 'true' && env.NEWMAN_STATUS == 'FAIL'
         run: |
-          echo "Newman tests failed. Jira bug has been created or updated."
+          echo "Newman failed. Jira bug/sub-task has been created above, now failing the CI job for visibility."
           exit 1
