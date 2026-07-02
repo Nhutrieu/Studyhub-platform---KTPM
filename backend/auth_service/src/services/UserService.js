@@ -58,7 +58,13 @@ export class UserService {
     }
     const updated_user = await this.userRepo.findById(user_id);
 
-    await this.auditRepo.logAction({ actor_user_id: user_id, action: "UPDATE_PROFILE", target_user_id: user_id, created_at: new Date() });
+    await this.auditRepo.logAction({
+      id: uuidv4(),
+      actor_user_id: user_id,
+      action: "UPDATE_PROFILE",
+      target_user_id: user_id,
+      created_at: new Date()
+    });
     return updated_user;
   }
 
