@@ -231,7 +231,11 @@ export class AdminService {
   async restoreUser(user_id, admin_id) {
     if (!user_id || !admin_id) throw new Error("Missing parameters");
     const deletions = await this.userDeletionRepo.findByUserId(user_id);
-    for (const del of deletions) {
+    const activeDeletions = deletions.filter(d => !d.restored_at);
+    if (activeDeletions.length === 0) {
+      throw new Error("User was not deleted");
+    }
+    for (const del of activeDeletions) {
       await this.userDeletionRepo.updateById(del.id, {
         restored_at: new Date(),
         restored_by: admin_id,
@@ -256,10 +260,27 @@ export class AdminService {
    * @returns {Promise<boolean>}
    */
   async updateRole(user_id, role_name, admin_id) {
+    // SH-226: Tu dong tao role moderator va thu hoi role cu truoc khi gan
     if (!user_id || !role_name || !admin_id)
       throw new Error("Missing parameters");
-    const role = await this.roleRepo.findByName(role_name);
+    let role = await this.roleRepo.findByName(role_name);
+    if (!role && role_name === "moderator") {
+      role = await this.roleRepo.createRole({
+        id: crypto.randomUUID(),
+        name: "moderator",
+        description: "Moderator user role"
+      });
+    }
     if (!role) throw new Error("Role not found");
+
+    // Revoke existing active roles
+    const existingRoles = await this.userRoleRepo.findByUserId(user_id);
+    for (const ur of existingRoles) {
+      if (!ur.revoked_at) {
+        await this.userRoleRepo.revokeRole(ur.id);
+      }
+    }
+
     await this.userRoleRepo.assignRole({
       id: crypto.randomUUID(),
       user_id,

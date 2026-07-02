@@ -22,7 +22,9 @@ describe('AdminService - Unit Test', () => {
       updateById: jest.fn()
     };
     userRoleRepoMock = {
-      assignRole: jest.fn()
+      assignRole: jest.fn(),
+      findByUserId: jest.fn().mockResolvedValue([]),
+      revokeRole: jest.fn()
     };
     userBlockRepoMock = {
       isUserBlocked: jest.fn(),
@@ -177,6 +179,11 @@ describe('AdminService - Unit Test', () => {
       expect(userDeletionRepoMock.updateById).toHaveBeenCalledWith('del-1', expect.any(Object));
       expect(userRepoMock.updateById).toHaveBeenCalledWith('user-1', { status: 'active' });
       expect(res).toBe(true);
+    });
+
+    it('should throw error if user has no active deletions', async () => {
+      userDeletionRepoMock.findByUserId.mockResolvedValue([]);
+      await expect(adminService.restoreUser('user-1', 'admin-1')).rejects.toThrow('User was not deleted');
     });
   });
 
