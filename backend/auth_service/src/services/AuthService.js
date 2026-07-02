@@ -229,7 +229,7 @@ export class AuthService {
    * @returns {Promise<{user:Object, access_token:string, refresh_token:string}>}
    */
   async login({ email, user_name, password, user_agent = null, ip = null }) {
-    // SH-219: Kiem tra luong dang nhap bang username hoat dong tot (verified)
+    // SH-219: Kiem tra luong dang nhap bang username hoat dong tot (da kiem chung)
     if ((!email && !user_name) || !password)
       throw new Error("Email or username and password required");
 
