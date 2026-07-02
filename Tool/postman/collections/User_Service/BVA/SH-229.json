@@ -1,0 +1,298 @@
+{
+  "info": {
+    "name": "StudyHub - SH-229 - BVA Tìm kiếm người dùng Phân trang",
+    "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+  },
+  "item": [
+    {
+      "name": "🔑 User Login (Pre-requisite)",
+      "request": {
+        "method": "POST",
+        "header": [
+          {
+            "key": "Content-Type",
+            "value": "application/json"
+          }
+        ],
+        "body": {
+          "mode": "raw",
+          "raw": "{\n  \"user_name\": \"user1\",\n  \"password\": \"11111111\"\n}"
+        },
+        "url": {
+          "raw": "{{authBaseUrl}}/login",
+          "host": [
+            "{{authBaseUrl}}"
+          ],
+          "path": [
+            "login"
+          ]
+        }
+      },
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "exec": [
+              "const json = pm.response.json();",
+              "const target = json.data || json;",
+              "if (target.access_token) pm.collectionVariables.set('accessToken', target.access_token);",
+              "if (target.user && target.user.id) pm.collectionVariables.set('userId', target.user.id);"
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "name": "✅ Hợp lệ Biên Min (limit=1, offset=0)",
+      "request": {
+        "method": "GET",
+        "header": [
+          {
+            "key": "Authorization",
+            "value": "Bearer {{accessToken}}"
+          }
+        ],
+        "url": {
+          "raw": "{{userBaseUrl}}/profile/search?limit=1&offset=0&query=user",
+          "host": [
+            "{{userBaseUrl}}"
+          ],
+          "path": [
+            "profile",
+            "search"
+          ],
+          "query": [
+            {
+              "key": "limit",
+              "value": "1"
+            },
+            {
+              "key": "offset",
+              "value": "0"
+            },
+            {
+              "key": "query",
+              "value": "user"
+            }
+          ]
+        }
+      },
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "exec": [
+              "pm.test('Status 200', () => pm.response.to.have.status(200));"
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "name": "✅ Hợp lệ Biên Max (limit=100, offset=10000)",
+      "request": {
+        "method": "GET",
+        "header": [
+          {
+            "key": "Authorization",
+            "value": "Bearer {{accessToken}}"
+          }
+        ],
+        "url": {
+          "raw": "{{userBaseUrl}}/profile/search?limit=100&offset=10000&query=user",
+          "host": [
+            "{{userBaseUrl}}"
+          ],
+          "path": [
+            "profile",
+            "search"
+          ],
+          "query": [
+            {
+              "key": "limit",
+              "value": "100"
+            },
+            {
+              "key": "offset",
+              "value": "10000"
+            },
+            {
+              "key": "query",
+              "value": "user"
+            }
+          ]
+        }
+      },
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "exec": [
+              "pm.test('Status 200', () => pm.response.to.have.status(200));"
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "name": "❌ Không hợp lệ dưới Min limit (limit=0)",
+      "request": {
+        "method": "GET",
+        "header": [
+          {
+            "key": "Authorization",
+            "value": "Bearer {{accessToken}}"
+          }
+        ],
+        "url": {
+          "raw": "{{userBaseUrl}}/profile/search?limit=0&offset=0&query=user",
+          "host": [
+            "{{userBaseUrl}}"
+          ],
+          "path": [
+            "profile",
+            "search"
+          ],
+          "query": [
+            {
+              "key": "limit",
+              "value": "0"
+            },
+            {
+              "key": "offset",
+              "value": "0"
+            },
+            {
+              "key": "query",
+              "value": "user"
+            }
+          ]
+        }
+      },
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "exec": [
+              "pm.test('Status 400', () => pm.response.to.have.status(400));"
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "name": "❌ Không hợp lệ vượt Max limit (limit=101)",
+      "request": {
+        "method": "GET",
+        "header": [
+          {
+            "key": "Authorization",
+            "value": "Bearer {{accessToken}}"
+          }
+        ],
+        "url": {
+          "raw": "{{userBaseUrl}}/profile/search?limit=101&offset=0&query=user",
+          "host": [
+            "{{userBaseUrl}}"
+          ],
+          "path": [
+            "profile",
+            "search"
+          ],
+          "query": [
+            {
+              "key": "limit",
+              "value": "101"
+            },
+            {
+              "key": "offset",
+              "value": "0"
+            },
+            {
+              "key": "query",
+              "value": "user"
+            }
+          ]
+        }
+      },
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "exec": [
+              "pm.test('Status 400', () => pm.response.to.have.status(400));"
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "name": "❌ Không hợp lệ dưới Min offset (offset=-1)",
+      "request": {
+        "method": "GET",
+        "header": [
+          {
+            "key": "Authorization",
+            "value": "Bearer {{accessToken}}"
+          }
+        ],
+        "url": {
+          "raw": "{{userBaseUrl}}/profile/search?limit=10&offset=-1&query=user",
+          "host": [
+            "{{userBaseUrl}}"
+          ],
+          "path": [
+            "profile",
+            "search"
+          ],
+          "query": [
+            {
+              "key": "limit",
+              "value": "10"
+            },
+            {
+              "key": "offset",
+              "value": "-1"
+            },
+            {
+              "key": "query",
+              "value": "user"
+            }
+          ]
+        }
+      },
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "exec": [
+              "pm.test('Status 400', () => pm.response.to.have.status(400));"
+            ]
+          }
+        }
+      ]
+    }
+  ],
+  "variable": [
+    {
+      "key": "authBaseUrl",
+      "value": "http://localhost:3000/api/v1/auth",
+      "type": "string"
+    },
+    {
+      "key": "userBaseUrl",
+      "value": "http://localhost:3001/api/v1/user",
+      "type": "string"
+    },
+    {
+      "key": "accessToken",
+      "value": "",
+      "type": "string"
+    },
+    {
+      "key": "userId",
+      "value": "",
+      "type": "string"
+    }
+  ]
+}
