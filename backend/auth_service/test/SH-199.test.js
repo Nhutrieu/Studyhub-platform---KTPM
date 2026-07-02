@@ -95,7 +95,7 @@ describe('OAuthService - Unit Test', () => {
 
       expect(userRepoMock.findById).toHaveBeenCalledWith('user-123');
       expect(auditRepoMock.logAction).toHaveBeenCalled();
-      expect(res.user_name).toBe('existing');
+      expect(res.user.user_name).toBe('existing');
     });
 
     it('should create user and link OAuth account if new user', async () => {
@@ -111,7 +111,7 @@ describe('OAuthService - Unit Test', () => {
       expect(userEmailRepoMock.create).toHaveBeenCalled();
       expect(oAuthAccountRepoMock.linkAccount).toHaveBeenCalled();
       expect(sessionRepoMock.create).toHaveBeenCalled();
-      expect(res.user_name).toBe('new');
+      expect(res.user.user_name).toBe('new');
     });
   });
 });

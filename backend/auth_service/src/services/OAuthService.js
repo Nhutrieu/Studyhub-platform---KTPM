@@ -50,94 +50,104 @@ export class OAuthService {
       throw new Error("Invalid provider payload");
 
     // Find OAuth provider
-    const provider = await this.oAuthProviderRepo.findByName(provider_name);
+    let provider = await this.oAuthProviderRepo.findByName(provider_name);
+    if (!provider && ["google", "facebook", "github", "linkedin"].includes(provider_name)) {
+      provider = { name: provider_name };
+    }
     if (!provider) throw new Error("Provider not supported");
 
     // Check if OAuth account already exists
+    let user;
     const existing_account = await this.oAuthAccountRepo.find(
       provider_name,
       provider_user.id
     );
+
     if (existing_account) {
-      const user = await this.userRepo.findById(existing_account.user_id);
+      user = await this.userRepo.findById(existing_account.user_id);
       await this.auditRepo.logAction({
         id: uuidv4(),
         actor_user_id: user.id,
         action: "OAUTH_LOGIN",
         created_at: new Date(),
       });
-      return user;
-    }
+    } else {
+      // If email exists, link account; otherwise create new user
+      if (provider_user.email) {
+        const existing_email = await this.userEmailRepo.findByEmail(
+          provider_user.email
+        );
+        if (existing_email) {
+          user = await this.userRepo.findById(existing_email.user_id);
+        } else {
+          // Create new user
+          user = await this.userRepo.create({
+            id: uuidv4(),
+            user_name: provider_user.name || provider_user.email.split("@")[0],
+            password_hash: null,
+            status: "active",
+            created_at: new Date(),
+          });
 
-    // If email exists, link account; otherwise create new user
-    let new_user;
-    if (provider_user.email) {
-      const existing_email = await this.userEmailRepo.findByEmail(
-        provider_user.email
-      );
-      if (existing_email) {
-        new_user = await this.userRepo.findById(existing_email.user_id);
+          // Create primary email
+          await this.userEmailRepo.create({
+            id: uuidv4(),
+            user_id: user.id,
+            email: provider_user.email,
+            type: "primary",
+            is_verified: 1,
+            created_at: new Date(),
+          });
+        }
       } else {
-        // Create new user
-        new_user = await this.userRepo.create({
+        // User without email
+        user = await this.userRepo.create({
           id: uuidv4(),
-          user_name: provider_user.name || provider_user.email.split("@")[0],
+          user_name: provider_user.name || `user_${Date.now()}`,
           password_hash: null,
           status: "active",
           created_at: new Date(),
         });
+      }
 
-        // Create primary email
-        await this.userEmailRepo.create({
+      // Assign default role
+      const default_role = await this.roleRepo.findByName("user");
+      if (default_role) {
+        await this.userRoleRepo.assignRole({
           id: uuidv4(),
-          user_id: new_user.id,
-          email: provider_user.email,
-          type: "primary",
-          is_verified: 1,
-          created_at: new Date(),
+          user_id: user.id,
+          role_id: default_role.id,
+          assigned_at: new Date(),
         });
       }
-    } else {
-      // User without email
-      new_user = await this.userRepo.create({
+
+      // Link OAuth account
+      await this.oAuthAccountRepo.linkAccount({
         id: uuidv4(),
-        user_name: provider_user.name || `user_${Date.now()}`,
-        password_hash: null,
-        status: "active",
+        user_id: user.id,
+        provider: provider_name,
+        provider_user_id: provider_user.id,
+        created_at: new Date(),
+      });
+
+      await this.auditRepo.logAction({
+        id: uuidv4(),
+        actor_user_id: user.id,
+        action: "OAUTH_REGISTER",
         created_at: new Date(),
       });
     }
 
-    // Assign default role
-    const default_role = await this.roleRepo.findByName("user");
-    if (default_role) {
-      await this.userRoleRepo.assignRole({
-        id: uuidv4(),
-        user_id: new_user.id,
-        role_id: default_role.id,
-        assigned_at: new Date(),
-      });
-    }
-
-    // Link OAuth account
-    await this.oAuthAccountRepo.linkAccount({
-      id: uuidv4(),
-      user_id: new_user.id,
-      provider: provider_name,
-      provider_user_id: provider_user.id,
-      created_at: new Date(),
-    });
-
-    // Create session tokens
+    // Create session tokens (for both login and registration)
     const access_token = signAccessToken({
-      id: new_user.id,
-      name: new_user.user_name,
+      id: user.id,
+      name: user.user_name,
     });
-    const refresh_token = signRefreshToken({ id: new_user.id });
+    const refresh_token = signRefreshToken({ id: user.id });
 
     await this.sessionRepo.create({
       id: uuidv4(),
-      user_id: new_user.id,
+      user_id: user.id,
       refresh_token_hash: createTokenHash(refresh_token),
       created_at: new Date(),
       expires_at: new Date(Date.now() + 30 * 24 * 60 * 60 * 1000), // 30 days
@@ -145,12 +155,6 @@ export class OAuthService {
       user_agent: provider_user.user_agent || null,
     });
 
-    await this.auditRepo.logAction({
-      actor_user_id: new_user.id,
-      action: "OAUTH_REGISTER",
-      created_at: new Date(),
-    });
-
-    return new_user;
+    return { user, access_token, refresh_token };
   }
 }
