@@ -207,16 +207,29 @@ jobs:
           fi
           truncate -s 101M "Tool/postman/fixtures/oversized-file-over-100mb.zip"
 
-      - name: Start Docker Compose
+      - name: Build Docker Images
         if: env.HAS_POSTMAN == 'true' && env.START_DOCKER_EFFECTIVE == 'true'
         timeout-minutes: 20
         run: |
           cd deployment/docker
           if [ "$DOCKER_PROFILE_EFFECTIVE" = "notification" ]; then
-            docker compose up -d --build auth-service notification-service
+            docker compose build --progress=plain auth-service notification-service
           else
-            docker compose up -d --build
+            docker compose build --progress=plain
           fi
+
+      - name: Start Docker Compose
+        if: env.HAS_POSTMAN == 'true' && env.START_DOCKER_EFFECTIVE == 'true'
+        timeout-minutes: 10
+        run: |
+          cd deployment/docker
+          if [ "$DOCKER_PROFILE_EFFECTIVE" = "notification" ]; then
+            docker compose up -d mysql-auth mongo-notification rabbitmq
+            docker compose up -d auth-service notification-service
+          else
+            docker compose up -d
+          fi
+          docker compose ps
           echo "Waiting for backend services to boot..."
           sleep 45
 
