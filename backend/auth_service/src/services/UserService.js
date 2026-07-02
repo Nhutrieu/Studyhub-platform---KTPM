@@ -123,6 +123,11 @@ export class UserService {
   async setPrimaryEmail(user_id, email_id) {
     if (!user_id || !email_id) throw new Error("Missing parameters");
 
+    const email = await this.userEmailRepo.findById(email_id);
+    if (!email || email.user_id !== user_id) {
+      throw new Error("Email not found");
+    }
+
     const updated_email = await this.userEmailRepo.markPrimary(email_id, user_id);
     await this.auditRepo.logAction({
       id: uuidv4(),
