@@ -225,7 +225,9 @@ jobs:
           cd deployment/docker
           if [ "$DOCKER_PROFILE_EFFECTIVE" = "notification" ]; then
             docker compose up -d mysql-auth mongo-notification rabbitmq
-            docker compose up -d auth-service notification-service
+            echo "Waiting for notification dependencies to boot..."
+            sleep 25
+            docker compose up -d --no-deps auth-service notification-service
           else
             docker compose up -d
           fi
