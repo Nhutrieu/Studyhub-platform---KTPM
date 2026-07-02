@@ -93,7 +93,7 @@ describe("StudyHub - SH-152 - Kiểm thử đơn vị Controller (White Box)", (
             req.body = {
                 sender_id: "sender1",
                 content: "content1",
-                target: { type: "post", id: "1" },
+                target: { type: "post", id: "1234567890" },
                 type: "ALERT",
                 receiver_ids: ["r1"],
             };
@@ -117,6 +117,36 @@ describe("StudyHub - SH-152 - Kiểm thử đơn vị Controller (White Box)", (
                 success: false,
                 message: "Missing required fields: sender_id, content, target, type, receiver_ids",
             });
+            expect(mockNotificationService.sendNotification).not.toHaveBeenCalled();
+        });
+
+        it("should return 400 for invalid receiver_ids boundary", async () => {
+            req.body = {
+                sender_id: "sender1",
+                content: "content1",
+                target: { type: "post", id: "1234567890" },
+                type: "ALERT",
+                receiver_ids: [],
+            };
+
+            await controller.sendNotification(req, res);
+
+            expect(res.status).toHaveBeenCalledWith(400);
+            expect(mockNotificationService.sendNotification).not.toHaveBeenCalled();
+        });
+
+        it("should return 400 for invalid target id boundary", async () => {
+            req.body = {
+                sender_id: "sender1",
+                content: "content1",
+                target: { type: "post", id: "1234567890123456789012345" },
+                type: "ALERT",
+                receiver_ids: ["r1"],
+            };
+
+            await controller.sendNotification(req, res);
+
+            expect(res.status).toHaveBeenCalledWith(400);
             expect(mockNotificationService.sendNotification).not.toHaveBeenCalled();
         });
     });

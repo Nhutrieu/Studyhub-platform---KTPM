@@ -150,7 +150,7 @@
             "header": [
               {
                 "key": "Authorization",
-                "value": "Bearer {{anotherUserAccessToken}}"
+                "value": "Bearer {{accessToken}}"
               }
             ],
             "url": {
