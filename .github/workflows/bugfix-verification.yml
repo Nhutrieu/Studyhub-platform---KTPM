@@ -255,7 +255,8 @@ jobs:
               --env-var "authBaseUrl=$AUTH_BASE_URL" \
               --env-var "chatBaseUrl=$CHAT_BASE_URL" \
               --env-var "notificationBaseUrl=$NOTIFICATION_BASE_URL" \
-              --env-var "userEmail=admin@example.com" \
+              --env-var "userEmail=user1@example.com" \
+              --env-var "adminEmail=admin@example.com" \
               --env-var "password=11111111" \
               -r json --reporter-json-export "newman-reports/${report_name}.json" || ANY_FAIL=true
           done < selected-postman-files.txt
