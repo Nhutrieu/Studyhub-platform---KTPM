@@ -129,7 +129,7 @@
                 {
                   "key": "file",
                   "type": "file",
-                  "src": "postman/fixtures/document.pdf"
+                  "src": "Tool/postman/fixtures/document.pdf"
                 }
               ]
             },
