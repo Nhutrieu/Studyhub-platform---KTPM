@@ -38,12 +38,8 @@
         },
         "url": {
           "raw": "{{authBaseUrl}}/login",
-          "host": [
-            "{{authBaseUrl}}"
-          ],
-          "path": [
-            "login"
-          ]
+          "host": ["{{authBaseUrl}}"],
+          "path": ["login"]
         }
       }
     },
@@ -87,13 +83,8 @@
         },
         "url": {
           "raw": "{{groupBaseUrl}}/{{groupId}}/invite",
-          "host": [
-            "{{groupBaseUrl}}"
-          ],
-          "path": [
-            "{{groupId}}",
-            "invite"
-          ]
+          "host": ["{{groupBaseUrl}}"],
+          "path": ["{{groupId}}", "invite"]
         }
       }
     },
@@ -130,14 +121,46 @@
         },
         "url": {
           "raw": "{{authBaseUrl}}/login",
-          "host": [
-            "{{authBaseUrl}}"
-          ],
-          "path": [
-            "login"
-          ]
+          "host": ["{{authBaseUrl}}"],
+          "path": ["login"]
         }
       }
+    },
+    {
+      "name": "🧪 Tạo group PUBLIC dùng cho test invite",
+      "request": {
+        "method": "POST",
+        "header": [
+          {
+            "key": "Authorization",
+            "value": "Bearer {{groupOwnerToken}}"
+          },
+          {
+            "key": "Content-Type",
+            "value": "application/json"
+          }
+        ],
+        "body": {
+          "mode": "raw",
+          "raw": "{\n  \"name\": \"SH-20 Invite {{$timestamp}}\",\n  \"description\": \"Fixture group for invite test\",\n  \"access\": \"PUBLIC\"\n}"
+        },
+        "url": {
+          "raw": "{{groupBaseUrl}}",
+          "host": ["{{groupBaseUrl}}"]
+        }
+      },
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "exec": [
+              "pm.test('Status 201 - Tạo group invite thành công', () => pm.response.to.have.status(201));",
+              "const json = pm.response.json();",
+              "if (json.data?.id) pm.collectionVariables.set('groupId', json.data.id);"
+            ]
+          }
+        }
+      ]
     },
     {
       "name": "✅ [Manager] Mời thành viên vào group (invite)",
@@ -175,13 +198,8 @@
         },
         "url": {
           "raw": "{{groupBaseUrl}}/{{groupId}}/invite",
-          "host": [
-            "{{groupBaseUrl}}"
-          ],
-          "path": [
-            "{{groupId}}",
-            "invite"
-          ]
+          "host": ["{{groupBaseUrl}}"],
+          "path": ["{{groupId}}", "invite"]
         }
       }
     },
@@ -221,17 +239,12 @@
         ],
         "body": {
           "mode": "raw",
-          "raw": "{\n  \"user_id\": \"{{userId}}\"\n}"
+          "raw": "{\n  \"user_id\": \"{{anotherUserId}}\"\n}"
         },
         "url": {
           "raw": "{{groupBaseUrl}}/{{groupId}}/invite",
-          "host": [
-            "{{groupBaseUrl}}"
-          ],
-          "path": [
-            "{{groupId}}",
-            "invite"
-          ]
+          "host": ["{{groupBaseUrl}}"],
+          "path": ["{{groupId}}", "invite"]
         }
       }
     }
