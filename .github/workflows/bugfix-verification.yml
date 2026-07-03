@@ -317,6 +317,13 @@ jobs:
             echo "JEST_STATUS=PASS" >> "$GITHUB_ENV"
           fi
 
+      - name: Print Docker Compose Logs on Failure
+        if: always() && env.HAS_POSTMAN == 'true' && env.START_DOCKER_EFFECTIVE == 'true'
+        run: |
+          cd deployment/docker
+          echo "=== AUTH-SERVICE LOGS ==="
+          docker compose logs auth-service
+
       - name: Resolve Verification Status
         if: always()
         run: |

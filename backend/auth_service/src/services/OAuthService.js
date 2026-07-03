@@ -84,7 +84,7 @@ export class OAuthService {
           user = await this.userRepo.create({
             id: uuidv4(),
             user_name: provider_user.name || provider_user.email.split("@")[0],
-            password_hash: null,
+            password_hash: "",
             status: "active",
             created_at: new Date(),
           });
@@ -104,7 +104,7 @@ export class OAuthService {
         user = await this.userRepo.create({
           id: uuidv4(),
           user_name: provider_user.name || `user_${Date.now()}`,
-          password_hash: null,
+          password_hash: "",
           status: "active",
           created_at: new Date(),
         });

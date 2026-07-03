@@ -267,14 +267,19 @@ export class AuthService {
 
     // ======== FIND USER BY USERNAME ========
     else {
+      console.log(`[DEBUG LOGIN] Logging in by username: ${user_name}`);
       user = await this.userRepo.findByUserName(user_name);
+      console.log(`[DEBUG LOGIN] Found user:`, user ? user.toJSON() : null);
       if (!user) throw new Error("Username not found");
 
       const emails = await this.userEmailRepo.getUserEmails(user.id);
+      console.log(`[DEBUG LOGIN] Found emails:`, emails.map(e => e.toJSON()));
       emailRow = emails.find((e) => e.is_verified);
+      console.log(`[DEBUG LOGIN] Found verified emailRow:`, emailRow ? emailRow.toJSON() : null);
 
       if (!emailRow) {
         const primaryEmail = emails[0];
+        console.log(`[DEBUG LOGIN] Primary email is:`, primaryEmail ? primaryEmail.toJSON() : null);
         await this.sendVerificationEmail(
           { ...primaryEmail, user_name: user.user_name },
           user_agent,
