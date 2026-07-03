@@ -38,12 +38,8 @@
         },
         "url": {
           "raw": "{{authBaseUrl}}/login",
-          "host": [
-            "{{authBaseUrl}}"
-          ],
-          "path": [
-            "login"
-          ]
+          "host": ["{{authBaseUrl}}"],
+          "path": ["login"]
         }
       }
     },
@@ -80,12 +76,8 @@
         },
         "url": {
           "raw": "{{authBaseUrl}}/login",
-          "host": [
-            "{{authBaseUrl}}"
-          ],
-          "path": [
-            "login"
-          ]
+          "host": ["{{authBaseUrl}}"],
+          "path": ["login"]
         }
       }
     },
@@ -121,14 +113,46 @@
         },
         "url": {
           "raw": "{{authBaseUrl}}/login",
-          "host": [
-            "{{authBaseUrl}}"
-          ],
-          "path": [
-            "login"
-          ]
+          "host": ["{{authBaseUrl}}"],
+          "path": ["login"]
         }
       }
+    },
+    {
+      "name": "🧪 Tạo group dùng cho test xóa",
+      "request": {
+        "method": "POST",
+        "header": [
+          {
+            "key": "Authorization",
+            "value": "Bearer {{groupOwnerToken}}"
+          },
+          {
+            "key": "Content-Type",
+            "value": "application/json"
+          }
+        ],
+        "body": {
+          "mode": "raw",
+          "raw": "{\n  \"name\": \"SH-23 Delete {{$timestamp}}\",\n  \"description\": \"Fixture group for delete test\",\n  \"access\": \"PUBLIC\"\n}"
+        },
+        "url": {
+          "raw": "{{groupBaseUrl}}",
+          "host": ["{{groupBaseUrl}}"]
+        }
+      },
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "exec": [
+              "pm.test('Status 201 - Tạo group delete thành công', () => pm.response.to.have.status(201));",
+              "const json = pm.response.json();",
+              "if (json.data?.id) pm.collectionVariables.set('emptyGroupId', json.data.id);"
+            ]
+          }
+        }
+      ]
     },
     {
       "name": "✅ [Owner] Xóa group",
@@ -142,12 +166,8 @@
         ],
         "url": {
           "raw": "{{groupBaseUrl}}/{{emptyGroupId}}",
-          "host": [
-            "{{groupBaseUrl}}"
-          ],
-          "path": [
-            "{{emptyGroupId}}"
-          ]
+          "host": ["{{groupBaseUrl}}"],
+          "path": ["{{emptyGroupId}}"]
         }
       },
       "event": [
@@ -173,12 +193,8 @@
         ],
         "url": {
           "raw": "{{groupBaseUrl}}/{{groupId}}",
-          "host": [
-            "{{groupBaseUrl}}"
-          ],
-          "path": [
-            "{{groupId}}"
-          ]
+          "host": ["{{groupBaseUrl}}"],
+          "path": ["{{groupId}}"]
         }
       },
       "event": [
@@ -204,12 +220,8 @@
         ],
         "url": {
           "raw": "{{groupBaseUrl}}/{{groupId}}",
-          "host": [
-            "{{groupBaseUrl}}"
-          ],
-          "path": [
-            "{{groupId}}"
-          ]
+          "host": ["{{groupBaseUrl}}"],
+          "path": ["{{groupId}}"]
         }
       },
       "event": [
