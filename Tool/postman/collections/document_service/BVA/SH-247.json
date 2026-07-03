@@ -1,0 +1,151 @@
+{
+  "info": {
+    "name": "SH-247: Boundary Bookmark Tài liệu",
+    "description": "Boundary Value Analysis bổ sung cho SH-66. File gốc SH-66.json không bị sửa.",
+    "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+  },
+  "item": [
+    {
+      "name": "Login user thường",
+      "request": {
+        "method": "POST",
+        "header": [{ "key": "Content-Type", "value": "application/json" }],
+        "body": {
+          "mode": "raw",
+          "raw": "{\n  \"email\": \"{{userEmail}}\",\n  \"password\": \"{{password}}\"\n}"
+        },
+        "url": "{{authBaseUrl}}/login"
+      },
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "type": "text/javascript",
+            "exec": [
+              "pm.test('Login 200', () => pm.response.to.have.status(200));",
+              "var data = (pm.response.json().data || pm.response.json());",
+              "pm.collectionVariables.set('accessToken', data.access_token);"
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "name": "BVA bookmark status - valid document_id",
+      "request": {
+        "method": "GET",
+        "header": [
+          { "key": "Authorization", "value": "Bearer {{accessToken}}" }
+        ],
+        "url": "{{documentBaseUrl}}/interactions/{{documentId}}/bookmark"
+      },
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "type": "text/javascript",
+            "exec": [
+              "pm.test('Status 200', () => pm.response.to.have.status(200));",
+              "pm.test('Có bookmarked boolean', () => pm.expect(pm.response.json().bookmarked).to.be.a('boolean'));"
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "name": "BVA toggle bookmark - valid document_id",
+      "request": {
+        "method": "POST",
+        "header": [
+          { "key": "Authorization", "value": "Bearer {{accessToken}}" }
+        ],
+        "url": "{{documentBaseUrl}}/interactions/{{documentId}}/bookmark"
+      },
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "type": "text/javascript",
+            "exec": [
+              "pm.test('Status 200', () => pm.response.to.have.status(200));"
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "name": "BVA toggle bookmark - document_id nil UUID",
+      "request": {
+        "method": "POST",
+        "header": [
+          { "key": "Authorization", "value": "Bearer {{accessToken}}" }
+        ],
+        "url": "{{documentBaseUrl}}/interactions/00000000-0000-0000-0000-000000000000/bookmark"
+      },
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "type": "text/javascript",
+            "exec": [
+              "pm.test('Status 400 hoặc 404', () => pm.expect([400, 404]).to.include(pm.response.code));"
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "name": "BVA toggle bookmark - document_id sai format",
+      "request": {
+        "method": "POST",
+        "header": [
+          { "key": "Authorization", "value": "Bearer {{accessToken}}" }
+        ],
+        "url": "{{documentBaseUrl}}/interactions/not-a-uuid/bookmark"
+      },
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "type": "text/javascript",
+            "exec": [
+              "pm.test('Status lỗi', () => pm.expect([400, 404]).to.include(pm.response.code));"
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "name": "Cleanup toggle bookmark lần 2",
+      "request": {
+        "method": "POST",
+        "header": [
+          { "key": "Authorization", "value": "Bearer {{accessToken}}" }
+        ],
+        "url": "{{documentBaseUrl}}/interactions/{{documentId}}/bookmark"
+      },
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "type": "text/javascript",
+            "exec": [
+              "pm.test('Status 200', () => pm.response.to.have.status(200));"
+            ]
+          }
+        }
+      ]
+    }
+  ],
+  "variable": [
+    { "key": "authBaseUrl", "value": "http://localhost:3000/api/v1/auth" },
+    {
+      "key": "documentBaseUrl",
+      "value": "http://localhost:3003/api/v1/document"
+    },
+    { "key": "userEmail", "value": "user1@example.com" },
+    { "key": "password", "value": "11111111" },
+    { "key": "documentId", "value": "1111-0001-4111-8111-aaaaaaaa0001" },
+    { "key": "accessToken", "value": "" }
+  ]
+}

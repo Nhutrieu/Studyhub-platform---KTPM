@@ -16,7 +16,7 @@ export default class DocumentRepository extends BaseRepository {
   /** Count documents */
   async countAllDocuments() {
     const [rows] = await this.pool.query(
-      "SELECT COUNT(*) AS count FROM documents"
+      "SELECT COUNT(*) AS count FROM documents",
     );
     return rows[0].count;
   }
@@ -128,7 +128,7 @@ export default class DocumentRepository extends BaseRepository {
     ORDER BY d.created_at DESC
     LIMIT ? OFFSET ?
     `,
-      [limit, offset]
+      [limit, offset],
     );
 
     return rows.map((r) => {
@@ -144,7 +144,7 @@ export default class DocumentRepository extends BaseRepository {
   async findAllOfOwner(owner_id, { limit = 50, offset = 0 } = {}) {
     const [rows] = await this.pool.query(
       `SELECT * FROM documents WHERE owner_id = ? ORDER BY created_at DESC LIMIT ? OFFSET ?`,
-      [owner_id, limit, offset]
+      [owner_id, limit, offset],
     );
     return rows.map((r) => new Document(r));
   }
@@ -153,15 +153,15 @@ export default class DocumentRepository extends BaseRepository {
   async findPublicOfUser(owner_id, { limit = 50, offset = 0 } = {}) {
     const [rows] = await this.pool.query(
       `SELECT * FROM documents WHERE owner_id = ? AND visibility = 'PUBLIC' ORDER BY created_at DESC LIMIT ? OFFSET ?`,
-      [owner_id, limit, offset]
+      [owner_id, limit, offset],
     );
     return rows.map((r) => new Document(r));
   }
 
-async searchByKeyword(keyword, limit = 10, offset = 0) {
-  if (!keyword) return [];
+  async searchByKeyword(keyword, limit = 10, offset = 0) {
+    if (!keyword) return [];
 
-  const sql = `
+    const sql = `
   SELECT *
   FROM (
     SELECT t.*,
@@ -196,22 +196,22 @@ async searchByKeyword(keyword, limit = 10, offset = 0) {
   LIMIT ? OFFSET ?;
   `;
 
-  const params = [
-    `%${keyword}%`,
-    `%${keyword}%`,
-    `%${keyword}%`,
-    limit,
-    offset,
-  ];
+    const params = [
+      `%${keyword}%`,
+      `%${keyword}%`,
+      `%${keyword}%`,
+      limit,
+      offset,
+    ];
 
-  const [rows] = await this.pool.query(sql, params);
-  return rows;
-}
-
+    const [rows] = await this.pool.query(sql, params);
+    return rows;
+  }
 
   /** Update document by id */
   async update(id, updates) {
-    const row = await super.update(id, updates);
+    await super.updateById(id, updates);
+    const row = await super.findById(id);
     return row ? new Document(row) : null;
   }
 

@@ -1,0 +1,212 @@
+{
+  "info": {
+    "name": "SH-250: Boundary Duyệt & Từ chối Tài liệu Group",
+    "description": "Boundary Value Analysis bổ sung cho SH-69. File gốc SH-69.json không bị sửa.",
+    "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+  },
+  "item": [
+    {
+      "name": "Login group manager",
+      "request": {
+        "method": "POST",
+        "header": [{ "key": "Content-Type", "value": "application/json" }],
+        "body": {
+          "mode": "raw",
+          "raw": "{\n  \"email\": \"{{groupManagerEmail}}\",\n  \"password\": \"{{password}}\"\n}"
+        },
+        "url": "{{authBaseUrl}}/login"
+      },
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "type": "text/javascript",
+            "exec": [
+              "pm.test('Login 200', () => pm.response.to.have.status(200));",
+              "var data = (pm.response.json().data || pm.response.json());",
+              "pm.collectionVariables.set('groupManagerNotOwnerToken', data.access_token);"
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "name": "Login user thường",
+      "request": {
+        "method": "POST",
+        "header": [{ "key": "Content-Type", "value": "application/json" }],
+        "body": {
+          "mode": "raw",
+          "raw": "{\n  \"email\": \"{{userEmail}}\",\n  \"password\": \"{{password}}\"\n}"
+        },
+        "url": "{{authBaseUrl}}/login"
+      },
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "type": "text/javascript",
+            "exec": [
+              "pm.test('Login 200', () => pm.response.to.have.status(200));",
+              "var data = (pm.response.json().data || pm.response.json());",
+              "pm.collectionVariables.set('accessToken', data.access_token);"
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "name": "BVA approve - thiếu group_id",
+      "request": {
+        "method": "POST",
+        "header": [
+          {
+            "key": "Authorization",
+            "value": "Bearer {{groupManagerNotOwnerToken}}"
+          },
+          { "key": "Content-Type", "value": "application/json" }
+        ],
+        "body": { "mode": "raw", "raw": "{}" },
+        "url": "{{documentBaseUrl}}/interactions/{{pendingDocumentId}}/approve"
+      },
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "type": "text/javascript",
+            "exec": [
+              "pm.test('Status 400', () => pm.response.to.have.status(400));"
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "name": "BVA approve - group_id sai format",
+      "request": {
+        "method": "POST",
+        "header": [
+          {
+            "key": "Authorization",
+            "value": "Bearer {{groupManagerNotOwnerToken}}"
+          },
+          { "key": "Content-Type", "value": "application/json" }
+        ],
+        "body": {
+          "mode": "raw",
+          "raw": "{\n  \"group_id\": \"not-a-uuid\"\n}"
+        },
+        "url": "{{documentBaseUrl}}/interactions/{{pendingDocumentId}}/approve"
+      },
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "type": "text/javascript",
+            "exec": [
+              "pm.test('Status 400', () => pm.response.to.have.status(400));"
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "name": "BVA approve - document_id nil UUID",
+      "request": {
+        "method": "POST",
+        "header": [
+          {
+            "key": "Authorization",
+            "value": "Bearer {{groupManagerNotOwnerToken}}"
+          },
+          { "key": "Content-Type", "value": "application/json" }
+        ],
+        "body": {
+          "mode": "raw",
+          "raw": "{\n  \"group_id\": \"{{groupId}}\"\n}"
+        },
+        "url": "{{documentBaseUrl}}/interactions/00000000-0000-0000-0000-000000000000/approve"
+      },
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "type": "text/javascript",
+            "exec": [
+              "pm.test('Status 400 hoặc 404', () => pm.expect([400, 404]).to.include(pm.response.code));"
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "name": "BVA approve - member thường bị từ chối",
+      "request": {
+        "method": "POST",
+        "header": [
+          { "key": "Authorization", "value": "Bearer {{accessToken}}" },
+          { "key": "Content-Type", "value": "application/json" }
+        ],
+        "body": {
+          "mode": "raw",
+          "raw": "{\n  \"group_id\": \"{{groupId}}\"\n}"
+        },
+        "url": "{{documentBaseUrl}}/interactions/{{pendingDocumentId}}/approve"
+      },
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "type": "text/javascript",
+            "exec": [
+              "pm.test('Status 400 hoặc 403', () => pm.expect([400, 403]).to.include(pm.response.code));"
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "name": "BVA reject - document_id sai format",
+      "request": {
+        "method": "POST",
+        "header": [
+          {
+            "key": "Authorization",
+            "value": "Bearer {{groupManagerNotOwnerToken}}"
+          },
+          { "key": "Content-Type", "value": "application/json" }
+        ],
+        "body": {
+          "mode": "raw",
+          "raw": "{\n  \"group_id\": \"{{groupId}}\"\n}"
+        },
+        "url": "{{documentBaseUrl}}/interactions/not-a-uuid/reject"
+      },
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "type": "text/javascript",
+            "exec": [
+              "pm.test('Status lỗi', () => pm.expect([400, 404]).to.include(pm.response.code));"
+            ]
+          }
+        }
+      ]
+    }
+  ],
+  "variable": [
+    { "key": "authBaseUrl", "value": "http://localhost:3000/api/v1/auth" },
+    {
+      "key": "documentBaseUrl",
+      "value": "http://localhost:3003/api/v1/document"
+    },
+    { "key": "userEmail", "value": "user1@example.com" },
+    { "key": "groupManagerEmail", "value": "user4@example.com" },
+    { "key": "password", "value": "11111111" },
+    { "key": "groupId", "value": "aaaaaaaa-aaaa-4aaa-8aaa-aaaaaaaaaaa1" },
+    { "key": "pendingDocumentId", "value": "1119-0003-4111-8111-aaaaaaaa0027" },
+    { "key": "accessToken", "value": "" },
+    { "key": "groupManagerNotOwnerToken", "value": "" }
+  ]
+}
