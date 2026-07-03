@@ -24,6 +24,9 @@ export class ChatService {
      * Get or create a direct conversation between two users
      */
     async getOrCreateDirectConversation(user_id, target_user_id) {
+        if (user_id === target_user_id) {
+            throw this._createError("Cannot create direct conversation with yourself", 400);
+        }
         // Check if conversation already exists
         let conversation = await this.conversationRepo.findDirectConversation(
             user_id,
