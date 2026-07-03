@@ -38,12 +38,8 @@
         },
         "url": {
           "raw": "{{authBaseUrl}}/login",
-          "host": [
-            "{{authBaseUrl}}"
-          ],
-          "path": [
-            "login"
-          ]
+          "host": ["{{authBaseUrl}}"],
+          "path": ["login"]
         }
       }
     },
@@ -59,12 +55,8 @@
         ],
         "url": {
           "raw": "{{groupBaseUrl}}/{{groupId}}",
-          "host": [
-            "{{groupBaseUrl}}"
-          ],
-          "path": [
-            "{{groupId}}"
-          ]
+          "host": ["{{groupBaseUrl}}"],
+          "path": ["{{groupId}}"]
         }
       },
       "event": [
@@ -91,12 +83,8 @@
         ],
         "url": {
           "raw": "{{groupBaseUrl}}/00000000-0000-0000-0000-000000000000",
-          "host": [
-            "{{groupBaseUrl}}"
-          ],
-          "path": [
-            "00000000-0000-0000-0000-000000000000"
-          ]
+          "host": ["{{groupBaseUrl}}"],
+          "path": ["00000000-0000-0000-0000-000000000000"]
         }
       },
       "event": [
@@ -117,12 +105,8 @@
         "header": [],
         "url": {
           "raw": "{{groupBaseUrl}}/{{groupId}}",
-          "host": [
-            "{{groupBaseUrl}}"
-          ],
-          "path": [
-            "{{groupId}}"
-          ]
+          "host": ["{{groupBaseUrl}}"],
+          "path": ["{{groupId}}"]
         }
       },
       "event": [
