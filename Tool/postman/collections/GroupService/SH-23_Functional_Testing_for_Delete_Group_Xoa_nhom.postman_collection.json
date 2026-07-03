@@ -44,7 +44,7 @@
       }
     },
     {
-      "name": "🔑 Đăng nhập Group Owner (user2) (Lấy Access Token)",
+      "name": "🔑 Đăng nhập Group Owner (user1) (Lấy Access Token)",
       "event": [
         {
           "listen": "test",
@@ -72,7 +72,7 @@
         ],
         "body": {
           "mode": "raw",
-          "raw": "{\n  \"email\": \"user2@example.com\",\n  \"password\": \"11111111\"\n}"
+          "raw": "{\n  \"email\": \"user1@example.com\",\n  \"password\": \"11111111\"\n}"
         },
         "url": {
           "raw": "{{authBaseUrl}}/login",
