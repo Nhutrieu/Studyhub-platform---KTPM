@@ -1,5 +1,5 @@
 import { jest } from "@jest/globals";
- 
+
 // GroupController không import trực tiếp module ngoài nào cần mock ở cấp module,
 // nên chỉ cần load động để đồng nhất theo quy ước ESM của dự án.
 const { GroupController } = await import("../src/controllers/GroupController.js");
@@ -145,7 +145,7 @@ describe("SH-215: Unit Test - GroupController", () => {
  
       await controller.updateAvatar(req, res);
  
-      expect(res.status).toHaveBeenCalledWith(500);
+      expect(res.status).toHaveBeenCalledWith(400);
       expect(res.json).toHaveBeenCalledWith(
         expect.objectContaining({ success: false, message: "No avatar file uploaded" })
       );
@@ -520,4 +520,3 @@ describe("SH-215: Unit Test - GroupController", () => {
     });
   });
 });
- 
