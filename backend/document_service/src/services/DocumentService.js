@@ -104,6 +104,7 @@ export default class DocumentService {
     file,
   }) {
     if (!file) throw new Error("file_required");
+    if (visibility === "GROUP" && !group_id) throw new Error("group_id_required");
 
     const document_id = randomUUID();
     const now = new Date();
@@ -117,14 +118,12 @@ export default class DocumentService {
       filename: ext ? `${publicId}.${ext}` : publicId,
     });
 
-    if (group_id) {
-      const { group, role } = await this.groupClient.getMembership(
+    let approval = null;
+    if (visibility === "GROUP") {
+      approval = await this.groupClient.evaluateDocumentApproval({
         group_id,
-        owner_id,
-      );
-
-      if (!group) throw new Error("group_not_found");
-      if (!role) throw new Error("forbidden");
+        requester_id: owner_id,
+      });
     }
 
     const doc = await this.documentRepo.create({
@@ -139,34 +138,22 @@ export default class DocumentService {
       updated_at: now,
     });
 
+    const createdDocumentId = doc?.id || document_id;
+
     if (tags?.length) {
-      await this.tagRepo.attachTags(document_id, tags);
+      await this.tagRepo.attachTags(createdDocumentId, tags);
     }
 
     if (visibility === "GROUP") {
-      if (!group_id) throw new Error("group_id_required");
-
-      const { group, role } = await this.groupClient.getMembership(
-        group_id,
-        owner_id,
-      );
-
-      if (!group) throw new Error("group_not_found");
-      if (!role) throw new Error("forbidden");
-
-      const autoApprove =
-        Number(group?.auto_approve_docs) === 1 ||
-        ["OWNER", "MODERATOR"].includes(role);
-
       await this.groupDocRepo.createRecord({
         id: randomUUID(),
         group_id,
-        document_id,
-        status: autoApprove ? "APPROVED" : "PENDING",
+        document_id: createdDocumentId,
+        status: approval?.autoApprove ? "APPROVED" : "PENDING",
         submitted_by: owner_id,
-        reviewed_by: autoApprove ? owner_id : null,
+        reviewed_by: approval?.autoApprove ? owner_id : null,
         submitted_at: now,
-        reviewed_at: autoApprove ? now : null,
+        reviewed_at: approval?.autoApprove ? now : null,
       });
     }
 
@@ -318,13 +305,12 @@ export default class DocumentService {
     requester_id,
     { limit = 50, offset = 0 } = {},
   ) {
-    const { group, role } = await this.groupClient.getMembership(
+    const access = await this.groupClient.canViewGroupDocuments(
       group_id,
       requester_id,
     );
 
-    if (!group) throw new Error("group_not_found");
-    if (group.access !== "PUBLIC" && !role) throw new Error("forbidden");
+    if (!access?.allowed) throw new Error(access?.reason || "forbidden");
 
     const docs = await this.groupDocRepo.findApprovedInGroup(group_id, {
       limit,
@@ -338,15 +324,12 @@ export default class DocumentService {
     requester_id,
     { limit = 50, offset = 0 } = {},
   ) {
-    const { group, role } = await this.groupClient.getMembership(
+    const access = await this.groupClient.canViewGroupDocuments(
       group_id,
       requester_id,
     );
 
-    if (!group) throw new Error("group_not_found");
-    if (!role || !["OWNER", "MODERATOR"].includes(role)) {
-      throw new Error("forbidden");
-    }
+    if (!access?.allowed) throw new Error(access?.reason || "forbidden");
 
     const docs = await this.groupDocRepo.findPendingInGroup(group_id, {
       limit,
