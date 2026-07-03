@@ -39,6 +39,56 @@
               "if (target.user && target.user.id) pm.collectionVariables.set('userId', target.user.id);"
             ]
           }
+        },
+        {
+          "listen": "prerequest",
+          "script": {
+            "exec": [
+              "pm.sendRequest({",
+              "    url: pm.collectionVariables.get('authBaseUrl') + '/login',",
+              "    method: 'POST',",
+              "    header: { 'Content-Type': 'application/json' },",
+              "    body: {",
+              "        mode: 'raw',",
+              "        raw: JSON.stringify({ user_name: 'user1', password: '11111111' })",
+              "    }",
+              "}, function (err, res) {",
+              "    if (res && res.code === 200) {",
+              "        console.log('Login with 11111111 succeeded');",
+              "    } else {",
+              "        console.log('Login with 11111111 failed. Trying self-healing with 88888888...');",
+              "        pm.sendRequest({",
+              "            url: pm.collectionVariables.get('authBaseUrl') + '/login',",
+              "            method: 'POST',",
+              "            header: { 'Content-Type': 'application/json' },",
+              "            body: {",
+              "                mode: 'raw',",
+              "                raw: JSON.stringify({ user_name: 'user1', password: '88888888' })",
+              "            }",
+              "        }, function (err2, res2) {",
+              "            if (res2 && res2.code === 200) {",
+              "                const token = (res2.json().data || res2.json()).access_token;",
+              "                pm.sendRequest({",
+              "                    url: pm.collectionVariables.get('authBaseUrl') + '/change-password',",
+              "                    method: 'POST',",
+              "                    header: {",
+              "                        'Authorization': 'Bearer ' + token,",
+              "                        'Content-Type': 'application/json'",
+              "                    },",
+              "                    body: {",
+              "                        mode: 'raw',",
+              "                        raw: JSON.stringify({ old_password: '88888888', new_password: '11111111' })",
+              "                    }",
+              "                }, function (err3, res3) {",
+              "                    console.log('Password self-healed back to 11111111:', res3.code);",
+              "                });",
+              "            }",
+              "        });",
+              "    }",
+              "});"
+            ],
+            "type": "text/javascript"
+          }
         }
       ]
     },
@@ -175,6 +225,16 @@
     },
     {
       "key": "userId",
+      "value": "",
+      "type": "string"
+    },
+    {
+      "key": "bvaUser",
+      "value": "",
+      "type": "string"
+    },
+    {
+      "key": "bvaEmail",
       "value": "",
       "type": "string"
     }
