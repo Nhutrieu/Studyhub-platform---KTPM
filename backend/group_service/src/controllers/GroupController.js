@@ -81,7 +81,11 @@ export class GroupController {
       const { group_id } = req.params;
       const file = req.file;
 
-      if (!file) throw new Error("No avatar file uploaded");
+      if (!file) {
+        return res
+          .status(400)
+          .json({ success: false, message: "No avatar file uploaded" });
+      }
 
       const updated = await this.groupService.updateAvatar(group_id, file);
 

@@ -47,11 +47,23 @@ export class MemberService {
     return true;
   }
 
-  async changeRole(group_id, target_id, role, actor_id) {
+  async changeRole(group_id, target_id, role, actor_id, options = {}) {
+    const normalizedRole = String(role || "").toUpperCase();
+    const allowedRoles = options.allowOwner
+      ? ["OWNER", "MODERATOR", "MEMBER"]
+      : ["MODERATOR", "MEMBER"];
+
+    if (!allowedRoles.includes(normalizedRole)) {
+      if (normalizedRole === "OWNER" && !options.allowOwner) {
+        throw createError("Use transfer ownership route to assign OWNER", 400);
+      }
+      throw createError("Invalid member role", 400);
+    }
+
     const member = await this.memberRepo.getMember(group_id, target_id);
     if (!member) throw createError("Member not found", 404);
 
-    const updated = await this.memberRepo.updateRole(group_id, target_id, role);
+    const updated = await this.memberRepo.updateRole(group_id, target_id, normalizedRole);
     await this.activityRepo.logActivity({
       id: uuidv4(),
       group_id,

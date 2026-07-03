@@ -6,13 +6,13 @@
   },
   "item": [
     {
-      "name": "🔑 Đăng nhập User thường (user1) (Lấy Access Token)",
+      "name": "🔑 Đăng nhập Group Owner (user1) để tạo group test",
       "event": [
         {
           "listen": "test",
           "script": {
             "exec": [
-              "pm.test('Status 200 - Đăng nhập User thường (user1) thành công', () => pm.response.to.have.status(200));",
+              "pm.test('Status 200 - Đăng nhập Group Owner (user1) thành công', () => pm.response.to.have.status(200));",
               "const json = pm.response.json();",
               "const resData = json.data || json;",
               "if (resData.access_token) {",
@@ -38,12 +38,118 @@
         },
         "url": {
           "raw": "{{authBaseUrl}}/login",
-          "host": [
-            "{{authBaseUrl}}"
-          ],
-          "path": [
-            "login"
-          ]
+          "host": ["{{authBaseUrl}}"],
+          "path": ["login"]
+        }
+      }
+    },
+    {
+      "name": "🧪 Tạo group PUBLIC dùng cho test join",
+      "request": {
+        "method": "POST",
+        "header": [
+          {
+            "key": "Authorization",
+            "value": "Bearer {{accessToken}}"
+          },
+          {
+            "key": "Content-Type",
+            "value": "application/json"
+          }
+        ],
+        "body": {
+          "mode": "raw",
+          "raw": "{\n  \"name\": \"SH-17 Public {{$timestamp}}\",\n  \"description\": \"Fixture group for join test\",\n  \"access\": \"PUBLIC\"\n}"
+        },
+        "url": {
+          "raw": "{{groupBaseUrl}}",
+          "host": ["{{groupBaseUrl}}"]
+        }
+      },
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "exec": [
+              "pm.test('Status 201 - Tạo group public thành công', () => pm.response.to.have.status(201));",
+              "const json = pm.response.json();",
+              "if (json.data?.id) pm.collectionVariables.set('groupId', json.data.id);"
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "name": "🧪 Tạo group RESTRICTED dùng cho test join request",
+      "request": {
+        "method": "POST",
+        "header": [
+          {
+            "key": "Authorization",
+            "value": "Bearer {{accessToken}}"
+          },
+          {
+            "key": "Content-Type",
+            "value": "application/json"
+          }
+        ],
+        "body": {
+          "mode": "raw",
+          "raw": "{\n  \"name\": \"SH-17 Restricted {{$timestamp}}\",\n  \"description\": \"Fixture group for join request test\",\n  \"access\": \"RESTRICTED\"\n}"
+        },
+        "url": {
+          "raw": "{{groupBaseUrl}}",
+          "host": ["{{groupBaseUrl}}"]
+        }
+      },
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "exec": [
+              "pm.test('Status 201 - Tạo group restricted thành công', () => pm.response.to.have.status(201));",
+              "const json = pm.response.json();",
+              "if (json.data?.id) pm.collectionVariables.set('privateGroupId', json.data.id);"
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "name": "🔑 Đăng nhập User thường (user8) (Lấy Access Token)",
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "exec": [
+              "pm.test('Status 200 - Đăng nhập User thường (user8) thành công', () => pm.response.to.have.status(200));",
+              "const json = pm.response.json();",
+              "const resData = json.data || json;",
+              "if (resData.access_token) {",
+              "    pm.collectionVariables.set('accessToken', resData.access_token);",
+              "    pm.collectionVariables.set('userId', resData.user && resData.user.id);",
+              "}"
+            ],
+            "type": "text/javascript"
+          }
+        }
+      ],
+      "request": {
+        "method": "POST",
+        "header": [
+          {
+            "key": "Content-Type",
+            "value": "application/json"
+          }
+        ],
+        "body": {
+          "mode": "raw",
+          "raw": "{\n  \"email\": \"user8@example.com\",\n  \"password\": \"11111111\"\n}"
+        },
+        "url": {
+          "raw": "{{authBaseUrl}}/login",
+          "host": ["{{authBaseUrl}}"],
+          "path": ["login"]
         }
       }
     },
@@ -59,7 +165,7 @@
               "const groups = json.data?.items || json.data || json;",
               "if (Array.isArray(groups)) {",
               "    const publicGroup = groups.find(g => g.access === 'PUBLIC' || g.type === 'PUBLIC' || g.isPrivate === false);",
-              "    const privateGroup = groups.find(g => ['PRIVATE', 'RESTRICTED'].includes(g.access || g.type) || g.isPrivate === true);",
+              "    const privateGroup = groups.find(g => g.access === 'RESTRICTED' || g.access === 'PRIVATE' || g.type === 'RESTRICTED' || g.type === 'PRIVATE' || g.isPrivate === true);",
               "    if (publicGroup) pm.collectionVariables.set('groupId', publicGroup.id);",
               "    else if (groups.length > 0) pm.collectionVariables.set('groupId', groups[0].id);",
               "    if (privateGroup) pm.collectionVariables.set('privateGroupId', privateGroup.id);",
@@ -80,9 +186,7 @@
         ],
         "url": {
           "raw": "{{groupBaseUrl}}",
-          "host": [
-            "{{groupBaseUrl}}"
-          ]
+          "host": ["{{groupBaseUrl}}"]
         }
       }
     },
@@ -98,13 +202,8 @@
         ],
         "url": {
           "raw": "{{groupBaseUrl}}/{{groupId}}/join",
-          "host": [
-            "{{groupBaseUrl}}"
-          ],
-          "path": [
-            "{{groupId}}",
-            "join"
-          ]
+          "host": ["{{groupBaseUrl}}"],
+          "path": ["{{groupId}}", "join"]
         }
       },
       "event": [
@@ -119,7 +218,7 @@
       ]
     },
     {
-      "name": "✅ Yêu cầu tham gia group RESTRICTED (join - tạo join request chờ duyệt)",
+      "name": "✅ Yêu cầu tham gia group PRIVATE (join - tạo join request chờ duyệt)",
       "request": {
         "method": "POST",
         "header": [
@@ -130,13 +229,8 @@
         ],
         "url": {
           "raw": "{{groupBaseUrl}}/{{privateGroupId}}/join",
-          "host": [
-            "{{groupBaseUrl}}"
-          ],
-          "path": [
-            "{{privateGroupId}}",
-            "join"
-          ]
+          "host": ["{{groupBaseUrl}}"],
+          "path": ["{{privateGroupId}}", "join"]
         }
       },
       "event": [
@@ -144,7 +238,7 @@
           "listen": "test",
           "script": {
             "exec": [
-              "pm.test('Status 200, 400 nếu group restricted đã bị xóa, hoặc 500 nếu join request đã tồn tại', () => pm.expect([200, 400, 500]).to.include(pm.response.code));",
+              "pm.test('Status 200', () => pm.response.to.have.status(200));",
               "const json = pm.response.json();",
               "if (json.data?.id) pm.collectionVariables.set('joinRequestId', json.data.id);"
             ]
@@ -153,7 +247,7 @@
       ]
     },
     {
-      "name": "✅ Tham gia group đã là member rồi - trả về member hiện tại",
+      "name": "❌ Tham gia group đã là member rồi",
       "request": {
         "method": "POST",
         "header": [
@@ -164,13 +258,8 @@
         ],
         "url": {
           "raw": "{{groupBaseUrl}}/{{groupId}}/join",
-          "host": [
-            "{{groupBaseUrl}}"
-          ],
-          "path": [
-            "{{groupId}}",
-            "join"
-          ]
+          "host": ["{{groupBaseUrl}}"],
+          "path": ["{{groupId}}", "join"]
         }
       },
       "event": [
@@ -178,7 +267,7 @@
           "listen": "test",
           "script": {
             "exec": [
-              "pm.test('Status 200', () => pm.response.to.have.status(200));"
+              "pm.test('Status 400', () => pm.response.to.have.status(400));"
             ]
           }
         }
@@ -196,13 +285,8 @@
         ],
         "url": {
           "raw": "{{groupBaseUrl}}/00000000-0000-0000-0000-000000000000/join",
-          "host": [
-            "{{groupBaseUrl}}"
-          ],
-          "path": [
-            "00000000-0000-0000-0000-000000000000",
-            "join"
-          ]
+          "host": ["{{groupBaseUrl}}"],
+          "path": ["00000000-0000-0000-0000-000000000000", "join"]
         }
       },
       "event": [
@@ -210,7 +294,7 @@
           "listen": "test",
           "script": {
             "exec": [
-              "pm.test('Status 400 hoặc 404', () => pm.expect([400, 404]).to.include(pm.response.code));"
+              "pm.test('Status 400', () => pm.expect([400]).to.include(pm.response.code));"
             ]
           }
         }
@@ -330,17 +414,17 @@
     },
     {
       "key": "groupId",
-      "value": "aaaaaaaa-aaaa-4aaa-8aaa-aaaaaaaaaaa1",
+      "value": "",
       "type": "string"
     },
     {
       "key": "privateGroupId",
-      "value": "aaaaaaaa-aaaa-4aaa-8aaa-aaaaaaaaaaa2",
+      "value": "",
       "type": "string"
     },
     {
       "key": "emptyGroupId",
-      "value": "aaaaaaaa-aaaa-4aaa-8aaa-aaaaaaaaaaa2",
+      "value": "{{REPLACE_WITH_GROUP_ID_SAFE_TO_DELETE}}",
       "type": "string"
     },
     {

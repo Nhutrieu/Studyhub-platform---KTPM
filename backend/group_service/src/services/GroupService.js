@@ -106,7 +106,9 @@ export class GroupService {
   }
 
   async getGroupDetail(group_id, user_id) {
-    return this.groupRepo.getGroupById(group_id, user_id);
+    const group = await this.groupRepo.getGroupById(group_id, user_id);
+    if (!group) throw createError("Group not found", 404);
+    return group;
   }
 
   async listGroupsByUser(user_id, options = {}) {
@@ -174,7 +176,7 @@ export class GroupService {
     if (!group) throw createError("Group not found");
 
     const existed = await this.memberRepo.getMember(group_id, user_id);
-    if (existed) return existed;
+    if (existed) throw createError("User is already a member", 400);
 
     if (group.access === "PUBLIC") {
       const member = await this.memberRepo.addMember({
@@ -255,7 +257,7 @@ export class GroupService {
       throw createError("No permission to invite", 403);
 
     const existed = await this.memberRepo.getMember(group_id, target_id);
-    if (existed) return existed;
+    if (existed) throw createError("User is already a member", 400);
 
     if (group.access === "PUBLIC") {
       const member = await this.memberRepo.addMember({
