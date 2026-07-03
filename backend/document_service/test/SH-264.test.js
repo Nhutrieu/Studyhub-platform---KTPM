@@ -178,6 +178,50 @@ describe("DocumentService (SH-264)", () => {
       ).rejects.toThrow("group_id_required");
     });
 
+    it("tu hieu la document GROUP khi co group_id nhung khong truyen visibility", async () => {
+      groupClient.evaluateDocumentApproval.mockResolvedValue({ autoApprove: false });
+      uploadToCloudinary.mockResolvedValue({ secure_url: "https://cdn.test/x" });
+      documentRepo.create.mockResolvedValue(
+        buildDoc({ visibility: "GROUP", group_id: "group-1" })
+      );
+
+      await service.createDocument({
+        owner_id: "user-1",
+        title: "Implicit group doc",
+        group_id: "group-1",
+        file: { originalname: "a.pdf", buffer: Buffer.from("x") },
+      });
+
+      expect(groupClient.evaluateDocumentApproval).toHaveBeenCalledWith({
+        group_id: "group-1",
+        requester_id: "user-1",
+      });
+      expect(documentRepo.create).toHaveBeenCalledWith(
+        expect.objectContaining({ visibility: "GROUP" })
+      );
+      expect(groupDocRepo.createRecord).toHaveBeenCalledWith(
+        expect.objectContaining({ status: "PENDING" })
+      );
+    });
+
+    it("khong upload file khi user khong phai thanh vien group", async () => {
+      groupClient.evaluateDocumentApproval.mockRejectedValue(
+        new Error("not_group_member")
+      );
+
+      await expect(
+        service.createDocument({
+          owner_id: "user-outside",
+          title: "Forbidden group doc",
+          group_id: "group-1",
+          file: { originalname: "a.pdf", buffer: Buffer.from("x") },
+        })
+      ).rejects.toThrow("not_group_member");
+
+      expect(uploadToCloudinary).not.toHaveBeenCalled();
+      expect(documentRepo.create).not.toHaveBeenCalled();
+    });
+
     it("tạo record GROUP với status APPROVED khi autoApprove=true", async () => {
       uploadToCloudinary.mockResolvedValue({ secure_url: "https://cdn.test/x" });
       documentRepo.create.mockResolvedValue(
