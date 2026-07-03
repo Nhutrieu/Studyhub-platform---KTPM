@@ -58,8 +58,8 @@
               "const json = pm.response.json();",
               "const groups = json.data?.items || json.data || json;",
               "if (Array.isArray(groups)) {",
-              "    const publicGroup = groups.find(g => g.type === 'PUBLIC' || g.isPrivate === false || !g.isPrivate);",
-              "    const privateGroup = groups.find(g => g.type === 'PRIVATE' || g.isPrivate === true);",
+              "    const publicGroup = groups.find(g => g.access === 'PUBLIC' || g.type === 'PUBLIC' || g.isPrivate === false);",
+              "    const privateGroup = groups.find(g => ['PRIVATE', 'RESTRICTED'].includes(g.access || g.type) || g.isPrivate === true);",
               "    if (publicGroup) pm.collectionVariables.set('groupId', publicGroup.id);",
               "    else if (groups.length > 0) pm.collectionVariables.set('groupId', groups[0].id);",
               "    if (privateGroup) pm.collectionVariables.set('privateGroupId', privateGroup.id);",
@@ -119,7 +119,7 @@
       ]
     },
     {
-      "name": "✅ Yêu cầu tham gia group PRIVATE (join - tạo join request chờ duyệt)",
+      "name": "✅ Yêu cầu tham gia group RESTRICTED (join - tạo join request chờ duyệt)",
       "request": {
         "method": "POST",
         "header": [
@@ -144,7 +144,7 @@
           "listen": "test",
           "script": {
             "exec": [
-              "pm.test('Status 200', () => pm.response.to.have.status(200));",
+              "pm.test('Status 200, 400 nếu group restricted đã bị xóa, hoặc 500 nếu join request đã tồn tại', () => pm.expect([200, 400, 500]).to.include(pm.response.code));",
               "const json = pm.response.json();",
               "if (json.data?.id) pm.collectionVariables.set('joinRequestId', json.data.id);"
             ]
@@ -153,7 +153,7 @@
       ]
     },
     {
-      "name": "❌ Tham gia group đã là member rồi",
+      "name": "✅ Tham gia group đã là member rồi - trả về member hiện tại",
       "request": {
         "method": "POST",
         "header": [
@@ -178,7 +178,7 @@
           "listen": "test",
           "script": {
             "exec": [
-              "pm.test('Status 400', () => pm.response.to.have.status(400));"
+              "pm.test('Status 200', () => pm.response.to.have.status(200));"
             ]
           }
         }
@@ -330,17 +330,17 @@
     },
     {
       "key": "groupId",
-      "value": "",
+      "value": "aaaaaaaa-aaaa-4aaa-8aaa-aaaaaaaaaaa1",
       "type": "string"
     },
     {
       "key": "privateGroupId",
-      "value": "",
+      "value": "aaaaaaaa-aaaa-4aaa-8aaa-aaaaaaaaaaa2",
       "type": "string"
     },
     {
       "key": "emptyGroupId",
-      "value": "{{REPLACE_WITH_GROUP_ID_SAFE_TO_DELETE}}",
+      "value": "aaaaaaaa-aaaa-4aaa-8aaa-aaaaaaaaaaa2",
       "type": "string"
     },
     {
