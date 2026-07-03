@@ -218,6 +218,23 @@ describe('ProfileController - Unit Test', () => {
       expect(res.status).toHaveBeenCalledWith(500);
       expect(res.json).toHaveBeenCalledWith({ error: 'Internal server error' });
     });
+
+    it('should return 400 for invalid pagination boundaries', async () => {
+      req.query = { query: 'test', limit: '0', offset: '0' };
+
+      await controller.searchUsers(req, res);
+
+      expect(res.status).toHaveBeenCalledWith(400);
+      expect(profileServiceMock.searchUsers).not.toHaveBeenCalled();
+
+      jest.clearAllMocks();
+      req.query = { query: 'test', limit: '10', offset: '-1' };
+
+      await controller.searchUsers(req, res);
+
+      expect(res.status).toHaveBeenCalledWith(400);
+      expect(profileServiceMock.searchUsers).not.toHaveBeenCalled();
+    });
   });
 
   describe('socialLinks & interests', () => {
@@ -228,7 +245,7 @@ describe('ProfileController - Unit Test', () => {
 
       await controller.addSocialLink(req, res);
 
-      expect(profileServiceMock.addSocialLink).toHaveBeenCalledWith('user-123', 'https://github.com');
+      expect(profileServiceMock.addSocialLink).toHaveBeenCalledWith('user-123', 'https://github.com', undefined);
       expect(res.json).toHaveBeenCalledWith({ id: 'link-1' });
     });
 

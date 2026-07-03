@@ -91,11 +91,29 @@ export class ProfileController {
   async searchUsers(req, res) {
     try {
       const { query, limit, offset } = req.query;
+      const limitNum = limit === undefined ? 5 : Number(limit);
+      const offsetNum = offset === undefined ? 0 : Number(offset);
+
+      if (
+        !Number.isInteger(limitNum) ||
+        limitNum < 1 ||
+        limitNum > 100
+      ) {
+        return res
+          .status(400)
+          .json({ error: "limit must be an integer from 1 to 100" });
+      }
+
+      if (!Number.isInteger(offsetNum) || offsetNum < 0) {
+        return res
+          .status(400)
+          .json({ error: "offset must be a non-negative integer" });
+      }
 
       const users = await this.profileService.searchUsers({
         keyword: query,
-        limit: Number(limit) || 5,
-        offset: Number(offset) || 0,
+        limit: limitNum,
+        offset: offsetNum,
       });
 
       return res.json(users);
@@ -110,7 +128,8 @@ export class ProfileController {
     try {
       const updated = await this.profileService.addSocialLink(
         params.user_id,
-        body.url
+        body.url,
+        body.platform
       );
       res.json(updated);
     } catch (err) {
