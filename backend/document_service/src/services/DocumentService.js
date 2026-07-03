@@ -98,13 +98,24 @@ export default class DocumentService {
     owner_id,
     title,
     description,
-    visibility = "PUBLIC",
+    visibility,
     tags = [],
     group_id = null,
     file,
   }) {
     if (!file) throw new Error("file_required");
-    if (visibility === "GROUP" && !group_id) throw new Error("group_id_required");
+
+    const normalizedVisibility = (
+      visibility || (group_id ? "GROUP" : "PUBLIC")
+    ).toUpperCase();
+
+    if (!["PUBLIC", "PRIVATE", "GROUP"].includes(normalizedVisibility)) {
+      throw new Error("invalid_visibility");
+    }
+
+    if (normalizedVisibility === "GROUP" && !group_id) {
+      throw new Error("group_id_required");
+    }
 
     const document_id = randomUUID();
     const now = new Date();
@@ -113,25 +124,25 @@ export default class DocumentService {
     const ext = file.originalname?.split(".").pop()?.toLowerCase() || "";
     const publicId = `document_${document_id}`;
 
-    const uploaded = await uploadToCloudinary(file.buffer, {
-      public_id: publicId,
-      filename: ext ? `${publicId}.${ext}` : publicId,
-    });
-
     let approval = null;
-    if (visibility === "GROUP") {
+    if (normalizedVisibility === "GROUP") {
       approval = await this.groupClient.evaluateDocumentApproval({
         group_id,
         requester_id: owner_id,
       });
     }
 
+    const uploaded = await uploadToCloudinary(file.buffer, {
+      public_id: publicId,
+      filename: ext ? `${publicId}.${ext}` : publicId,
+    });
+
     const doc = await this.documentRepo.create({
       id: document_id,
       owner_id,
       title,
       description,
-      visibility,
+      visibility: normalizedVisibility,
       file_name: originalFileName,
       storage_path: uploaded.secure_url,
       created_at: now,
@@ -144,7 +155,7 @@ export default class DocumentService {
       await this.tagRepo.attachTags(createdDocumentId, tags);
     }
 
-    if (visibility === "GROUP") {
+    if (normalizedVisibility === "GROUP") {
       await this.groupDocRepo.createRecord({
         id: randomUUID(),
         group_id,
