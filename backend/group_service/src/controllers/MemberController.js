@@ -90,7 +90,8 @@ export class MemberController {
         group_id,
         target_id,
         "OWNER",
-        actor_id
+        actor_id,
+        { allowOwner: true }
       );
       res.json({ success: true, data: result });
     } catch (err) {
