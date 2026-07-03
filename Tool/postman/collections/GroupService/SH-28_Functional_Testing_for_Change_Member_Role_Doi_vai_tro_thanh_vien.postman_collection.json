@@ -38,12 +38,8 @@
         },
         "url": {
           "raw": "{{authBaseUrl}}/login",
-          "host": [
-            "{{authBaseUrl}}"
-          ],
-          "path": [
-            "login"
-          ]
+          "host": ["{{authBaseUrl}}"],
+          "path": ["login"]
         }
       }
     },
@@ -80,12 +76,8 @@
         },
         "url": {
           "raw": "{{authBaseUrl}}/login",
-          "host": [
-            "{{authBaseUrl}}"
-          ],
-          "path": [
-            "login"
-          ]
+          "host": ["{{authBaseUrl}}"],
+          "path": ["login"]
         }
       }
     },
@@ -105,9 +97,7 @@
         ],
         "url": {
           "raw": "{{groupBaseUrl}}/members/{{groupId}}/user/{{anotherUserId}}/role",
-          "host": [
-            "{{groupBaseUrl}}"
-          ],
+          "host": ["{{groupBaseUrl}}"],
           "path": [
             "members",
             "{{groupId}}",
@@ -148,9 +138,7 @@
         ],
         "url": {
           "raw": "{{groupBaseUrl}}/members/{{groupId}}/user/{{anotherUserId}}/role",
-          "host": [
-            "{{groupBaseUrl}}"
-          ],
+          "host": ["{{groupBaseUrl}}"],
           "path": [
             "members",
             "{{groupId}}",
@@ -191,9 +179,7 @@
         ],
         "url": {
           "raw": "{{groupBaseUrl}}/members/{{groupId}}/user/{{anotherUserId}}/role",
-          "host": [
-            "{{groupBaseUrl}}"
-          ],
+          "host": ["{{groupBaseUrl}}"],
           "path": [
             "members",
             "{{groupId}}",
@@ -234,9 +220,7 @@
         ],
         "url": {
           "raw": "{{groupBaseUrl}}/members/{{groupId}}/user/{{anotherUserId}}/role",
-          "host": [
-            "{{groupBaseUrl}}"
-          ],
+          "host": ["{{groupBaseUrl}}"],
           "path": [
             "members",
             "{{groupId}}",
