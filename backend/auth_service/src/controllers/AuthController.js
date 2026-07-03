@@ -55,6 +55,7 @@ export class AuthController {
         });
       res.json({ user, access_token, refresh_token });
     } catch (err) {
+      console.log(`[DEBUG LOGIN ERROR] error:`, err.message);
       res.status(401).json({ error: err.message });
     }
   }

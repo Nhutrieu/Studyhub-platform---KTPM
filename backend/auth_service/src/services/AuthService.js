@@ -291,12 +291,18 @@ export class AuthService {
       }
     }
 
+    console.log(`[DEBUG LOGIN STATUS] user status:`, user.status);
     if (user.status === "locked") {
       throw new Error("User is locked");
     }
+    if (user.status === "deleted") {
+      throw new Error("User has been deleted");
+    }
 
     // ======== PASSWORD VALIDATION ========
+    console.log(`[DEBUG LOGIN PASSWORD] comparing password:`, password ? "provided" : "empty", `with hash:`, user.password_hash);
     const match = await bcrypt.compare(password, user.password_hash);
+    console.log(`[DEBUG LOGIN PASSWORD] match result:`, match);
     if (!match) throw new Error("Password incorrect");
 
     await this.userRepo.updateById(user.id, {
