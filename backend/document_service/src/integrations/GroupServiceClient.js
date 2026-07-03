@@ -72,6 +72,7 @@ export default class GroupServiceClient {
     const { group, role } = await this.getMembership(group_id, requester_id);
 
     if (!group) throw new Error("group_not_found");
+    if (!role) throw new Error("not_group_member");
 
     const autoApprove =
       Number(group?.auto_approve_docs) === 1 ||
