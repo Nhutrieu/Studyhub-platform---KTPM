@@ -271,7 +271,7 @@ export class AuthService {
       if (!user) throw new Error("Username not found");
 
       const emails = await this.userEmailRepo.getUserEmails(user.id);
-      emailRow = emails.find((e) => e.is_verified === 1);
+      emailRow = emails.find((e) => e.is_verified == 1);
 
       if (!emailRow) {
         const primaryEmail = emails[0];
@@ -284,6 +284,10 @@ export class AuthService {
           "No verified email found. A verification email has been sent to your primary email."
         );
       }
+    }
+
+    if (user.status === "locked") {
+      throw new Error("User is locked");
     }
 
     // ======== PASSWORD VALIDATION ========
