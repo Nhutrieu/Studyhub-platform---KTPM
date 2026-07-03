@@ -250,7 +250,7 @@ export class AuthService {
       emailRow = await this.userEmailRepo.findByEmail(email);
       if (!emailRow) throw new Error("Email not found");
 
-      if (emailRow.is_verified === 0) {
+      if (!emailRow.is_verified) {
         await this.sendVerificationEmail(
           { ...emailRow, user_name: user_name },
           user_agent,
@@ -271,7 +271,7 @@ export class AuthService {
       if (!user) throw new Error("Username not found");
 
       const emails = await this.userEmailRepo.getUserEmails(user.id);
-      emailRow = emails.find((e) => e.is_verified == 1);
+      emailRow = emails.find((e) => e.is_verified);
 
       if (!emailRow) {
         const primaryEmail = emails[0];
