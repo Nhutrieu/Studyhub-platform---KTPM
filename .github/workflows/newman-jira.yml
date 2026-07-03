@@ -94,7 +94,12 @@ jobs:
           for file in $CHANGED_FILES; do
             if [ -f "$file" ]; then
               # Chạy Newman trỏ về link Staging hoặc Local Docker
-              newman run "$file" --env-var "gatewayUrl=$API_URL/api/v1" -r json --reporter-json-export "newman-reports/$(basename "$file" .json).json" || ANY_FAIL=true
+              newman run "$file" \
+                --env-var "gatewayUrl=$API_URL/api/v1" \
+                --env-var "authBaseUrl=$API_URL/api/v1/auth" \
+                --env-var "userEmail=user1@example.com" \
+                --env-var "password=11111111" \
+                -r json --reporter-json-export "newman-reports/$(basename "$file" .json).json" || ANY_FAIL=true
             fi
           done
           IFS=$OLD_IFS
