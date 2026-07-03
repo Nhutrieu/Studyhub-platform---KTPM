@@ -38,12 +38,8 @@
         },
         "url": {
           "raw": "{{authBaseUrl}}/login",
-          "host": [
-            "{{authBaseUrl}}"
-          ],
-          "path": [
-            "login"
-          ]
+          "host": ["{{authBaseUrl}}"],
+          "path": ["login"]
         }
       }
     },
@@ -80,12 +76,8 @@
         },
         "url": {
           "raw": "{{authBaseUrl}}/login",
-          "host": [
-            "{{authBaseUrl}}"
-          ],
-          "path": [
-            "login"
-          ]
+          "host": ["{{authBaseUrl}}"],
+          "path": ["login"]
         }
       }
     },
@@ -101,13 +93,8 @@
         ],
         "url": {
           "raw": "{{groupBaseUrl}}/{{groupId}}/avatar",
-          "host": [
-            "{{groupBaseUrl}}"
-          ],
-          "path": [
-            "{{groupId}}",
-            "avatar"
-          ]
+          "host": ["{{groupBaseUrl}}"],
+          "path": ["{{groupId}}", "avatar"]
         },
         "body": {
           "mode": "formdata",
@@ -115,7 +102,7 @@
             {
               "key": "avatar",
               "type": "file",
-              "src": "/path/to/new-avatar.jpg"
+              "src": "/Users/huynhngocbinh/Downloads/studyhub-platform/avatar.jpg"
             }
           ]
         }
@@ -143,13 +130,8 @@
         ],
         "url": {
           "raw": "{{groupBaseUrl}}/{{groupId}}/avatar",
-          "host": [
-            "{{groupBaseUrl}}"
-          ],
-          "path": [
-            "{{groupId}}",
-            "avatar"
-          ]
+          "host": ["{{groupBaseUrl}}"],
+          "path": ["{{groupId}}", "avatar"]
         },
         "body": {
           "mode": "formdata",
@@ -179,13 +161,8 @@
         ],
         "url": {
           "raw": "{{groupBaseUrl}}/{{groupId}}/avatar",
-          "host": [
-            "{{groupBaseUrl}}"
-          ],
-          "path": [
-            "{{groupId}}",
-            "avatar"
-          ]
+          "host": ["{{groupBaseUrl}}"],
+          "path": ["{{groupId}}", "avatar"]
         },
         "body": {
           "mode": "formdata",
@@ -193,7 +170,7 @@
             {
               "key": "avatar",
               "type": "file",
-              "src": "/path/to/avatar.jpg"
+              "src": "/Users/huynhngocbinh/Downloads/studyhub-platform/avatar.jpg"
             }
           ]
         }
@@ -225,12 +202,8 @@
         ],
         "url": {
           "raw": "{{groupBaseUrl}}/{{groupId}}",
-          "host": [
-            "{{groupBaseUrl}}"
-          ],
-          "path": [
-            "{{groupId}}"
-          ]
+          "host": ["{{groupBaseUrl}}"],
+          "path": ["{{groupId}}"]
         },
         "body": {
           "mode": "raw",
@@ -264,12 +237,8 @@
         ],
         "url": {
           "raw": "{{groupBaseUrl}}/{{groupId}}",
-          "host": [
-            "{{groupBaseUrl}}"
-          ],
-          "path": [
-            "{{groupId}}"
-          ]
+          "host": ["{{groupBaseUrl}}"],
+          "path": ["{{groupId}}"]
         },
         "body": {
           "mode": "raw",
