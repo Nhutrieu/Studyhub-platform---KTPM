@@ -1,5 +1,5 @@
 import { jest } from "@jest/globals";
- 
+
 // ============================================================
 // 1. Mock các module/dependency bên ngoài TRƯỚC khi import module cần test
 //    (ESM read-only bindings -> phải mock trước, load động bằng await import)
@@ -272,6 +272,15 @@ describe("SH-214: Unit Test - GroupService", () => {
       expect(groupRepo.getGroupById).toHaveBeenCalledWith(FAKE_GROUP_ID, "user-01");
       expect(result).toEqual({ id: FAKE_GROUP_ID, name: "SE Group" });
     });
+
+    it("ném lỗi 404 nếu group không tồn tại", async () => {
+      groupRepo.getGroupById.mockResolvedValue(null);
+
+      await expect(groupService.getGroupDetail(FAKE_GROUP_ID, "user-01")).rejects.toMatchObject({
+        message: "Group not found",
+        status: 404,
+      });
+    });
   });
  
   describe("listGroupsByUser()", () => {
@@ -398,15 +407,17 @@ describe("SH-214: Unit Test - GroupService", () => {
       await expect(groupService.joinGroup(FAKE_GROUP_ID, "user-01")).rejects.toThrow("Group not found");
     });
  
-    it("trả về member hiện có nếu user đã là thành viên (không tạo duplicate)", async () => {
+    it("ném lỗi 400 nếu user đã là thành viên", async () => {
       groupRepo.getGroupById.mockResolvedValue({ id: FAKE_GROUP_ID, access: "PUBLIC" });
       memberRepo.getMember.mockResolvedValue({ group_id: FAKE_GROUP_ID, role: "MEMBER" });
  
-      const result = await groupService.joinGroup(FAKE_GROUP_ID, "user-01");
+      await expect(groupService.joinGroup(FAKE_GROUP_ID, "user-01")).rejects.toMatchObject({
+        message: "User is already a member",
+        status: 400,
+      });
  
       expect(memberRepo.addMember).not.toHaveBeenCalled();
       expect(joinRepo.createRequest).not.toHaveBeenCalled();
-      expect(result).toEqual({ group_id: FAKE_GROUP_ID, role: "MEMBER" });
     });
  
     it("tự động thêm thành viên khi group PUBLIC", async () => {
@@ -552,16 +563,18 @@ describe("SH-214: Unit Test - GroupService", () => {
       });
     });
  
-    it("trả về member hiện có nếu target đã là thành viên", async () => {
+    it("ném lỗi 400 nếu target đã là thành viên", async () => {
       groupRepo.getGroupById.mockResolvedValue({ id: FAKE_GROUP_ID, access: "PUBLIC" });
       memberRepo.getMember
         .mockResolvedValueOnce({ role: "OWNER" }) // actor
         .mockResolvedValueOnce({ role: "MEMBER", user_id: "user-02" }); // target đã tồn tại
  
-      const result = await groupService.inviteMember(FAKE_GROUP_ID, "user-02", "user-01");
+      await expect(groupService.inviteMember(FAKE_GROUP_ID, "user-02", "user-01")).rejects.toMatchObject({
+        message: "User is already a member",
+        status: 400,
+      });
  
       expect(memberRepo.addMember).not.toHaveBeenCalled();
-      expect(result).toEqual({ role: "MEMBER", user_id: "user-02" });
     });
  
     it("thêm thành viên trực tiếp khi group PUBLIC", async () => {
@@ -646,4 +659,3 @@ describe("SH-214: Unit Test - GroupService", () => {
     });
   });
 });
- 
