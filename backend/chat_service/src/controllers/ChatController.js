@@ -202,7 +202,8 @@ export class ChatController {
 
             res.json({ success: true, message: "Message deleted" });
         } catch (err) {
-            res.status(err.status || 500).json({ success: false, message: err.message });
+            const status = err.name === "CastError" ? 400 : (err.status || 500);
+            res.status(status).json({ success: false, message: err.message });
         }
     }
 }
