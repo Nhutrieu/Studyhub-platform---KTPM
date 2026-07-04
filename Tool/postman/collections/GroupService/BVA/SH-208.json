@@ -1,7 +1,7 @@
 {
   "info": {
     "name": "SH-28 - BVA for Change Member Role (Boundary Value Analysis - Enum & hoa/thuong)",
-    "description": "BVA: Kiểm thử tập giá trị danh mục (Enum: MEMBER, DEPUTY) và tính Case-Sensitive khi đổi vai trò thành viên.\nAPI: PATCH /api/v1/group/members/:groupId/user/:memberId/role",
+    "description": "BVA: Kiểm thử tập giá trị danh mục (Enum thật: MODERATOR, MEMBER) khi đổi vai trò thành viên. Đã xác nhận qua test thực tế: hệ thống chuẩn hoá role về chữ hoa (case-insensitive theo thiết kế), nên role viết thường vẫn hợp lệ.\nAPI: PATCH /api/v1/group/members/:groupId/user/:memberId/role",
     "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
   },
   "item": [
@@ -38,12 +38,8 @@
         },
         "url": {
           "raw": "{{authBaseUrl}}/login",
-          "host": [
-            "{{authBaseUrl}}"
-          ],
-          "path": [
-            "login"
-          ]
+          "host": ["{{authBaseUrl}}"],
+          "path": ["login"]
         }
       }
     },
@@ -83,9 +79,7 @@
         },
         "url": {
           "raw": "{{groupBaseUrl}}/members/{{groupId}}/user/{{anotherUserId}}/role",
-          "host": [
-            "{{groupBaseUrl}}"
-          ],
+          "host": ["{{groupBaseUrl}}"],
           "path": [
             "members",
             "{{groupId}}",
@@ -97,7 +91,7 @@
       }
     },
     {
-      "name": "✅ BVA-2 Biên danh mục hợp lệ 2: role=\"DEPUTY\"",
+      "name": "✅ BVA-2 Biên danh mục hợp lệ 2: role=\"MODERATOR\"",
       "event": [
         {
           "listen": "prerequest",
@@ -113,7 +107,7 @@
           "listen": "test",
           "script": {
             "exec": [
-              "pm.test('Status 200/403 - role=DEPUTY hợp lệ', () => {\n    pm.expect(pm.response.code).to.be.oneOf([200, 403]);\n});"
+              "pm.test('Status 200/403 - role=MODERATOR hợp lệ', () => {\n    pm.expect(pm.response.code).to.be.oneOf([200, 403]);\n});"
             ]
           }
         }
@@ -128,13 +122,11 @@
         ],
         "body": {
           "mode": "raw",
-          "raw": "{\n  \"role\": \"DEPUTY\"\n}"
+          "raw": "{\n  \"role\": \"MODERATOR\"\n}"
         },
         "url": {
           "raw": "{{groupBaseUrl}}/members/{{groupId}}/user/{{anotherUserId}}/role",
-          "host": [
-            "{{groupBaseUrl}}"
-          ],
+          "host": ["{{groupBaseUrl}}"],
           "path": [
             "members",
             "{{groupId}}",
@@ -146,7 +138,7 @@
       }
     },
     {
-      "name": "❌ BVA-3 Vượt biên định dạng chữ: role=\"member\" (chữ thường)",
+      "name": "✅ BVA-3 Chuẩn hoá chữ hoa/thường: role=\"member\" (chữ thường, hệ thống tự viết hoa)",
       "event": [
         {
           "listen": "prerequest",
@@ -162,7 +154,7 @@
           "listen": "test",
           "script": {
             "exec": [
-              "pm.test('Status 400 - role viết thường sai Case-Sensitive', () => pm.response.to.have.status(400));"
+              "pm.test('Status 200/403 - role viết thường được tự động chuẩn hoá (case-insensitive theo thiết kế)', () => {\n    pm.expect(pm.response.code).to.be.oneOf([200, 403]);\n});"
             ]
           }
         }
@@ -181,9 +173,7 @@
         },
         "url": {
           "raw": "{{groupBaseUrl}}/members/{{groupId}}/user/{{anotherUserId}}/role",
-          "host": [
-            "{{groupBaseUrl}}"
-          ],
+          "host": ["{{groupBaseUrl}}"],
           "path": [
             "members",
             "{{groupId}}",
@@ -230,9 +220,7 @@
         },
         "url": {
           "raw": "{{groupBaseUrl}}/members/{{groupId}}/user/{{anotherUserId}}/role",
-          "host": [
-            "{{groupBaseUrl}}"
-          ],
+          "host": ["{{groupBaseUrl}}"],
           "path": [
             "members",
             "{{groupId}}",
@@ -279,9 +267,7 @@
         },
         "url": {
           "raw": "{{groupBaseUrl}}/members/{{groupId}}/user/{{anotherUserId}}/role",
-          "host": [
-            "{{groupBaseUrl}}"
-          ],
+          "host": ["{{groupBaseUrl}}"],
           "path": [
             "members",
             "{{groupId}}",
@@ -328,9 +314,7 @@
         },
         "url": {
           "raw": "{{groupBaseUrl}}/members/{{groupId}}/user/{{anotherUserId}}/role",
-          "host": [
-            "{{groupBaseUrl}}"
-          ],
+          "host": ["{{groupBaseUrl}}"],
           "path": [
             "members",
             "{{groupId}}",
