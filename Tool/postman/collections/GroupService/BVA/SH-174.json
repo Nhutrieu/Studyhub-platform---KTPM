@@ -1,0 +1,309 @@
+{
+  "info": {
+    "name": "SH-20 - BVA for Invite Member (Boundary Value Analysis - do dai user_id UUID)",
+    "description": "BVA: Kiểm thử độ dài và cấu hình ranh giới của user_id (CHAR(36) UUID) khi mời thành viên vào nhóm.\nAPI: POST /api/v1/group/:groupId/invite",
+    "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+  },
+  "item": [
+    {
+      "name": "🔑 Đăng nhập Group Owner (user1) (Lấy Access Token)",
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "exec": [
+              "pm.test('Status 200 - Đăng nhập Group Owner (user1) thành công', () => pm.response.to.have.status(200));",
+              "const json = pm.response.json();",
+              "const resData = json.data || json;",
+              "if (resData.access_token) {",
+              "    pm.collectionVariables.set('groupOwnerToken', resData.access_token);",
+              "    pm.collectionVariables.set('groupOwnerUserId', resData.user && resData.user.id);",
+              "}"
+            ],
+            "type": "text/javascript"
+          }
+        }
+      ],
+      "request": {
+        "method": "POST",
+        "header": [
+          {
+            "key": "Content-Type",
+            "value": "application/json"
+          }
+        ],
+        "body": {
+          "mode": "raw",
+          "raw": "{\n  \"email\": \"user1@example.com\",\n  \"password\": \"11111111\"\n}"
+        },
+        "url": {
+          "raw": "{{authBaseUrl}}/login",
+          "host": ["{{authBaseUrl}}"],
+          "path": ["login"]
+        }
+      }
+    },
+    {
+      "name": "✅ BVA-1 Biên chuẩn hợp lệ: user_id đúng 36 ký tự UUID",
+      "event": [
+        {
+          "listen": "prerequest",
+          "script": {
+            "exec": [
+              "pm.request.headers.remove('Authorization');",
+              "pm.request.headers.add({ key: 'Authorization', value: 'Bearer ' + pm.collectionVariables.get('groupOwnerToken') });"
+            ],
+            "type": "text/javascript"
+          }
+        },
+        {
+          "listen": "test",
+          "script": {
+            "exec": [
+              "pm.test('Status 200/201/403 - UUID 36 ký tự hợp lệ', () => {\n    pm.expect(pm.response.code).to.be.oneOf([200, 201, 403]);\n});"
+            ]
+          }
+        }
+      ],
+      "request": {
+        "method": "POST",
+        "header": [
+          {
+            "key": "Content-Type",
+            "value": "application/json"
+          }
+        ],
+        "body": {
+          "mode": "raw",
+          "raw": "{\n  \"user_id\": \"{{$guid}}\"\n}"
+        },
+        "url": {
+          "raw": "{{groupBaseUrl}}/{{groupId}}/invite",
+          "host": ["{{groupBaseUrl}}"],
+          "path": ["{{groupId}}", "invite"]
+        }
+      }
+    },
+    {
+      "name": "❌ BVA-2 Biên dưới trống: user_id = \"\" (0 ký tự)",
+      "event": [
+        {
+          "listen": "prerequest",
+          "script": {
+            "exec": [
+              "pm.request.headers.remove('Authorization');",
+              "pm.request.headers.add({ key: 'Authorization', value: 'Bearer ' + pm.collectionVariables.get('groupOwnerToken') });"
+            ],
+            "type": "text/javascript"
+          }
+        },
+        {
+          "listen": "test",
+          "script": {
+            "exec": [
+              "pm.test('Status 400 - user_id rỗng bị từ chối', () => pm.response.to.have.status(400));"
+            ]
+          }
+        }
+      ],
+      "request": {
+        "method": "POST",
+        "header": [
+          {
+            "key": "Content-Type",
+            "value": "application/json"
+          }
+        ],
+        "body": {
+          "mode": "raw",
+          "raw": "{\n  \"user_id\": \"\"\n}"
+        },
+        "url": {
+          "raw": "{{groupBaseUrl}}/{{groupId}}/invite",
+          "host": ["{{groupBaseUrl}}"],
+          "path": ["{{groupId}}", "invite"]
+        }
+      }
+    },
+    {
+      "name": "❌ BVA-3 Cận dưới biên: user_id dài 35 ký tự",
+      "event": [
+        {
+          "listen": "prerequest",
+          "script": {
+            "exec": [
+              "pm.request.headers.remove('Authorization');",
+              "pm.request.headers.add({ key: 'Authorization', value: 'Bearer ' + pm.collectionVariables.get('groupOwnerToken') });"
+            ],
+            "type": "text/javascript"
+          }
+        },
+        {
+          "listen": "test",
+          "script": {
+            "exec": [
+              "pm.test('Status 400 - user_id 35 ký tự (thiếu 1 ký tự) bị từ chối', () => pm.response.to.have.status(400));"
+            ]
+          }
+        }
+      ],
+      "request": {
+        "method": "POST",
+        "header": [
+          {
+            "key": "Content-Type",
+            "value": "application/json"
+          }
+        ],
+        "body": {
+          "mode": "raw",
+          "raw": "{\n  \"user_id\": \"11111111-2222-4222-8222-11111111111\"\n}"
+        },
+        "url": {
+          "raw": "{{groupBaseUrl}}/{{groupId}}/invite",
+          "host": ["{{groupBaseUrl}}"],
+          "path": ["{{groupId}}", "invite"]
+        }
+      }
+    },
+    {
+      "name": "❌ BVA-4 Cận trên biên: user_id dài 37 ký tự",
+      "event": [
+        {
+          "listen": "prerequest",
+          "script": {
+            "exec": [
+              "pm.request.headers.remove('Authorization');",
+              "pm.request.headers.add({ key: 'Authorization', value: 'Bearer ' + pm.collectionVariables.get('groupOwnerToken') });"
+            ],
+            "type": "text/javascript"
+          }
+        },
+        {
+          "listen": "test",
+          "script": {
+            "exec": [
+              "pm.test('Status 400 - user_id 37 ký tự (thừa 1 ký tự) bị từ chối', () => pm.response.to.have.status(400));"
+            ]
+          }
+        }
+      ],
+      "request": {
+        "method": "POST",
+        "header": [
+          {
+            "key": "Content-Type",
+            "value": "application/json"
+          }
+        ],
+        "body": {
+          "mode": "raw",
+          "raw": "{\n  \"user_id\": \"11111111-2222-4222-8222-1111111111188\"\n}"
+        },
+        "url": {
+          "raw": "{{groupBaseUrl}}/{{groupId}}/invite",
+          "host": ["{{groupBaseUrl}}"],
+          "path": ["{{groupId}}", "invite"]
+        }
+      }
+    },
+    {
+      "name": "❌ BVA-5 Vượt biên cực đại: user_id chuỗi siêu dài 255 ký tự",
+      "event": [
+        {
+          "listen": "prerequest",
+          "script": {
+            "exec": [
+              "pm.request.headers.remove('Authorization');",
+              "pm.request.headers.add({ key: 'Authorization', value: 'Bearer ' + pm.collectionVariables.get('groupOwnerToken') });"
+            ],
+            "type": "text/javascript"
+          }
+        },
+        {
+          "listen": "test",
+          "script": {
+            "exec": [
+              "pm.test('Status 400 - user_id 255 ký tự bị từ chối', () => pm.response.to.have.status(400));"
+            ]
+          }
+        }
+      ],
+      "request": {
+        "method": "POST",
+        "header": [
+          {
+            "key": "Content-Type",
+            "value": "application/json"
+          }
+        ],
+        "body": {
+          "mode": "raw",
+          "raw": "{\n  \"user_id\": \"aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa\"\n}"
+        },
+        "url": {
+          "raw": "{{groupBaseUrl}}/{{groupId}}/invite",
+          "host": ["{{groupBaseUrl}}"],
+          "path": ["{{groupId}}", "invite"]
+        }
+      }
+    }
+  ],
+  "variable": [
+    {
+      "key": "authBaseUrl",
+      "value": "http://localhost:3000/api/v1/auth",
+      "type": "string"
+    },
+    {
+      "key": "groupBaseUrl",
+      "value": "http://localhost:3002/api/v1/group",
+      "type": "string"
+    },
+    {
+      "key": "accessToken",
+      "value": "",
+      "type": "string"
+    },
+    {
+      "key": "userId",
+      "value": "",
+      "type": "string"
+    },
+    {
+      "key": "groupOwnerToken",
+      "value": "",
+      "type": "string"
+    },
+    {
+      "key": "groupOwnerUserId",
+      "value": "",
+      "type": "string"
+    },
+    {
+      "key": "groupId",
+      "value": "aaaaaaaa-aaaa-4aaa-8aaa-aaaaaaaaaaa1",
+      "type": "string"
+    },
+    {
+      "key": "userId36",
+      "value": "11111111-2222-4222-8222-111111111118",
+      "type": "string"
+    },
+    {
+      "key": "userId35",
+      "value": "11111111-2222-4222-8222-11111111111",
+      "type": "string"
+    },
+    {
+      "key": "userId37",
+      "value": "11111111-2222-4222-8222-1111111111188",
+      "type": "string"
+    },
+    {
+      "key": "userId255",
+      "value": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+      "type": "string"
+    }
+  ]
+}
