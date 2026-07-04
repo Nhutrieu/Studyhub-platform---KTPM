@@ -38,12 +38,8 @@
         },
         "url": {
           "raw": "{{authBaseUrl}}/login",
-          "host": [
-            "{{authBaseUrl}}"
-          ],
-          "path": [
-            "login"
-          ]
+          "host": ["{{authBaseUrl}}"],
+          "path": ["login"]
         }
       }
     },
@@ -79,17 +75,12 @@
         ],
         "body": {
           "mode": "raw",
-          "raw": "{\n  \"user_id\": \"11111111-2222-4222-8222-111111111118\"\n}"
+          "raw": "{\n  \"user_id\": \"{{$guid}}\"\n}"
         },
         "url": {
           "raw": "{{groupBaseUrl}}/{{groupId}}/invite",
-          "host": [
-            "{{groupBaseUrl}}"
-          ],
-          "path": [
-            "{{groupId}}",
-            "invite"
-          ]
+          "host": ["{{groupBaseUrl}}"],
+          "path": ["{{groupId}}", "invite"]
         }
       }
     },
@@ -129,13 +120,8 @@
         },
         "url": {
           "raw": "{{groupBaseUrl}}/{{groupId}}/invite",
-          "host": [
-            "{{groupBaseUrl}}"
-          ],
-          "path": [
-            "{{groupId}}",
-            "invite"
-          ]
+          "host": ["{{groupBaseUrl}}"],
+          "path": ["{{groupId}}", "invite"]
         }
       }
     },
@@ -175,13 +161,8 @@
         },
         "url": {
           "raw": "{{groupBaseUrl}}/{{groupId}}/invite",
-          "host": [
-            "{{groupBaseUrl}}"
-          ],
-          "path": [
-            "{{groupId}}",
-            "invite"
-          ]
+          "host": ["{{groupBaseUrl}}"],
+          "path": ["{{groupId}}", "invite"]
         }
       }
     },
@@ -221,13 +202,8 @@
         },
         "url": {
           "raw": "{{groupBaseUrl}}/{{groupId}}/invite",
-          "host": [
-            "{{groupBaseUrl}}"
-          ],
-          "path": [
-            "{{groupId}}",
-            "invite"
-          ]
+          "host": ["{{groupBaseUrl}}"],
+          "path": ["{{groupId}}", "invite"]
         }
       }
     },
@@ -267,13 +243,8 @@
         },
         "url": {
           "raw": "{{groupBaseUrl}}/{{groupId}}/invite",
-          "host": [
-            "{{groupBaseUrl}}"
-          ],
-          "path": [
-            "{{groupId}}",
-            "invite"
-          ]
+          "host": ["{{groupBaseUrl}}"],
+          "path": ["{{groupId}}", "invite"]
         }
       }
     }
