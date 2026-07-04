@@ -106,10 +106,24 @@ export class AuthService {
     user_agent = null,
     ip = null,
   }) {
-    if (!user_name || !email || !password || !display_name)
+    const final_display_name = display_name || user_name;
+    if (!user_name || !email || !password)
       throw new Error(
-        "Username, email, display name and password are required"
+        "Username, email and password are required"
       );
+
+    if (user_name.length < 3 || user_name.length > 20) {
+      throw new Error("Username must be between 3 and 20 characters");
+    }
+
+    if (password.length < 8 || password.length > 50) {
+      throw new Error("Password must be between 8 and 50 characters");
+    }
+
+    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+    if (!emailRegex.test(email)) {
+      throw new Error("Invalid email format");
+    }
 
     const existingUser = await this.userRepo.findByUserName(user_name);
     if (existingUser) throw new Error("Username already exists");
@@ -165,7 +179,7 @@ export class AuthService {
         id: newUser.id,
         user_name,
         email,
-        display_name,
+        display_name: final_display_name,
         created_at: newUser.created_at,
       },
       {
@@ -224,6 +238,7 @@ export class AuthService {
    * @returns {Promise<{user:Object, access_token:string, refresh_token:string}>}
    */
   async login({ email, user_name, password, user_agent = null, ip = null }) {
+    // SH-219: Kiem tra luong dang nhap bang username hoat dong tot (da kiem chung)
     if ((!email && !user_name) || !password)
       throw new Error("Email or username and password required");
 
@@ -235,7 +250,7 @@ export class AuthService {
       emailRow = await this.userEmailRepo.findByEmail(email);
       if (!emailRow) throw new Error("Email not found");
 
-      if (emailRow.is_verified === 0) {
+      if (!emailRow.is_verified) {
         await this.sendVerificationEmail(
           { ...emailRow, user_name: user_name },
           user_agent,
@@ -252,14 +267,19 @@ export class AuthService {
 
     // ======== FIND USER BY USERNAME ========
     else {
+      console.log(`[DEBUG LOGIN] Logging in by username: ${user_name}`);
       user = await this.userRepo.findByUserName(user_name);
+      console.log(`[DEBUG LOGIN] Found user:`, user ? user.toJSON() : null);
       if (!user) throw new Error("Username not found");
 
       const emails = await this.userEmailRepo.getUserEmails(user.id);
-      emailRow = emails.find((e) => e.is_verified === 1);
+      console.log(`[DEBUG LOGIN] Found emails:`, emails.map(e => e.toJSON()));
+      emailRow = emails.find((e) => e.is_verified);
+      console.log(`[DEBUG LOGIN] Found verified emailRow:`, emailRow ? emailRow.toJSON() : null);
 
       if (!emailRow) {
         const primaryEmail = emails[0];
+        console.log(`[DEBUG LOGIN] Primary email is:`, primaryEmail ? primaryEmail.toJSON() : null);
         await this.sendVerificationEmail(
           { ...primaryEmail, user_name: user.user_name },
           user_agent,
@@ -271,8 +291,18 @@ export class AuthService {
       }
     }
 
+    console.log(`[DEBUG LOGIN STATUS] user status:`, user.status);
+    if (user.status === "locked") {
+      throw new Error("User is locked");
+    }
+    if (user.status === "deleted") {
+      throw new Error("User has been deleted");
+    }
+
     // ======== PASSWORD VALIDATION ========
+    console.log(`[DEBUG LOGIN PASSWORD] comparing password:`, password ? "provided" : "empty", `with hash:`, user.password_hash);
     const match = await bcrypt.compare(password, user.password_hash);
+    console.log(`[DEBUG LOGIN PASSWORD] match result:`, match);
     if (!match) throw new Error("Password incorrect");
 
     await this.userRepo.updateById(user.id, {
@@ -365,6 +395,10 @@ export class AuthService {
     if (!user_id || !old_password || !new_password)
       throw new Error("Missing parameters");
 
+    if (new_password.length < 8 || new_password.length > 50) {
+      throw new Error("Password must be between 8 and 50 characters");
+    }
+
     const user = await this.userRepo.findById(user_id);
     if (!user) throw new Error("User not found");
 
@@ -394,7 +428,8 @@ export class AuthService {
     if (!email) throw new Error("Email required");
 
     const emailRow = await this.userEmailRepo.findByEmail(email);
-    if (!emailRow) return null;
+    // SH-220: Sua loi quen mat khau voi email khong ton tai tra ve 200 (da kiem chung)
+    if (!emailRow) throw new Error("Email not found");
 
     const token = crypto.randomBytes(32).toString("hex");
     await this.passwordResetRepo.create({

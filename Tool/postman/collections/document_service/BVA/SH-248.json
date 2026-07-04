@@ -1,0 +1,189 @@
+{
+  "info": {
+    "name": "SH-248: Boundary Comment Tài liệu",
+    "description": "Boundary Value Analysis bổ sung cho SH-67. File gốc SH-67.json không bị sửa.",
+    "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+  },
+  "item": [
+    {
+      "name": "Login user thường",
+      "request": {
+        "method": "POST",
+        "header": [{ "key": "Content-Type", "value": "application/json" }],
+        "body": {
+          "mode": "raw",
+          "raw": "{\n  \"email\": \"{{userEmail}}\",\n  \"password\": \"{{password}}\"\n}"
+        },
+        "url": "{{authBaseUrl}}/login"
+      },
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "type": "text/javascript",
+            "exec": [
+              "pm.test('Login 200', () => pm.response.to.have.status(200));",
+              "var data = (pm.response.json().data || pm.response.json());",
+              "pm.collectionVariables.set('accessToken', data.access_token);"
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "name": "BVA list comments - limit min = 1",
+      "request": {
+        "method": "GET",
+        "header": [
+          { "key": "Authorization", "value": "Bearer {{accessToken}}" }
+        ],
+        "url": "{{documentBaseUrl}}/{{documentId}}/comments?limit=1&offset=0"
+      },
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "type": "text/javascript",
+            "exec": [
+              "pm.test('Status 200', () => pm.response.to.have.status(200));",
+              "pm.test('Array response size <= 1', () => pm.expect(pm.response.json().length).to.be.at.most(1));"
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "name": "BVA add comment - content min 1 ký tự",
+      "request": {
+        "method": "POST",
+        "header": [
+          { "key": "Authorization", "value": "Bearer {{accessToken}}" },
+          { "key": "Content-Type", "value": "application/json" }
+        ],
+        "body": { "mode": "raw", "raw": "{\n  \"content\": \"A\"\n}" },
+        "url": "{{documentBaseUrl}}/interactions/{{documentId}}/comments"
+      },
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "type": "text/javascript",
+            "exec": [
+              "pm.test('Status 200', () => pm.response.to.have.status(200));",
+              "var data = (pm.response.json().data || pm.response.json());",
+              "if (data.id) pm.collectionVariables.set('bvaCommentId', data.id);"
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "name": "BVA add comment - content rỗng",
+      "request": {
+        "method": "POST",
+        "header": [
+          { "key": "Authorization", "value": "Bearer {{accessToken}}" },
+          { "key": "Content-Type", "value": "application/json" }
+        ],
+        "body": { "mode": "raw", "raw": "{\n  \"content\": \"\"\n}" },
+        "url": "{{documentBaseUrl}}/interactions/{{documentId}}/comments"
+      },
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "type": "text/javascript",
+            "exec": [
+              "pm.test('Status 400', () => pm.response.to.have.status(400));"
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "name": "BVA reply - parent_comment_id nil UUID",
+      "request": {
+        "method": "POST",
+        "header": [
+          { "key": "Authorization", "value": "Bearer {{accessToken}}" },
+          { "key": "Content-Type", "value": "application/json" }
+        ],
+        "body": {
+          "mode": "raw",
+          "raw": "{\n  \"content\": \"BVA reply nil parent\",\n  \"parent_comment_id\": \"00000000-0000-0000-0000-000000000000\"\n}"
+        },
+        "url": "{{documentBaseUrl}}/interactions/{{documentId}}/comments"
+      },
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "type": "text/javascript",
+            "exec": [
+              "pm.test('Status 400', () => pm.response.to.have.status(400));"
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "name": "BVA add comment - document_id sai format",
+      "request": {
+        "method": "POST",
+        "header": [
+          { "key": "Authorization", "value": "Bearer {{accessToken}}" },
+          { "key": "Content-Type", "value": "application/json" }
+        ],
+        "body": {
+          "mode": "raw",
+          "raw": "{\n  \"content\": \"BVA invalid document id\"\n}"
+        },
+        "url": "{{documentBaseUrl}}/interactions/not-a-uuid/comments"
+      },
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "type": "text/javascript",
+            "exec": [
+              "pm.test('Status lỗi', () => pm.expect([400, 404]).to.include(pm.response.code));"
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "name": "Cleanup delete comment min content",
+      "request": {
+        "method": "DELETE",
+        "header": [
+          { "key": "Authorization", "value": "Bearer {{accessToken}}" }
+        ],
+        "url": "{{documentBaseUrl}}/interactions/comments/{{bvaCommentId}}"
+      },
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "type": "text/javascript",
+            "exec": [
+              "pm.test('Status 200 hoặc 400', () => pm.expect([200, 400]).to.include(pm.response.code));"
+            ]
+          }
+        }
+      ]
+    }
+  ],
+  "variable": [
+    { "key": "authBaseUrl", "value": "http://localhost:3000/api/v1/auth" },
+    {
+      "key": "documentBaseUrl",
+      "value": "http://localhost:3003/api/v1/document"
+    },
+    { "key": "userEmail", "value": "user1@example.com" },
+    { "key": "password", "value": "11111111" },
+    { "key": "documentId", "value": "1111-0001-4111-8111-aaaaaaaa0001" },
+    { "key": "accessToken", "value": "" },
+    { "key": "bvaCommentId", "value": "" }
+  ]
+}

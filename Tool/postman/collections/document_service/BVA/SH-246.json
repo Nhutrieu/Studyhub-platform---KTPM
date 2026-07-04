@@ -1,0 +1,218 @@
+{
+  "info": {
+    "name": "SH-246: Boundary Cập nhật & Xóa Tài liệu",
+    "description": "Boundary Value Analysis bổ sung cho SH-65. File gốc SH-65.json không bị sửa.",
+    "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+  },
+  "item": [
+    {
+      "name": "Login user thường",
+      "request": {
+        "method": "POST",
+        "header": [{ "key": "Content-Type", "value": "application/json" }],
+        "body": {
+          "mode": "raw",
+          "raw": "{\n  \"email\": \"{{userEmail}}\",\n  \"password\": \"{{password}}\"\n}"
+        },
+        "url": "{{authBaseUrl}}/login"
+      },
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "type": "text/javascript",
+            "exec": [
+              "pm.test('Login 200', () => pm.response.to.have.status(200));",
+              "var data = (pm.response.json().data || pm.response.json());",
+              "pm.collectionVariables.set('accessToken', data.access_token);"
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "name": "Setup tạo tài liệu BVA để update/delete",
+      "request": {
+        "method": "POST",
+        "header": [
+          { "key": "Authorization", "value": "Bearer {{accessToken}}" }
+        ],
+        "body": {
+          "mode": "formdata",
+          "formdata": [
+            { "key": "title", "value": "BVA SH-65 temp document" },
+            {
+              "key": "description",
+              "value": "Temp document for BVA update/delete"
+            },
+            { "key": "visibility", "value": "PUBLIC" },
+            {
+              "key": "file",
+              "type": "file",
+              "src": "Tool/postman/fixtures/document.pdf"
+            }
+          ]
+        },
+        "url": "{{documentBaseUrl}}/"
+      },
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "type": "text/javascript",
+            "exec": [
+              "pm.test('Status 200', () => pm.response.to.have.status(200));",
+              "var data = (pm.response.json().data || pm.response.json());",
+              "pm.collectionVariables.set('bvaDocumentId', data.id);"
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "name": "BVA update - title min 1 ký tự",
+      "request": {
+        "method": "PATCH",
+        "header": [
+          { "key": "Authorization", "value": "Bearer {{accessToken}}" },
+          { "key": "Content-Type", "value": "application/json" }
+        ],
+        "body": { "mode": "raw", "raw": "{\n  \"title\": \"A\"\n}" },
+        "url": "{{documentBaseUrl}}/{{bvaDocumentId}}"
+      },
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "type": "text/javascript",
+            "exec": [
+              "pm.test('Status 200', () => pm.response.to.have.status(200));"
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "name": "BVA update - title rỗng",
+      "request": {
+        "method": "PATCH",
+        "header": [
+          { "key": "Authorization", "value": "Bearer {{accessToken}}" },
+          { "key": "Content-Type", "value": "application/json" }
+        ],
+        "body": { "mode": "raw", "raw": "{\n  \"title\": \"\"\n}" },
+        "url": "{{documentBaseUrl}}/{{bvaDocumentId}}"
+      },
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "type": "text/javascript",
+            "exec": [
+              "pm.test('Status 200 hoặc 400 hoặc 403', () => pm.expect([200, 400, 403]).to.include(pm.response.code));"
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "name": "BVA update - tags rỗng",
+      "request": {
+        "method": "PATCH",
+        "header": [
+          { "key": "Authorization", "value": "Bearer {{accessToken}}" },
+          { "key": "Content-Type", "value": "application/json" }
+        ],
+        "body": { "mode": "raw", "raw": "{\n  \"tags\": []\n}" },
+        "url": "{{documentBaseUrl}}/{{bvaDocumentId}}"
+      },
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "type": "text/javascript",
+            "exec": [
+              "pm.test('Status 200', () => pm.response.to.have.status(200));"
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "name": "BVA update - document_id nil UUID",
+      "request": {
+        "method": "PATCH",
+        "header": [
+          { "key": "Authorization", "value": "Bearer {{accessToken}}" },
+          { "key": "Content-Type", "value": "application/json" }
+        ],
+        "body": { "mode": "raw", "raw": "{\n  \"title\": \"BVA nil id\"\n}" },
+        "url": "{{documentBaseUrl}}/00000000-0000-0000-0000-000000000000"
+      },
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "type": "text/javascript",
+            "exec": [
+              "pm.test('Status 403 hoặc 404', () => pm.expect([403, 404]).to.include(pm.response.code));"
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "name": "BVA delete - document_id sai format",
+      "request": {
+        "method": "DELETE",
+        "header": [
+          { "key": "Authorization", "value": "Bearer {{accessToken}}" }
+        ],
+        "url": "{{documentBaseUrl}}/not-a-uuid"
+      },
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "type": "text/javascript",
+            "exec": [
+              "pm.test('Status lỗi', () => pm.expect([400, 403, 404]).to.include(pm.response.code));"
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "name": "Cleanup delete - tài liệu BVA",
+      "request": {
+        "method": "DELETE",
+        "header": [
+          { "key": "Authorization", "value": "Bearer {{accessToken}}" }
+        ],
+        "url": "{{documentBaseUrl}}/{{bvaDocumentId}}"
+      },
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "type": "text/javascript",
+            "exec": [
+              "pm.test('Status 200', () => pm.response.to.have.status(200));"
+            ]
+          }
+        }
+      ]
+    }
+  ],
+  "variable": [
+    { "key": "authBaseUrl", "value": "http://localhost:3000/api/v1/auth" },
+    {
+      "key": "documentBaseUrl",
+      "value": "http://localhost:3003/api/v1/document"
+    },
+    { "key": "userEmail", "value": "user1@example.com" },
+    { "key": "password", "value": "11111111" },
+    { "key": "accessToken", "value": "" },
+    { "key": "bvaDocumentId", "value": "" }
+  ]
+}

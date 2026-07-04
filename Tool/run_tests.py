@@ -110,7 +110,7 @@ def parse_report():
             error = assertion.get("error")
             if error:
                 assertion_errors.append(f"{assertion.get('assertion')}: {error.get('message')}")
-        result = "FAIL" if assertion_errors or (not ex.get("assertions") and status not in [200, 201, 204]) else "PASS"
+        result = "FAIL" if assertion_errors or status not in [200, 201, 204] else "PASS"
         row = {
             "name": name,
             "method": method,

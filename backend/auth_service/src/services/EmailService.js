@@ -66,6 +66,11 @@ export class EmailService {
    * @returns {Promise<nodemailer.SentMessageInfo>} - Nodemailer send result
    */
   async sendEmail({ to, subject, html }) {
+    if (process.env.MOCK_EMAIL === "true") {
+      console.log(`[MOCK EMAIL] Sent to: ${to}, Subject: ${subject}`);
+      return { messageId: "mock-id" };
+    }
+
     const transporter = await this.createTransporter();
 
     return transporter.sendMail({

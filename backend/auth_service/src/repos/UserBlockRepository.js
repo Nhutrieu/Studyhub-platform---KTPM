@@ -16,7 +16,7 @@ export class UserBlockRepository extends BaseRepository {
   }
 
   async findActiveBlockByUserId(user_id) {
-    const rows = await this.pool.query(
+    const [rows] = await this.pool.query(
       `
   SELECT * FROM user_blocks
   WHERE user_id = ?
@@ -31,7 +31,7 @@ export class UserBlockRepository extends BaseRepository {
   `,
       [user_id]
     );
-    return rows.rows[0] ? new UserBlock(rows.rows[0]) : null;
+    return rows[0] ? new UserBlock(rows[0]) : null;
   }
 
   async isUserBlocked(user_id) {

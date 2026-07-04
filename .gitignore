@@ -1,1 +1,5 @@
 .agents/
+scratch/
+selected-postman-files.txt
+selected-jest-files.txt
+newman-reports/
