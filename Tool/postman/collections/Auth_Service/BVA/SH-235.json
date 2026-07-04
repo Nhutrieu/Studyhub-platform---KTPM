@@ -1,0 +1,279 @@
+{
+  "info": {
+    "name": "StudyHub - SH-235 - BVA Đăng ký tài khoản",
+    "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+  },
+  "item": [
+    {
+      "name": "✅ Hợp lệ Biên Min",
+      "request": {
+        "method": "POST",
+        "header": [
+          {
+            "key": "Content-Type",
+            "value": "application/json"
+          }
+        ],
+        "body": {
+          "mode": "raw",
+          "raw": "{\n  \"user_name\": \"{{minUsername}}\",\n  \"password\": \"11111111\",\n  \"email\": \"{{minEmail}}\"\n}"
+        },
+        "url": {
+          "raw": "{{authBaseUrl}}/register",
+          "host": [
+            "{{authBaseUrl}}"
+          ],
+          "path": [
+            "register"
+          ]
+        }
+      },
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "exec": [
+              "pm.test('Status 201', () => pm.response.to.have.status(201));"
+            ]
+          }
+        },
+        {
+          "listen": "prerequest",
+          "script": {
+            "exec": [
+              "const randLetter = () => String.fromCharCode(97 + Math.floor(Math.random() * 26));",
+              "const randStr = (len) => Array.from({length: len}, randLetter).join('');",
+              "pm.collectionVariables.set('minUsername', randStr(3));",
+              "pm.collectionVariables.set('minEmail', `${randLetter()}@${randLetter()}.${randLetter()}`);"
+            ],
+            "type": "text/javascript"
+          }
+        }
+      ]
+    },
+    {
+      "name": "✅ Hợp lệ Biên Max",
+      "request": {
+        "method": "POST",
+        "header": [
+          {
+            "key": "Content-Type",
+            "value": "application/json"
+          }
+        ],
+        "body": {
+          "mode": "raw",
+          "raw": "{\n  \"user_name\": \"{{maxUsername}}\",\n  \"password\": \"pppppppppppppppppppppppppppppppppppppppppppppppppp\",\n  \"email\": \"{{maxEmail}}\"\n}"
+        },
+        "url": {
+          "raw": "{{authBaseUrl}}/register",
+          "host": [
+            "{{authBaseUrl}}"
+          ],
+          "path": [
+            "register"
+          ]
+        }
+      },
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "exec": [
+              "pm.test('Status 201', () => pm.response.to.have.status(201));"
+            ]
+          }
+        },
+        {
+          "listen": "prerequest",
+          "script": {
+            "exec": [
+              "const randLetter = () => String.fromCharCode(97 + Math.floor(Math.random() * 26));",
+              "const randStr = (len) => Array.from({length: len}, randLetter).join('');",
+              "pm.collectionVariables.set('maxUsername', randStr(20));",
+              "pm.collectionVariables.set('maxEmail', `${randStr(90)}@test.com`);"
+            ],
+            "type": "text/javascript"
+          }
+        }
+      ]
+    },
+    {
+      "name": "❌ Không hợp lệ dưới Min user_name (user_name < 3)",
+      "request": {
+        "method": "POST",
+        "header": [
+          {
+            "key": "Content-Type",
+            "value": "application/json"
+          }
+        ],
+        "body": {
+          "mode": "raw",
+          "raw": "{\n  \"user_name\": \"us\",\n  \"password\": \"11111111\",\n  \"email\": \"valid@example.com\"\n}"
+        },
+        "url": {
+          "raw": "{{authBaseUrl}}/register",
+          "host": [
+            "{{authBaseUrl}}"
+          ],
+          "path": [
+            "register"
+          ]
+        }
+      },
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "exec": [
+              "pm.test('Status 400', () => pm.response.to.have.status(400));"
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "name": "❌ Không hợp lệ vượt Max user_name (user_name > 20)",
+      "request": {
+        "method": "POST",
+        "header": [
+          {
+            "key": "Content-Type",
+            "value": "application/json"
+          }
+        ],
+        "body": {
+          "mode": "raw",
+          "raw": "{\n  \"user_name\": \"uuuuuuuuuuuuuuuuuuuuu\",\n  \"password\": \"11111111\",\n  \"email\": \"valid@example.com\"\n}"
+        },
+        "url": {
+          "raw": "{{authBaseUrl}}/register",
+          "host": [
+            "{{authBaseUrl}}"
+          ],
+          "path": [
+            "register"
+          ]
+        }
+      },
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "exec": [
+              "pm.test('Status 400', () => pm.response.to.have.status(400));"
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "name": "❌ Không hợp lệ dưới Min password (password < 8)",
+      "request": {
+        "method": "POST",
+        "header": [
+          {
+            "key": "Content-Type",
+            "value": "application/json"
+          }
+        ],
+        "body": {
+          "mode": "raw",
+          "raw": "{\n  \"user_name\": \"validusr\",\n  \"password\": \"1234567\",\n  \"email\": \"valid@example.com\"\n}"
+        },
+        "url": {
+          "raw": "{{authBaseUrl}}/register",
+          "host": [
+            "{{authBaseUrl}}"
+          ],
+          "path": [
+            "register"
+          ]
+        }
+      },
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "exec": [
+              "pm.test('Status 400', () => pm.response.to.have.status(400));"
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "name": "❌ Không hợp lệ vượt Max password (password > 50)",
+      "request": {
+        "method": "POST",
+        "header": [
+          {
+            "key": "Content-Type",
+            "value": "application/json"
+          }
+        ],
+        "body": {
+          "mode": "raw",
+          "raw": "{\n  \"user_name\": \"validusr\",\n  \"password\": \"ppppppppppppppppppppppppppppppppppppppppppppppppppp\",\n  \"email\": \"valid@example.com\"\n}"
+        },
+        "url": {
+          "raw": "{{authBaseUrl}}/register",
+          "host": [
+            "{{authBaseUrl}}"
+          ],
+          "path": [
+            "register"
+          ]
+        }
+      },
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "exec": [
+              "pm.test('Status 400', () => pm.response.to.have.status(400));"
+            ]
+          }
+        }
+      ]
+    }
+  ],
+  "variable": [
+    {
+      "key": "authBaseUrl",
+      "value": "http://localhost:3000/api/v1/auth",
+      "type": "string"
+    },
+    {
+      "key": "accessToken",
+      "value": "",
+      "type": "string"
+    },
+    {
+      "key": "userId",
+      "value": "",
+      "type": "string"
+    },
+    {
+      "key": "minUsername",
+      "value": "",
+      "type": "string"
+    },
+    {
+      "key": "minEmail",
+      "value": "",
+      "type": "string"
+    },
+    {
+      "key": "maxUsername",
+      "value": "",
+      "type": "string"
+    },
+    {
+      "key": "maxEmail",
+      "value": "",
+      "type": "string"
+    }
+  ]
+}

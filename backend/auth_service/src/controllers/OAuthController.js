@@ -1,3 +1,5 @@
+import { signAccessToken, signRefreshToken } from "../utils/jwt.js";
+
 export class OAuthController {
   /**
    * @param {Object} deps
@@ -16,11 +18,7 @@ export class OAuthController {
   async login(req, res) {
     try {
       const { provider_name, provider_user } = req.body;
-      const user = await this.oauthService.login(provider_name, provider_user);
-
-      // Generate JWT for OAuth users
-      const access_token = require("../utils/jwt.js").signAccessToken({ id: user.id, name: user.user_name || user.name });
-      const refresh_token = require("../utils/jwt.js").signRefreshToken({ id: user.id });
+      const { user, access_token, refresh_token } = await this.oauthService.login(provider_name, provider_user);
 
       res.json({ user, accessToken: access_token, refreshToken: refresh_token });
     } catch (err) {
