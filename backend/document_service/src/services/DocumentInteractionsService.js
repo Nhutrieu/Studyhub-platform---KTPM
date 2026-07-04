@@ -36,7 +36,7 @@ export default class DocumentInteractionsService {
       if (g.status !== "APPROVED") continue;
       const { role } = await this.groupClient.getMembership(
         g.group_id,
-        user_id
+        user_id,
       );
       if (role) return true;
     }
@@ -186,12 +186,12 @@ export default class DocumentInteractionsService {
 
     const groupDoc = await this.groupDocRepo.findByGroupAndDocument(
       group_id,
-      document_id
+      document_id,
     );
     if (!groupDoc) throw new Error("group_document_not_found");
 
     if (groupDoc.status === "APPROVED") {
-      return { approved: false, message: "Document already approved" };
+      throw new Error("document_already_approved");
     }
 
     await this.groupClient.validateReviewer({
@@ -210,12 +210,12 @@ export default class DocumentInteractionsService {
 
     const groupDoc = await this.groupDocRepo.findByGroupAndDocument(
       group_id,
-      document_id
+      document_id,
     );
     if (!groupDoc) throw new Error("group_document_not_found");
 
     if (groupDoc.status === "REJECTED") {
-      return { approved: false, message: "Document already rejected" };
+      throw new Error("document_already_rejected");
     }
 
     await this.groupClient.validateReviewer({

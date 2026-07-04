@@ -1,0 +1,480 @@
+{
+  "info": {
+    "name": "SH-84: Reset Password",
+    "_postman_id": "734133df-b2b3-4463-8280-98be6962cb2a",
+    "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+  },
+  "item": [
+    {
+      "name": "🔑 Register Unique User (Pre-requisite)",
+      "event": [
+        {
+          "listen": "prerequest",
+          "script": {
+            "exec": [
+              "const rand = Math.floor(Math.random() * 10000000);",
+              "pm.collectionVariables.set('regUsername', 'user_' + rand);",
+              "pm.collectionVariables.set('regEmail', 'user_' + rand + '@example.com');"
+            ]
+          }
+        },
+        {
+          "listen": "test",
+          "script": {
+            "exec": [
+              "pm.test('Status 201 (Register)', () => pm.response.to.have.status(201));",
+              "const json = pm.response.json();",
+              "const target = json.data || json;",
+              "if (target.verificationToken) pm.collectionVariables.set('verificationToken', target.verificationToken);",
+              "if (target.user && target.user.id) pm.collectionVariables.set('userId', target.user.id);"
+            ]
+          }
+        }
+      ],
+      "request": {
+        "method": "POST",
+        "header": [
+          {
+            "key": "Content-Type",
+            "value": "application/json"
+          }
+        ],
+        "body": {
+          "mode": "raw",
+          "raw": "{\n  \"user_name\": \"{{regUsername}}\",\n  \"email\": \"{{regEmail}}\",\n  \"password\": \"Password@123\",\n  \"display_name\": \"Test User\"\n}"
+        },
+        "url": {
+          "raw": "{{authBaseUrl}}/register",
+          "host": [
+            "{{authBaseUrl}}"
+          ],
+          "path": [
+            "register"
+          ]
+        }
+      }
+    },
+    {
+      "name": "🔑 Verify User Email (Pre-requisite)",
+      "request": {
+        "method": "POST",
+        "header": [
+          {
+            "key": "Content-Type",
+            "value": "application/json"
+          }
+        ],
+        "url": {
+          "raw": "{{authBaseUrl}}/verify-email?token={{verificationToken}}",
+          "host": [
+            "{{authBaseUrl}}"
+          ],
+          "path": [
+            "verify-email"
+          ],
+          "query": [
+            {
+              "key": "token",
+              "value": "{{verificationToken}}"
+            }
+          ]
+        }
+      },
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "exec": [
+              "pm.test('Status 200 (Verify)', () => pm.response.to.have.status(200));"
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "name": "🔑 Forgot Password (Pre-requisite)",
+      "request": {
+        "method": "POST",
+        "header": [
+          {
+            "key": "Content-Type",
+            "value": "application/json"
+          }
+        ],
+        "body": {
+          "mode": "raw",
+          "raw": "{\n  \"email\": \"{{regEmail}}\"\n}"
+        },
+        "url": {
+          "raw": "{{authBaseUrl}}/forgot-password",
+          "host": [
+            "{{authBaseUrl}}"
+          ],
+          "path": [
+            "forgot-password"
+          ]
+        }
+      },
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "exec": [
+              "pm.test('Status 200 (Forgot)', () => pm.response.to.have.status(200));",
+              "const json = pm.response.json();",
+              "const target = json.data || json;",
+              "if (target.token) pm.collectionVariables.set('resetToken', target.token);"
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "name": "✅ Đặt lại mật khẩu bằng token",
+      "request": {
+        "method": "POST",
+        "header": [
+          {
+            "key": "Content-Type",
+            "value": "application/json"
+          }
+        ],
+        "url": {
+          "raw": "{{authBaseUrl}}/reset-password",
+          "host": [
+            "{{authBaseUrl}}"
+          ],
+          "path": [
+            "reset-password"
+          ]
+        },
+        "body": {
+          "mode": "raw",
+          "raw": "{\n  \"token\": \"{{resetToken}}\",\n  \"new_password\": \"NewPassword@123\"\n}"
+        }
+      },
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "exec": [
+              "pm.test('Status 200', () => pm.response.to.have.status(200));"
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "name": "❌ Đặt lại mật khẩu - token sai/hết hạn",
+      "request": {
+        "method": "POST",
+        "header": [
+          {
+            "key": "Content-Type",
+            "value": "application/json"
+          }
+        ],
+        "url": {
+          "raw": "{{authBaseUrl}}/reset-password",
+          "host": [
+            "{{authBaseUrl}}"
+          ],
+          "path": [
+            "reset-password"
+          ]
+        },
+        "body": {
+          "mode": "raw",
+          "raw": "{\n  \"token\": \"invalid_reset_token\",\n  \"new_password\": \"NewPassword@123\"\n}"
+        }
+      },
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "exec": [
+              "pm.test('Status 400', () => pm.response.to.have.status(400));"
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "name": "❌ Đặt lại mật khẩu - token đã dùng rồi",
+      "request": {
+        "method": "POST",
+        "header": [
+          {
+            "key": "Content-Type",
+            "value": "application/json"
+          }
+        ],
+        "url": {
+          "raw": "{{authBaseUrl}}/reset-password",
+          "host": [
+            "{{authBaseUrl}}"
+          ],
+          "path": [
+            "reset-password"
+          ]
+        },
+        "body": {
+          "mode": "raw",
+          "raw": "{\n  \"token\": \"{{resetToken}}\",\n  \"new_password\": \"AnotherPassword@123\"\n}"
+        }
+      },
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "exec": [
+              "pm.test('Status 400', () => pm.response.to.have.status(400));"
+            ]
+          }
+        }
+      ]
+    }
+  ],
+  "variable": [
+    {
+      "key": "authBaseUrl",
+      "value": "http://localhost:3000/api/v1/auth",
+      "type": "string"
+    },
+    {
+      "key": "userBaseUrl",
+      "value": "http://localhost:3001/api/v1/user",
+      "type": "string"
+    },
+    {
+      "key": "groupBaseUrl",
+      "value": "http://localhost:3002/api/v1/group",
+      "type": "string"
+    },
+    {
+      "key": "documentBaseUrl",
+      "value": "http://localhost:3003/api/v1/document",
+      "type": "string"
+    },
+    {
+      "key": "notificationBaseUrl",
+      "value": "http://localhost:3005/api/v1/notification",
+      "type": "string"
+    },
+    {
+      "key": "chatBaseUrl",
+      "value": "http://localhost:3006/api/v1/chat",
+      "type": "string"
+    },
+    {
+      "key": "accessToken",
+      "value": "",
+      "type": "string"
+    },
+    {
+      "key": "refreshToken",
+      "value": "",
+      "type": "string"
+    },
+    {
+      "key": "revokedRefreshToken",
+      "value": "",
+      "type": "string"
+    },
+    {
+      "key": "adminAccessToken",
+      "value": "{{REPLACE_WITH_REAL_ADMIN_TOKEN}}",
+      "type": "string"
+    },
+    {
+      "key": "verificationToken",
+      "value": "",
+      "type": "string"
+    },
+    {
+      "key": "resetToken",
+      "value": "",
+      "type": "string"
+    },
+    {
+      "key": "secondaryEmailId",
+      "value": "",
+      "type": "string"
+    },
+    {
+      "key": "userId",
+      "value": "",
+      "type": "string"
+    },
+    {
+      "key": "anotherUserId",
+      "value": "{{REPLACE_WITH_REAL_USER_ID}}",
+      "type": "string"
+    },
+    {
+      "key": "anotherUserAccessToken",
+      "value": "{{REPLACE_WITH_REAL_TOKEN_OF_anotherUserId}}",
+      "type": "string"
+    },
+    {
+      "key": "outsiderToken",
+      "value": "{{REPLACE_WITH_TOKEN_OF_USER_NOT_IN_ANY_GROUP_DOC}}",
+      "type": "string"
+    },
+    {
+      "key": "deletableUserId",
+      "value": "{{REPLACE_WITH_A_USER_ID_SAFE_TO_DELETE}}",
+      "type": "string"
+    },
+    {
+      "key": "blockedUserEmail",
+      "value": "{{REPLACE_WITH_EMAIL_OF_AN_ALREADY_BLOCKED_USER}}",
+      "type": "string"
+    },
+    {
+      "key": "privateUserId",
+      "value": "{{REPLACE_WITH_USER_ID_WHOSE_PROFILE_IS_PRIVATE}}",
+      "type": "string"
+    },
+    {
+      "key": "otherUserSocialLinkId",
+      "value": "{{REPLACE_WITH_SOCIAL_LINK_ID_OF_ANOTHER_USER}}",
+      "type": "string"
+    },
+    {
+      "key": "socialLinkId",
+      "value": "",
+      "type": "string"
+    },
+    {
+      "key": "groupId",
+      "value": "{{REPLACE_WITH_REAL_PUBLIC_GROUP_ID}}",
+      "type": "string"
+    },
+    {
+      "key": "privateGroupId",
+      "value": "{{REPLACE_WITH_REAL_PRIVATE_GROUP_ID}}",
+      "type": "string"
+    },
+    {
+      "key": "emptyGroupId",
+      "value": "{{REPLACE_WITH_GROUP_ID_SAFE_TO_DELETE}}",
+      "type": "string"
+    },
+    {
+      "key": "joinRequestId",
+      "value": "",
+      "type": "string"
+    },
+    {
+      "key": "joinRequestId2",
+      "value": "{{REPLACE_WITH_ANOTHER_PENDING_JOIN_REQUEST_ID}}",
+      "type": "string"
+    },
+    {
+      "key": "groupOwnerToken",
+      "value": "{{REPLACE_WITH_TOKEN_OF_GROUP_OWNER}}",
+      "type": "string"
+    },
+    {
+      "key": "groupOwnerUserId",
+      "value": "{{REPLACE_WITH_USER_ID_OF_GROUP_OWNER}}",
+      "type": "string"
+    },
+    {
+      "key": "groupManagerNotOwnerToken",
+      "value": "{{REPLACE_WITH_TOKEN_OF_A_MANAGER_WHO_IS_NOT_OWNER}}",
+      "type": "string"
+    },
+    {
+      "key": "memberToLeaveToken",
+      "value": "{{REPLACE_WITH_TOKEN_OF_A_REGULAR_MEMBER_TO_TEST_LEAVE}}",
+      "type": "string"
+    },
+    {
+      "key": "memberToKickId",
+      "value": "{{REPLACE_WITH_USER_ID_OF_A_MEMBER_TO_KICK}}",
+      "type": "string"
+    },
+    {
+      "key": "documentId",
+      "value": "",
+      "type": "string"
+    },
+    {
+      "key": "privateDocumentId",
+      "value": "{{REPLACE_WITH_REAL_PRIVATE_DOCUMENT_ID}}",
+      "type": "string"
+    },
+    {
+      "key": "deletableDocumentId",
+      "value": "{{REPLACE_WITH_DOCUMENT_ID_SAFE_TO_DELETE}}",
+      "type": "string"
+    },
+    {
+      "key": "pendingDocumentId",
+      "value": "{{REPLACE_WITH_DOCUMENT_ID_PENDING_APPROVAL}}",
+      "type": "string"
+    },
+    {
+      "key": "pendingDocumentId2",
+      "value": "{{REPLACE_WITH_ANOTHER_DOCUMENT_ID_PENDING_APPROVAL}}",
+      "type": "string"
+    },
+    {
+      "key": "commentId",
+      "value": "",
+      "type": "string"
+    },
+    {
+      "key": "otherUserCommentId",
+      "value": "{{REPLACE_WITH_COMMENT_ID_OF_ANOTHER_USER}}",
+      "type": "string"
+    },
+    {
+      "key": "notificationId",
+      "value": "",
+      "type": "string"
+    },
+    {
+      "key": "otherUserNotificationId",
+      "value": "{{REPLACE_WITH_NOTIFICATION_ID_OF_ANOTHER_USER}}",
+      "type": "string"
+    },
+    {
+      "key": "deletableNotificationId",
+      "value": "{{REPLACE_WITH_NOTIFICATION_ID_SAFE_TO_DELETE}}",
+      "type": "string"
+    },
+    {
+      "key": "conversationId",
+      "value": "",
+      "type": "string"
+    },
+    {
+      "key": "groupConversationId",
+      "value": "",
+      "type": "string"
+    },
+    {
+      "key": "messageId",
+      "value": "",
+      "type": "string"
+    },
+    {
+      "key": "otherUserMessageId",
+      "value": "{{REPLACE_WITH_MESSAGE_ID_OF_ANOTHER_USER}}",
+      "type": "string"
+    },
+    {
+      "key": "regUsername",
+      "value": "",
+      "type": "string"
+    },
+    {
+      "key": "regEmail",
+      "value": "",
+      "type": "string"
+    }
+  ]
+}

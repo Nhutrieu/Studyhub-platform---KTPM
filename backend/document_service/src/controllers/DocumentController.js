@@ -54,6 +54,17 @@ export class DocumentController {
 
   async getCommentsByDocument(req, res) {
     try {
+      const user = req.user;
+      const isAdmin = Array.isArray(user?.role)
+        ? user.role.includes("admin")
+        : user?.role === "admin";
+
+      await this.documentService.getDocumentDetail(
+        req.params.id,
+        user?.id,
+        isAdmin,
+      );
+
       const { limit = 50, offset = 0 } = req.query;
 
       const comments = await this.documentService.getCommentsByDocument(
@@ -61,12 +72,20 @@ export class DocumentController {
         {
           limit: Number(limit),
           offset: Number(offset),
-        }
+        },
       );
 
       return res.json(comments);
     } catch (err) {
-      return res.status(403).json({ error: err.message });
+      if (err.message === "forbidden") {
+        return res.status(403).json({ error: err.message });
+      }
+
+      if (err.message === "document_not_found") {
+        return res.status(404).json({ error: err.message });
+      }
+
+      return res.status(400).json({ error: err.message });
     }
   }
 
@@ -145,7 +164,7 @@ export class DocumentController {
       const doc = await this.documentService.getDocumentDetail(
         req.params.id,
         user?.id,
-        isAdmin
+        isAdmin,
       );
 
       return res.json(doc);
@@ -167,7 +186,7 @@ export class DocumentController {
       const preview = await this.documentService.getDocumentPreview(
         req.params.id,
         user?.id,
-        isAdmin
+        isAdmin,
       );
 
       return res.json(preview);
@@ -183,7 +202,7 @@ export class DocumentController {
   async getUserPublicDocuments(req, res) {
     try {
       const docs = await this.documentService.getUserPublicProfileDocuments(
-        req.params.user_id
+        req.params.user_id,
       );
 
       return res.json(docs);
@@ -208,7 +227,7 @@ export class DocumentController {
     try {
       const docs = await this.documentService.getGroupApproved(
         req.params.group_id,
-        req.user.id
+        req.user.id,
       );
       return res.json(docs);
     } catch (err) {
@@ -220,7 +239,7 @@ export class DocumentController {
     try {
       const docs = await this.documentService.getGroupPending(
         req.params.group_id,
-        req.user.id
+        req.user.id,
       );
       return res.json(docs);
     } catch (err) {
@@ -236,7 +255,7 @@ export class DocumentController {
       const updated = await this.documentService.updateDocument(
         req.params.id,
         req.user.id,
-        req.body
+        req.body,
       );
 
       return res.json(updated);
@@ -271,7 +290,7 @@ export class DocumentController {
       const results = await this.documentService.searchDocuments(
         queryStr,
         req.user?.id,
-        { limit, offset }
+        { limit, offset },
       );
 
       return res.json(results);
@@ -280,7 +299,7 @@ export class DocumentController {
       return res.status(400).json({ error: err.message });
     }
   }
-  
+
   // =====================================================
   // TAGS
   // =====================================================

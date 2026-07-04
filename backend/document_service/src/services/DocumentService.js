@@ -72,7 +72,7 @@ export default class DocumentService {
         if (g.status === "APPROVED") {
           const { allowed } = await this.groupClient.canViewGroupDocuments(
             g.group_id,
-            user_id
+            user_id,
           );
           if (allowed) return true;
         } else {
@@ -98,12 +98,24 @@ export default class DocumentService {
     owner_id,
     title,
     description,
-    visibility = "PUBLIC",
+    visibility,
     tags = [],
     group_id = null,
     file,
   }) {
     if (!file) throw new Error("file_required");
+
+    const normalizedVisibility = (
+      visibility || (group_id ? "GROUP" : "PUBLIC")
+    ).toUpperCase();
+
+    if (!["PUBLIC", "PRIVATE", "GROUP"].includes(normalizedVisibility)) {
+      throw new Error("invalid_visibility");
+    }
+
+    if (normalizedVisibility === "GROUP" && !group_id) {
+      throw new Error("group_id_required");
+    }
 
     const document_id = randomUUID();
     const now = new Date();
@@ -111,6 +123,14 @@ export default class DocumentService {
     const originalFileName = file.originalname;
     const ext = file.originalname?.split(".").pop()?.toLowerCase() || "";
     const publicId = `document_${document_id}`;
+
+    let approval = null;
+    if (normalizedVisibility === "GROUP") {
+      approval = await this.groupClient.evaluateDocumentApproval({
+        group_id,
+        requester_id: owner_id,
+      });
+    }
 
     const uploaded = await uploadToCloudinary(file.buffer, {
       public_id: publicId,
@@ -122,34 +142,29 @@ export default class DocumentService {
       owner_id,
       title,
       description,
-      visibility,
+      visibility: normalizedVisibility,
       file_name: originalFileName,
       storage_path: uploaded.secure_url,
       created_at: now,
       updated_at: now,
     });
 
+    const createdDocumentId = doc?.id || document_id;
+
     if (tags?.length) {
-      await this.tagRepo.attachTags(document_id, tags);
+      await this.tagRepo.attachTags(createdDocumentId, tags);
     }
 
-    if (visibility === "GROUP") {
-      if (!group_id) throw new Error("group_id_required");
-
-      const { autoApprove } = await this.groupClient.evaluateDocumentApproval({
-        group_id,
-        requester_id: owner_id,
-      });
-
+    if (normalizedVisibility === "GROUP") {
       await this.groupDocRepo.createRecord({
         id: randomUUID(),
         group_id,
-        document_id,
-        status: autoApprove ? "APPROVED" : "PENDING",
+        document_id: createdDocumentId,
+        status: approval?.autoApprove ? "APPROVED" : "PENDING",
         submitted_by: owner_id,
-        reviewed_by: autoApprove ? owner_id : null,
+        reviewed_by: approval?.autoApprove ? owner_id : null,
         submitted_at: now,
-        reviewed_at: autoApprove ? now : null,
+        reviewed_at: approval?.autoApprove ? now : null,
       });
     }
 
@@ -204,7 +219,7 @@ export default class DocumentService {
 
   async getUserPublicProfileDocuments(
     user_id,
-    { limit = 50, offset = 0 } = {}
+    { limit = 50, offset = 0 } = {},
   ) {
     const docs = await this.documentRepo.findPublicOfUser(user_id, {
       limit,
@@ -233,7 +248,7 @@ export default class DocumentService {
     if (doc.visibility === "GROUP") {
       const allowed = await this._canAccessGroupDocument(
         document_id,
-        requester_id
+        requester_id,
       );
       if (!allowed) throw new Error("forbidden");
       return this._attachTagsToDocument(doc);
@@ -273,7 +288,7 @@ export default class DocumentService {
     if (doc.visibility === "GROUP") {
       const allowed = await this._canAccessGroupDocument(
         document_id,
-        requester_id
+        requester_id,
       );
       if (!allowed) throw new Error("forbidden");
 
@@ -299,14 +314,14 @@ export default class DocumentService {
   async getGroupApproved(
     group_id,
     requester_id,
-    { limit = 50, offset = 0 } = {}
+    { limit = 50, offset = 0 } = {},
   ) {
-    const { allowed, reason } = await this.groupClient.canViewGroupDocuments(
+    const access = await this.groupClient.canViewGroupDocuments(
       group_id,
-      requester_id
+      requester_id,
     );
 
-    if (!allowed) throw new Error(reason || "forbidden");
+    if (!access?.allowed) throw new Error(access?.reason || "forbidden");
 
     const docs = await this.groupDocRepo.findApprovedInGroup(group_id, {
       limit,
@@ -318,14 +333,14 @@ export default class DocumentService {
   async getGroupPending(
     group_id,
     requester_id,
-    { limit = 50, offset = 0 } = {}
+    { limit = 50, offset = 0 } = {},
   ) {
-    const { allowed, reason } = await this.groupClient.canViewGroupDocuments(
+    const access = await this.groupClient.canViewGroupDocuments(
       group_id,
-      requester_id
+      requester_id,
     );
 
-    if (!allowed) throw new Error(reason || "forbidden");
+    if (!access?.allowed) throw new Error(access?.reason || "forbidden");
 
     const docs = await this.groupDocRepo.findPendingInGroup(group_id, {
       limit,
@@ -340,14 +355,16 @@ export default class DocumentService {
     if (!doc) throw new Error("document_not_found");
     if (doc.owner_id !== requester_id) throw new Error("forbidden");
 
+    const { tags, ...fields } = updates || {};
+
     const updated = await this.documentRepo.update(document_id, {
-      ...updates,
+      ...fields,
       updated_at: new Date(),
     });
 
-    if (updates.tags) {
+    if (tags) {
       await this.tagRepo.deleteAllTags(document_id);
-      await this.tagRepo.attachTags(document_id, updates.tags);
+      await this.tagRepo.attachTags(document_id, tags);
     }
 
     return this._attachTagsToDocument(updated);
@@ -366,14 +383,14 @@ export default class DocumentService {
   async searchDocuments(
     keyword,
     requester_id,
-    { limit = 10, offset = 0 } = {}
+    { limit = 10, offset = 0 } = {},
   ) {
     if (!keyword) return [];
 
     const results = await this.documentRepo.searchByKeyword(
       keyword,
       limit,
-      offset
+      offset,
     );
     if (!results || results.length === 0) return [];
 
@@ -403,7 +420,7 @@ export default class DocumentService {
                   groupCache[g.group_id] =
                     await this.groupClient.canViewGroupDocuments(
                       g.group_id,
-                      requester_id
+                      requester_id,
                     );
                 }
                 if (groupCache[g.group_id].allowed) {
@@ -430,7 +447,7 @@ export default class DocumentService {
         }
       } catch (err) {
         this.logger.error(
-          `Skipping doc ${doc.id} due to group check error: ${err.message}`
+          `Skipping doc ${doc.id} due to group check error: ${err.message}`,
         );
         continue; // bỏ doc này, tiếp tục vòng lặp
       }
@@ -447,7 +464,7 @@ export default class DocumentService {
   async getCommentsByDocument(document_id, { limit = 10, offset = 0 }) {
     const latestComments = await this.commentRepo.findByDocumentPaginated(
       document_id,
-      { limit, offset }
+      { limit, offset },
     );
 
     const allCommentsMap = new Map();
@@ -463,7 +480,7 @@ export default class DocumentService {
         }
 
         const parent = await this.commentRepo.findById(
-          current.parent_comment_id
+          current.parent_comment_id,
         );
         if (!parent) break;
 

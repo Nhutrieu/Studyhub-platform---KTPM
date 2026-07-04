@@ -1,0 +1,439 @@
+name: Xac minh bug fix + Jira
+run-name: "${{ github.event_name == 'workflow_dispatch' && format('Xac minh bug fix: {0}', inputs.bug_keys) || github.event.pull_request.title || github.event.head_commit.message || github.workflow }}"
+
+on:
+  pull_request:
+    branches:
+      - main
+    paths:
+      - '.github/workflows/bugfix-verification.yml'
+      - 'Tool/postman/bugfix_verification_jira.py'
+  workflow_dispatch:
+    inputs:
+      bug_keys:
+        description: "Bug subtasks to verify, comma or newline separated (example: SH-147,SH-148)"
+        required: true
+        type: string
+      parent_keys:
+        description: "Optional parent tasks to comment/transition when verification passes"
+        required: false
+        default: ""
+        type: string
+      postman_collections:
+        description: "Optional Postman collection paths, comma or newline separated"
+        required: false
+        default: ""
+        type: string
+      jest_service_dir:
+        description: "Optional service directory for Jest verification (example: backend/notification_service)"
+        required: false
+        default: ""
+        type: string
+      jest_test_files:
+        description: "Optional Jest test files, comma or newline separated. Empty means all tests in service."
+        required: false
+        default: ""
+        type: string
+      start_docker:
+        description: "Start local Docker backend for Newman verification"
+        required: true
+        default: "true"
+        type: choice
+        options:
+          - "true"
+          - "false"
+      docker_profile:
+        description: "Docker startup profile for local Newman verification"
+        required: true
+        default: "full"
+        type: choice
+        options:
+          - "full"
+          - "notification"
+      api_base_url:
+        description: "Optional API base URL. Empty uses secret API_BASE_URL or local Docker http://localhost:8000"
+        required: false
+        default: ""
+        type: string
+      transition_bugs:
+        description: "Transition verified bug subtasks to Done when tests pass"
+        required: true
+        default: "true"
+        type: choice
+        options:
+          - "true"
+          - "false"
+      transition_parents:
+        description: "Transition parent tasks to Done when tests pass"
+        required: true
+        default: "false"
+        type: choice
+        options:
+          - "true"
+          - "false"
+      dry_run:
+        description: "Run verification without commenting or transitioning Jira"
+        required: true
+        default: "false"
+        type: choice
+        options:
+          - "true"
+          - "false"
+
+permissions:
+  contents: read
+  pull-requests: read
+
+jobs:
+  bugfix-verification:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout Source
+        uses: actions/checkout@v4
+
+      - name: Normalize Inputs
+        env:
+          BUG_KEYS_INPUT: ${{ inputs.bug_keys }}
+          PARENT_KEYS_INPUT: ${{ inputs.parent_keys }}
+          POSTMAN_COLLECTIONS_INPUT: ${{ inputs.postman_collections }}
+          JEST_SERVICE_DIR_INPUT: ${{ inputs.jest_service_dir }}
+          JEST_TEST_FILES_INPUT: ${{ inputs.jest_test_files }}
+          START_DOCKER_INPUT: ${{ inputs.start_docker }}
+          DOCKER_PROFILE_INPUT: ${{ inputs.docker_profile }}
+          TRANSITION_BUGS_INPUT: ${{ inputs.transition_bugs }}
+          TRANSITION_PARENTS_INPUT: ${{ inputs.transition_parents }}
+          DRY_RUN_INPUT: ${{ inputs.dry_run }}
+          API_BASE_URL_INPUT: ${{ inputs.api_base_url }}
+          API_BASE_URL_SECRET: ${{ secrets.API_BASE_URL }}
+        run: |
+          python - <<'PY'
+          import os
+          import re
+          import sys
+
+          event_name = os.environ.get("GITHUB_EVENT_NAME", "")
+          bug_keys = os.environ.get("BUG_KEYS_INPUT", "").strip()
+          parent_keys = os.environ.get("PARENT_KEYS_INPUT", "").strip()
+          raw = os.environ.get("POSTMAN_COLLECTIONS_INPUT", "")
+          jest_service_dir = os.environ.get("JEST_SERVICE_DIR_INPUT", "").strip()
+          jest_test_files = os.environ.get("JEST_TEST_FILES_INPUT", "").strip()
+          start_docker = os.environ.get("START_DOCKER_INPUT", "true").strip() or "true"
+          docker_profile = os.environ.get("DOCKER_PROFILE_INPUT", "full").strip() or "full"
+          transition_bugs = os.environ.get("TRANSITION_BUGS_INPUT", "true").strip() or "true"
+          transition_parents = os.environ.get("TRANSITION_PARENTS_INPUT", "false").strip() or "false"
+          dry_run = os.environ.get("DRY_RUN_INPUT", "false").strip() or "false"
+
+          if event_name != "workflow_dispatch":
+              bug_keys = bug_keys or "SH-000"
+              start_docker = "false"
+              docker_profile = "full"
+              transition_bugs = "false"
+              transition_parents = "false"
+              dry_run = "true"
+              if not raw.strip() and not jest_service_dir:
+                  jest_service_dir = "backend/notification_service"
+
+          items = [item.strip() for item in re.split(r"[\n,;]+", raw) if item.strip()]
+          with open("selected-postman-files.txt", "w", encoding="utf-8") as fh:
+              for item in items:
+                  fh.write(item + "\n")
+
+          has_postman = bool(items)
+          has_jest = bool(jest_service_dir)
+          if not has_postman and not has_jest:
+              print("At least one Postman collection or Jest service directory is required.", file=sys.stderr)
+              sys.exit(1)
+
+          with open(os.environ["GITHUB_ENV"], "a", encoding="utf-8") as fh:
+              fh.write("INPUTS_VALID=true\n")
+              fh.write(f"HAS_POSTMAN={'true' if has_postman else 'false'}\n")
+              fh.write(f"HAS_JEST={'true' if has_jest else 'false'}\n")
+              fh.write(f"POSTMAN_STATUS={'PENDING' if has_postman else 'SKIP'}\n")
+              fh.write(f"JEST_STATUS={'PENDING' if has_jest else 'SKIP'}\n")
+              fh.write(f"BUG_KEYS_EFFECTIVE={bug_keys}\n")
+              fh.write(f"PARENT_KEYS_EFFECTIVE={parent_keys}\n")
+              fh.write(f"JEST_SERVICE_DIR_EFFECTIVE={jest_service_dir}\n")
+              fh.write(f"JEST_TEST_FILES_EFFECTIVE={jest_test_files}\n")
+              fh.write(f"START_DOCKER_EFFECTIVE={start_docker}\n")
+              fh.write(f"DOCKER_PROFILE_EFFECTIVE={docker_profile}\n")
+              fh.write(f"TRANSITION_BUGS_EFFECTIVE={transition_bugs}\n")
+              fh.write(f"TRANSITION_PARENTS_EFFECTIVE={transition_parents}\n")
+              fh.write(f"DRY_RUN_EFFECTIVE={dry_run}\n")
+
+              api_url = os.environ.get("API_BASE_URL_INPUT", "").strip()
+              if not api_url:
+                  api_url = os.environ.get("API_BASE_URL_SECRET", "").strip()
+              if not api_url and start_docker == "true":
+                  api_url = "http://localhost:8000"
+              if has_postman and not api_url:
+                  print("Postman verification requires api_base_url, API_BASE_URL secret, or start_docker=true.", file=sys.stderr)
+                  sys.exit(1)
+              fh.write(f"API_URL={api_url}\n")
+              fh.write(f"GATEWAY_URL={api_url}/api/v1\n")
+              if start_docker == "true" and docker_profile == "notification":
+                  fh.write("AUTH_BASE_URL=http://localhost:3000/api/v1/auth\n")
+                  fh.write("NOTIFICATION_BASE_URL=http://localhost:3005/api/v1/notification\n")
+                  fh.write("CHAT_BASE_URL=http://localhost:3006/api/v1/chat\n")
+              else:
+                  fh.write(f"AUTH_BASE_URL={api_url}/api/v1/auth\n")
+                  fh.write(f"NOTIFICATION_BASE_URL={api_url}/api/v1/notification\n")
+                  fh.write(f"CHAT_BASE_URL={api_url}/api/v1/chat\n")
+          PY
+
+      - name: Setup Node.js
+        if: env.HAS_POSTMAN == 'true' || env.HAS_JEST == 'true'
+        uses: actions/setup-node@v4
+        with:
+          node-version: 18
+
+      - name: Install Newman
+        if: env.HAS_POSTMAN == 'true'
+        run: npm install -g newman
+
+      - name: Setup Backend Environment
+        if: env.HAS_POSTMAN == 'true' && env.START_DOCKER_EFFECTIVE == 'true'
+        run: |
+          for d in backend/*_service; do
+            if [ -f "$d/.env.example" ]; then
+              cp "$d/.env.example" "$d/.env"
+            fi
+          done
+
+      - name: Prepare Postman File Fixtures
+        if: env.HAS_POSTMAN == 'true'
+        run: |
+          mkdir -p Tool/postman/fixtures
+          if [ ! -f "Tool/postman/fixtures/document.pdf" ]; then
+            printf 'StudyHub document upload fixture\n' > "Tool/postman/fixtures/document.pdf"
+          fi
+          truncate -s 101M "Tool/postman/fixtures/oversized-file-over-100mb.zip"
+
+      - name: Build Docker Images
+        if: env.HAS_POSTMAN == 'true' && env.START_DOCKER_EFFECTIVE == 'true'
+        timeout-minutes: 20
+        run: |
+          cd deployment/docker
+          if [ "$DOCKER_PROFILE_EFFECTIVE" = "notification" ]; then
+            docker compose build --progress=plain auth-service notification-service
+          else
+            docker compose build --progress=plain
+          fi
+
+      - name: Start Docker Compose
+        if: env.HAS_POSTMAN == 'true' && env.START_DOCKER_EFFECTIVE == 'true'
+        timeout-minutes: 10
+        run: |
+          cd deployment/docker
+          if [ "$DOCKER_PROFILE_EFFECTIVE" = "notification" ]; then
+            docker compose up -d mysql-auth mongo-notification rabbitmq
+            echo "Waiting for notification dependencies to boot..."
+            sleep 25
+            docker compose up -d --no-deps auth-service notification-service
+          else
+            docker compose up -d
+          fi
+          docker compose ps
+          echo "Waiting for backend services to boot..."
+          sleep 45
+
+      - name: Run Newman Verification
+        if: env.HAS_POSTMAN == 'true'
+        run: |
+          mkdir -p newman-reports
+          ANY_FAIL=false
+
+          while IFS= read -r file; do
+            [ -z "$file" ] && continue
+            if [ ! -f "$file" ]; then
+              echo "Postman collection not found: $file"
+              ANY_FAIL=true
+              continue
+            fi
+
+            report_name=$(basename "$file" .json)
+            newman run "$file" \
+              --env-var "gatewayUrl=$GATEWAY_URL" \
+              --env-var "authBaseUrl=$AUTH_BASE_URL" \
+              --env-var "chatBaseUrl=$CHAT_BASE_URL" \
+              --env-var "notificationBaseUrl=$NOTIFICATION_BASE_URL" \
+              --env-var "userEmail=user1@example.com" \
+              --env-var "adminEmail=admin@example.com" \
+              --env-var "password=11111111" \
+              -r json --reporter-json-export "newman-reports/${report_name}.json" || ANY_FAIL=true
+          done < selected-postman-files.txt
+
+          if [ "$ANY_FAIL" = true ]; then
+            echo "POSTMAN_STATUS=FAIL" >> "$GITHUB_ENV"
+          else
+            echo "POSTMAN_STATUS=PASS" >> "$GITHUB_ENV"
+          fi
+
+      - name: Run Jest Verification
+        if: env.HAS_JEST == 'true'
+        run: |
+          export JEST_SERVICE_DIR="$JEST_SERVICE_DIR_EFFECTIVE"
+          export JEST_TEST_FILES="$JEST_TEST_FILES_EFFECTIVE"
+
+          if [ ! -d "$JEST_SERVICE_DIR" ]; then
+            echo "Jest service directory not found: $JEST_SERVICE_DIR"
+            echo "JEST_STATUS=FAIL" >> "$GITHUB_ENV"
+            exit 0
+          fi
+
+          python - <<'PY'
+          import os
+          import re
+
+          raw = os.environ.get("JEST_TEST_FILES", "")
+          items = [item.strip() for item in re.split(r"[\n,;]+", raw) if item.strip()]
+          service_dir = os.environ["JEST_SERVICE_DIR"].rstrip("/\\")
+          with open("selected-jest-files.txt", "w", encoding="utf-8") as fh:
+              for item in items:
+                  normalized = item.replace("\\", "/")
+                  if normalized.startswith(service_dir + "/"):
+                      normalized = normalized[len(service_dir) + 1:]
+                  fh.write(normalized + "\n")
+          PY
+
+          cd "$JEST_SERVICE_DIR"
+          npm ci
+
+          JEST_FAILED=false
+          mapfile -t TEST_FILES < "$GITHUB_WORKSPACE/selected-jest-files.txt"
+          TEST_ARGS=()
+          for item in "${TEST_FILES[@]}"; do
+            [ -z "$item" ] && continue
+            TEST_ARGS+=("$item")
+          done
+
+          node --experimental-vm-modules node_modules/jest/bin/jest.js \
+            "${TEST_ARGS[@]}" \
+            --json --outputFile=bugfix-jest-report.json || JEST_FAILED=true
+
+          if [ "$JEST_FAILED" = true ]; then
+            echo "JEST_STATUS=FAIL" >> "$GITHUB_ENV"
+          else
+            echo "JEST_STATUS=PASS" >> "$GITHUB_ENV"
+          fi
+
+      - name: Print Docker Compose Logs on Failure
+        if: always() && env.HAS_POSTMAN == 'true' && env.START_DOCKER_EFFECTIVE == 'true'
+        run: |
+          cd deployment/docker
+          echo "=== AUTH-SERVICE LOGS ==="
+          docker compose logs auth-service
+
+      - name: Resolve Verification Status
+        if: always()
+        run: |
+          VERIFY_STATUS=PASS
+          if [ "${POSTMAN_STATUS:-SKIP}" != "PASS" ] && [ "${POSTMAN_STATUS:-SKIP}" != "SKIP" ]; then
+            VERIFY_STATUS=FAIL
+          fi
+          if [ "${JEST_STATUS:-SKIP}" != "PASS" ] && [ "${JEST_STATUS:-SKIP}" != "SKIP" ]; then
+            VERIFY_STATUS=FAIL
+          fi
+          echo "VERIFY_STATUS=$VERIFY_STATUS" >> "$GITHUB_ENV"
+
+      - name: Resolve Code Evidence Links
+        if: always() && env.INPUTS_VALID == 'true'
+        env:
+          GITHUB_TOKEN: ${{ github.token }}
+        run: |
+          python - <<'PY'
+          import json
+          import os
+          import urllib.parse
+          import urllib.request
+
+          server_url = os.environ.get("GITHUB_SERVER_URL", "https://github.com").rstrip("/")
+          api_url = os.environ.get("GITHUB_API_URL", "https://api.github.com").rstrip("/")
+          repo = os.environ.get("GITHUB_REPOSITORY", "")
+          branch = os.environ.get("GITHUB_HEAD_REF") or os.environ.get("GITHUB_REF_NAME", "")
+          base_branch = os.environ.get("GITHUB_BASE_REF") or "main"
+          sha = os.environ.get("GITHUB_SHA", "")
+          run_id = os.environ.get("GITHUB_RUN_ID", "")
+          event_path = os.environ.get("GITHUB_EVENT_PATH", "")
+
+          pr_url = ""
+          pr_label = ""
+          if event_path and os.path.exists(event_path):
+              with open(event_path, "r", encoding="utf-8") as fh:
+                  event = json.load(fh)
+              pull_request = event.get("pull_request") or {}
+              pr_url = pull_request.get("html_url") or ""
+              if pull_request.get("number"):
+                  pr_label = f"PR #{pull_request['number']}"
+              base_branch = pull_request.get("base", {}).get("ref") or base_branch
+
+          if not pr_url and repo and branch:
+              owner = repo.split("/", 1)[0]
+              query = urllib.parse.urlencode({
+                  "head": f"{owner}:{branch}",
+                  "base": base_branch,
+                  "state": "open",
+              })
+              request = urllib.request.Request(
+                  f"{api_url}/repos/{repo}/pulls?{query}",
+                  headers={
+                      "Accept": "application/vnd.github+json",
+                      "Authorization": f"Bearer {os.environ.get('GITHUB_TOKEN', '')}",
+                      "X-GitHub-Api-Version": "2022-11-28",
+                  },
+              )
+              try:
+                  with urllib.request.urlopen(request, timeout=15) as response:
+                      pulls = json.loads(response.read().decode("utf-8"))
+                  if pulls:
+                      pr_url = pulls[0].get("html_url") or ""
+                      if pulls[0].get("number"):
+                          pr_label = f"PR #{pulls[0]['number']}"
+              except Exception as exc:
+                  print(f"Could not resolve pull request URL: {exc}")
+
+          run_url = f"{server_url}/{repo}/actions/runs/{run_id}" if repo and run_id else ""
+          commit_url = f"{server_url}/{repo}/commit/{sha}" if repo and sha else ""
+          compare_url = ""
+          if repo and branch and base_branch:
+              base = urllib.parse.quote(base_branch, safe="/")
+              head = urllib.parse.quote(branch, safe="/")
+              compare_url = f"{server_url}/{repo}/compare/{base}...{head}"
+          branch_url = f"{server_url}/{repo}/tree/{urllib.parse.quote(branch, safe='/')}" if repo and branch else ""
+
+          code_url = pr_url or compare_url or branch_url
+          code_label = pr_label or (f"compare {base_branch}...{branch}" if compare_url else branch)
+
+          with open(os.environ["GITHUB_ENV"], "a", encoding="utf-8") as fh:
+              fh.write(f"BUGFIX_RUN_URL={run_url}\n")
+              fh.write(f"BUGFIX_COMMIT_URL={commit_url}\n")
+              fh.write(f"BUGFIX_CODE_URL={code_url}\n")
+              fh.write(f"BUGFIX_CODE_LABEL={code_label}\n")
+
+          print(f"Code evidence URL: {code_url or 'none'}")
+          PY
+
+      - name: Update Jira With Verification Result
+        if: always() && env.INPUTS_VALID == 'true'
+        env:
+          JIRA_BASE_URL: ${{ secrets.JIRA_BASE_URL }}
+          JIRA_EMAIL: ${{ secrets.JIRA_EMAIL }}
+          JIRA_API_TOKEN: ${{ secrets.JIRA_API_TOKEN }}
+        run: |
+          ARGS=(
+            --status "${VERIFY_STATUS:-FAIL}"
+            --bug-keys "$BUG_KEYS_EFFECTIVE"
+            --parent-keys "$PARENT_KEYS_EFFECTIVE"
+            --transition-bugs "$TRANSITION_BUGS_EFFECTIVE"
+            --transition-parents "$TRANSITION_PARENTS_EFFECTIVE"
+          )
+          if [ "$DRY_RUN_EFFECTIVE" = "true" ]; then
+            ARGS+=(--dry-run)
+          fi
+          python Tool/postman/bugfix_verification_jira.py "${ARGS[@]}"
+
+      - name: Fail Workflow When Verification Fails
+        if: env.VERIFY_STATUS == 'FAIL'
+        run: |
+          echo "Bug fix verification failed. Jira was updated and issues were not transitioned to Done."
+          exit 1

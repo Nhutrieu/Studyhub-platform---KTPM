@@ -15,6 +15,7 @@ export function createAuthRouter({ authService }) {
   router.post("/logout", verifyAccessToken, controller.logout.bind(controller));
 
   router.post("/change-password", verifyAccessToken, controller.changePassword.bind(controller));
+  router.put("/change-password", verifyAccessToken, controller.changePassword.bind(controller));
   router.get("/me", verifyAccessToken, controller.me.bind(controller));
 
   return router;

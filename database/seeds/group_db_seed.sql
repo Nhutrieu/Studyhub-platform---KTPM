@@ -8,10 +8,10 @@ INSERT INTO `groups` (id, name, avatar_url, description, access, auto_approve_do
 -- GROUP 1 MEMBERS (6 người)
 -- =========================
 INSERT INTO group_members (group_id, user_id, role) VALUES
-('aaaaaaaa-aaaa-4aaa-8aaa-aaaaaaaaaaa1', '11111111-2222-4222-8222-111111111112', 'OWNER'),
-('aaaaaaaa-aaaa-4aaa-8aaa-aaaaaaaaaaa1', '11111111-2222-4222-8222-111111111113', 'MODERATOR'),
-('aaaaaaaa-aaaa-4aaa-8aaa-aaaaaaaaaaa1', '11111111-2222-4222-8222-111111111114', 'MEMBER'),
-('aaaaaaaa-aaaa-4aaa-8aaa-aaaaaaaaaaa1', '11111111-2222-4222-8222-111111111115', 'MEMBER'),
+('aaaaaaaa-aaaa-4aaa-8aaa-aaaaaaaaaaa1', '11111111-2222-4222-8222-111111111112', 'MEMBER'),
+('aaaaaaaa-aaaa-4aaa-8aaa-aaaaaaaaaaa1', '11111111-2222-4222-8222-111111111113', 'MEMBER'),
+('aaaaaaaa-aaaa-4aaa-8aaa-aaaaaaaaaaa1', '11111111-2222-4222-8222-111111111114', 'OWNER'),
+('aaaaaaaa-aaaa-4aaa-8aaa-aaaaaaaaaaa1', '11111111-2222-4222-8222-111111111115', 'MODERATOR'),
 ('aaaaaaaa-aaaa-4aaa-8aaa-aaaaaaaaaaa1', '11111111-2222-4222-8222-111111111116', 'MEMBER'),
 ('aaaaaaaa-aaaa-4aaa-8aaa-aaaaaaaaaaa1', '11111111-2222-4222-8222-111111111117', 'MEMBER');
 

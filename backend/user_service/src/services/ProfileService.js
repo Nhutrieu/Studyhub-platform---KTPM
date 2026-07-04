@@ -3,6 +3,37 @@ import path from "path";
 import { fileTypeFromBuffer } from "file-type";
 import { uploadToCloudinary } from "../utils/cloudinary.js";
 
+const PROFILE_LIMITS = {
+  display_name: { min: 1, max: 50, required: true },
+  bio: { max: 200 },
+  school: { max: 100 },
+};
+
+const SOCIAL_URL_MIN_LENGTH = 11;
+const SOCIAL_URL_MAX_LENGTH = 254;
+const SOCIAL_PLATFORM_DOMAINS = {
+  github: ["github.com"],
+  linkedin: ["linkedin.com"],
+  twitter: ["twitter.com", "x.com"],
+  facebook: ["facebook.com"],
+};
+
+function validateOptionalStringLength(value, field, { min, max, required }) {
+  if (value === undefined || value === null) return;
+  if (typeof value !== "string") {
+    throw new Error(`${field} must be a string`);
+  }
+
+  const length = value.trim().length;
+  if ((required || min) && length < (min ?? 1)) {
+    throw new Error(`${field} is too short`);
+  }
+
+  if (max && value.length > max) {
+    throw new Error(`${field} is too long`);
+  }
+}
+
 export class ProfileService {
   /**
    * ProfileService constructor
@@ -83,6 +114,14 @@ export class ProfileService {
    * @returns {Promise<Object>} - Updated user and details
    */
   async updateProfile(user_id, data) {
+    validateOptionalStringLength(
+      data.display_name,
+      "display_name",
+      PROFILE_LIMITS.display_name
+    );
+    validateOptionalStringLength(data.bio, "bio", PROFILE_LIMITS.bio);
+    validateOptionalStringLength(data.school, "school", PROFILE_LIMITS.school);
+
     const updatedUser = await this.userRepo.updateUserById(user_id, {
       display_name: data.display_name,
       full_name: data.full_name,
@@ -188,10 +227,15 @@ export class ProfileService {
    * Add or update a social link for a user
    * @param {string} user_id
    * @param {string} url
+   * @param {string} [requestedPlatform]
    */
-  async addSocialLink(user_id, url) {
+  async addSocialLink(user_id, url, requestedPlatform) {
     if (!url) {
       throw new Error("Social link URL is required");
+    }
+
+    if (typeof url !== "string") {
+      throw new Error("Social link URL must be a string");
     }
 
     let parsedUrl;
@@ -201,24 +245,26 @@ export class ProfileService {
       throw new Error("Invalid URL format");
     }
 
+    if (
+      url.length < SOCIAL_URL_MIN_LENGTH ||
+      url.length > SOCIAL_URL_MAX_LENGTH
+    ) {
+      throw new Error("Social link URL length is invalid");
+    }
+
     const host = parsedUrl.hostname.toLowerCase();
+    const normalizedPlatform =
+      typeof requestedPlatform === "string"
+        ? requestedPlatform.trim().toLowerCase()
+        : "";
 
-    const PLATFORM_MAP = {
-      github: ["github.com"],
-      linkedin: ["linkedin.com"],
-      twitter: ["twitter.com", "x.com"],
-      facebook: ["facebook.com"],
-      instagram: ["instagram.com"],
-      youtube: ["youtube.com", "youtu.be"],
-      tiktok: ["tiktok.com"],
-      medium: ["medium.com"],
-    };
+    const platform =
+      normalizedPlatform ||
+      Object.entries(SOCIAL_PLATFORM_DOMAINS).find(([_, domains]) =>
+        domains.some((d) => host.includes(d))
+      )?.[0];
 
-    const platform = Object.entries(PLATFORM_MAP).find(([_, domains]) =>
-      domains.some((d) => host.includes(d))
-    )?.[0];
-
-    if (!platform) {
+    if (!platform || !SOCIAL_PLATFORM_DOMAINS[platform]) {
       throw new Error("Unsupported social media platform");
     }
 
