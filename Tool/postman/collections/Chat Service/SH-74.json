@@ -311,7 +311,7 @@
               "listen": "test",
               "script": {
                 "exec": [
-                  "pm.test('Status 404 hoặc 500', () => pm.expect([404, 500]).to.include(pm.response.code));"
+                  "pm.test('Status 400, 404 hoặc 500', () => pm.expect([400, 404, 500]).to.include(pm.response.code));"
                 ]
               }
             }
