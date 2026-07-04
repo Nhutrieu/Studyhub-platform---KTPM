@@ -1,0 +1,379 @@
+{
+  "info": {
+    "name": "SH-21 - BVA for Group Activity Logs (Boundary Value Analysis - phan trang limit)",
+    "description": "BVA: Kiểm thử giá trị giới hạn phân trang (limit: Min=1, Max=100) khi tải nhật ký hoạt động nhóm.\nAPI: GET /api/v1/group/:groupId/logs",
+    "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+  },
+  "item": [
+    {
+      "name": "🔑 Đăng nhập User thường (user1) (Lấy Access Token)",
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "exec": [
+              "pm.test('Status 200 - Đăng nhập User thường (user1) thành công', () => pm.response.to.have.status(200));",
+              "const json = pm.response.json();",
+              "const resData = json.data || json;",
+              "if (resData.access_token) {",
+              "    pm.collectionVariables.set('accessToken', resData.access_token);",
+              "    pm.collectionVariables.set('userId', resData.user && resData.user.id);",
+              "}"
+            ],
+            "type": "text/javascript"
+          }
+        }
+      ],
+      "request": {
+        "method": "POST",
+        "header": [
+          {
+            "key": "Content-Type",
+            "value": "application/json"
+          }
+        ],
+        "body": {
+          "mode": "raw",
+          "raw": "{\n  \"email\": \"user1@example.com\",\n  \"password\": \"11111111\"\n}"
+        },
+        "url": {
+          "raw": "{{authBaseUrl}}/login",
+          "host": [
+            "{{authBaseUrl}}"
+          ],
+          "path": [
+            "login"
+          ]
+        }
+      }
+    },
+    {
+      "name": "✅ BVA-1 Biên tối thiểu hợp lệ: limit=1",
+      "event": [
+        {
+          "listen": "prerequest",
+          "script": {
+            "exec": [
+              "pm.request.headers.remove('Authorization');",
+              "pm.request.headers.add({ key: 'Authorization', value: 'Bearer ' + pm.collectionVariables.get('accessToken') });"
+            ],
+            "type": "text/javascript"
+          }
+        },
+        {
+          "listen": "test",
+          "script": {
+            "exec": [
+              "pm.test('Status 200 - limit=1 hợp lệ', () => pm.response.to.have.status(200));"
+            ]
+          }
+        }
+      ],
+      "request": {
+        "method": "GET",
+        "header": [],
+        "url": {
+          "raw": "{{groupBaseUrl}}/{{groupId}}/logs?limit=1&offset=0",
+          "host": [
+            "{{groupBaseUrl}}"
+          ],
+          "path": [
+            "{{groupId}}",
+            "logs"
+          ],
+          "query": [
+            {
+              "key": "limit",
+              "value": "1"
+            },
+            {
+              "key": "offset",
+              "value": "0"
+            }
+          ]
+        }
+      }
+    },
+    {
+      "name": "⚠️ BVA-2 Biên âm không hợp lệ: limit=-1",
+      "event": [
+        {
+          "listen": "prerequest",
+          "script": {
+            "exec": [
+              "pm.request.headers.remove('Authorization');",
+              "pm.request.headers.add({ key: 'Authorization', value: 'Bearer ' + pm.collectionVariables.get('accessToken') });"
+            ],
+            "type": "text/javascript"
+          }
+        },
+        {
+          "listen": "test",
+          "script": {
+            "exec": [
+              "// Chấp nhận 400 (chặn) hoặc 200 (fallback về giá trị mặc định)",
+              "pm.test('Status 400 hoặc Fallback 200 - limit=-1', () => {\n    pm.expect(pm.response.code).to.be.oneOf([400, 200]);\n});"
+            ]
+          }
+        }
+      ],
+      "request": {
+        "method": "GET",
+        "header": [],
+        "url": {
+          "raw": "{{groupBaseUrl}}/{{groupId}}/logs?limit=-1&offset=0",
+          "host": [
+            "{{groupBaseUrl}}"
+          ],
+          "path": [
+            "{{groupId}}",
+            "logs"
+          ],
+          "query": [
+            {
+              "key": "limit",
+              "value": "-1"
+            },
+            {
+              "key": "offset",
+              "value": "0"
+            }
+          ]
+        }
+      }
+    },
+    {
+      "name": "⚠️ BVA-3 Biên bằng không: limit=0",
+      "event": [
+        {
+          "listen": "prerequest",
+          "script": {
+            "exec": [
+              "pm.request.headers.remove('Authorization');",
+              "pm.request.headers.add({ key: 'Authorization', value: 'Bearer ' + pm.collectionVariables.get('accessToken') });"
+            ],
+            "type": "text/javascript"
+          }
+        },
+        {
+          "listen": "test",
+          "script": {
+            "exec": [
+              "// Chấp nhận 400 (chặn) hoặc 200 với mảng rỗng",
+              "pm.test('Status 400 hoặc mảng rỗng - limit=0', () => {\n    pm.expect(pm.response.code).to.be.oneOf([400, 200]);\n});"
+            ]
+          }
+        }
+      ],
+      "request": {
+        "method": "GET",
+        "header": [],
+        "url": {
+          "raw": "{{groupBaseUrl}}/{{groupId}}/logs?limit=0&offset=0",
+          "host": [
+            "{{groupBaseUrl}}"
+          ],
+          "path": [
+            "{{groupId}}",
+            "logs"
+          ],
+          "query": [
+            {
+              "key": "limit",
+              "value": "0"
+            },
+            {
+              "key": "offset",
+              "value": "0"
+            }
+          ]
+        }
+      }
+    },
+    {
+      "name": "✅ BVA-4 Biên tối đa hợp lệ: limit=100",
+      "event": [
+        {
+          "listen": "prerequest",
+          "script": {
+            "exec": [
+              "pm.request.headers.remove('Authorization');",
+              "pm.request.headers.add({ key: 'Authorization', value: 'Bearer ' + pm.collectionVariables.get('accessToken') });"
+            ],
+            "type": "text/javascript"
+          }
+        },
+        {
+          "listen": "test",
+          "script": {
+            "exec": [
+              "pm.test('Status 200 - limit=100 (tải tối đa cho phép)', () => pm.response.to.have.status(200));"
+            ]
+          }
+        }
+      ],
+      "request": {
+        "method": "GET",
+        "header": [],
+        "url": {
+          "raw": "{{groupBaseUrl}}/{{groupId}}/logs?limit=100&offset=0",
+          "host": [
+            "{{groupBaseUrl}}"
+          ],
+          "path": [
+            "{{groupId}}",
+            "logs"
+          ],
+          "query": [
+            {
+              "key": "limit",
+              "value": "100"
+            },
+            {
+              "key": "offset",
+              "value": "0"
+            }
+          ]
+        }
+      }
+    },
+    {
+      "name": "⚠️ BVA-5 Vượt biên tối đa: limit=9999",
+      "event": [
+        {
+          "listen": "prerequest",
+          "script": {
+            "exec": [
+              "pm.request.headers.remove('Authorization');",
+              "pm.request.headers.add({ key: 'Authorization', value: 'Bearer ' + pm.collectionVariables.get('accessToken') });"
+            ],
+            "type": "text/javascript"
+          }
+        },
+        {
+          "listen": "test",
+          "script": {
+            "exec": [
+              "// Chấp nhận 400 (chặn vượt trần) hoặc 200 (hệ thống tự ép về max)",
+              "pm.test('Status 400 hoặc Ép về max - limit=9999', () => {\n    pm.expect(pm.response.code).to.be.oneOf([400, 200]);\n});"
+            ]
+          }
+        }
+      ],
+      "request": {
+        "method": "GET",
+        "header": [],
+        "url": {
+          "raw": "{{groupBaseUrl}}/{{groupId}}/logs?limit=9999&offset=0",
+          "host": [
+            "{{groupBaseUrl}}"
+          ],
+          "path": [
+            "{{groupId}}",
+            "logs"
+          ],
+          "query": [
+            {
+              "key": "limit",
+              "value": "9999"
+            },
+            {
+              "key": "offset",
+              "value": "0"
+            }
+          ]
+        }
+      }
+    },
+    {
+      "name": "✅ BVA-6 Vượt biên vị trí: offset=999999",
+      "event": [
+        {
+          "listen": "prerequest",
+          "script": {
+            "exec": [
+              "pm.request.headers.remove('Authorization');",
+              "pm.request.headers.add({ key: 'Authorization', value: 'Bearer ' + pm.collectionVariables.get('accessToken') });"
+            ],
+            "type": "text/javascript"
+          }
+        },
+        {
+          "listen": "test",
+          "script": {
+            "exec": [
+              "pm.test('Status 200 - offset=999999 vượt tổng dữ liệu', () => pm.response.to.have.status(200));",
+              "const json = pm.response.json();",
+              "const resData = json.data || json;",
+              "const list = Array.isArray(resData) ? resData : (resData.logs || resData.items || []);",
+              "pm.test('Trả về mảng rỗng khi offset vượt quá tổng số bản ghi', () => {",
+              "    pm.expect(list.length).to.eql(0);",
+              "});"
+            ]
+          }
+        }
+      ],
+      "request": {
+        "method": "GET",
+        "header": [],
+        "url": {
+          "raw": "{{groupBaseUrl}}/{{groupId}}/logs?limit=20&offset=999999",
+          "host": [
+            "{{groupBaseUrl}}"
+          ],
+          "path": [
+            "{{groupId}}",
+            "logs"
+          ],
+          "query": [
+            {
+              "key": "limit",
+              "value": "20"
+            },
+            {
+              "key": "offset",
+              "value": "999999"
+            }
+          ]
+        }
+      }
+    }
+  ],
+  "variable": [
+    {
+      "key": "authBaseUrl",
+      "value": "http://localhost:3000/api/v1/auth",
+      "type": "string"
+    },
+    {
+      "key": "groupBaseUrl",
+      "value": "http://localhost:3002/api/v1/group",
+      "type": "string"
+    },
+    {
+      "key": "accessToken",
+      "value": "",
+      "type": "string"
+    },
+    {
+      "key": "userId",
+      "value": "",
+      "type": "string"
+    },
+    {
+      "key": "groupOwnerToken",
+      "value": "",
+      "type": "string"
+    },
+    {
+      "key": "groupOwnerUserId",
+      "value": "",
+      "type": "string"
+    },
+    {
+      "key": "groupId",
+      "value": "aaaaaaaa-aaaa-4aaa-8aaa-aaaaaaaaaaa1",
+      "type": "string"
+    }
+  ]
+}
