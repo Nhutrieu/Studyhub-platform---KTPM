@@ -13,8 +13,20 @@ export class MemberController {
       const { group_id } = req.params;
       const { role, limit, offset } = req.query;
 
-      const limitNum = Number(limit) || 50;
-      const offsetNum = Number(offset) || 0;
+      const limitNum = limit !== undefined ? Number(limit) : 50;
+      const offsetNum = offset !== undefined ? Number(offset) : 0;
+
+      if (
+        !Number.isFinite(limitNum) ||
+        limitNum <= 0 ||
+        !Number.isFinite(offsetNum) ||
+        offsetNum < 0
+      ) {
+        return res.status(400).json({
+          success: false,
+          message: "limit must be positive and offset must be zero or greater",
+        });
+      }
 
       const members = await this.memberService.listMembers(group_id, role, {
         limit: limitNum,
@@ -70,7 +82,7 @@ export class MemberController {
         group_id,
         target_id,
         role,
-        actor_id
+        actor_id,
       );
       res.json({ success: true, data: result });
     } catch (err) {
@@ -91,7 +103,7 @@ export class MemberController {
         target_id,
         "OWNER",
         actor_id,
-        { allowOwner: true }
+        { allowOwner: true },
       );
       res.json({ success: true, data: result });
     } catch (err) {

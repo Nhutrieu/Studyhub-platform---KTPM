@@ -65,7 +65,28 @@ export class GroupController {
   async updateGroup(req, res) {
     try {
       const { group_id } = req.params;
-      const data = req.body;
+      const data = { ...req.body };
+
+      if (data.name !== undefined) {
+        const name = String(data.name).trim();
+        if (name.length < 3 || name.length > 50) {
+          return res.status(400).json({
+            success: false,
+            message: "Group name must be between 3 and 50 characters",
+          });
+        }
+        data.name = name;
+      }
+
+      if (data.description !== undefined && data.description !== null) {
+        if (String(data.description).length > 500) {
+          return res.status(400).json({
+            success: false,
+            message: "Description must be at most 500 characters",
+          });
+        }
+      }
+
       const updated = await this.groupService.updateGroup(group_id, data);
       res.json({ success: true, data: updated });
     } catch (err) {
@@ -180,7 +201,7 @@ export class GroupController {
           limit: limitNum,
           offset: offsetNum,
         },
-        user_id
+        user_id,
       );
 
       res.json({ success: true, data: result });
@@ -318,7 +339,7 @@ export class GroupController {
 
       const result = await this.groupService.approveJoinRequest(
         request_id,
-        actor_id
+        actor_id,
       );
       res.json({ success: true, data: result });
     } catch (err) {
@@ -335,7 +356,7 @@ export class GroupController {
 
       const result = await this.groupService.rejectJoinRequest(
         request_id,
-        actor_id
+        actor_id,
       );
       res.json({ success: true, data: result });
     } catch (err) {
@@ -352,10 +373,23 @@ export class GroupController {
       const target_id = req.body.user_id;
       const actor_id = req.user.id;
 
+      const uuidRegex =
+        /^[0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{12}$/;
+
+      if (
+        !target_id ||
+        typeof target_id !== "string" ||
+        !uuidRegex.test(target_id)
+      ) {
+        return res
+          .status(400)
+          .json({ success: false, message: "user_id must be a valid UUID" });
+      }
+
       const result = await this.groupService.inviteMember(
         group_id,
         target_id,
-        actor_id
+        actor_id,
       );
       res.json({ success: true, data: result });
     } catch (err) {
@@ -384,11 +418,24 @@ export class GroupController {
       const { group_id } = req.params;
       const { action, limit, offset } = req.query;
 
-      const limitNum = Number(limit) || 50;
-      const offsetNum = Number(offset) || 0;
+      const limitNum = limit !== undefined ? Number(limit) : 50;
+      const offsetNum = offset !== undefined ? Number(offset) : 0;
+
+      if (!Number.isFinite(limitNum) || limitNum <= 0) {
+        return res
+          .status(400)
+          .json({ success: false, message: "limit must be a positive number" });
+      }
+      if (!Number.isFinite(offsetNum) || offsetNum < 0) {
+        return res
+          .status(400)
+          .json({ success: false, message: "offset must be zero or greater" });
+      }
+
+      const cappedLimit = Math.min(limitNum, 100);
 
       const logs = await this.groupService.getActivityLogs(group_id, action, {
-        limit: limitNum,
+        limit: cappedLimit,
         offset: offsetNum,
       });
 
