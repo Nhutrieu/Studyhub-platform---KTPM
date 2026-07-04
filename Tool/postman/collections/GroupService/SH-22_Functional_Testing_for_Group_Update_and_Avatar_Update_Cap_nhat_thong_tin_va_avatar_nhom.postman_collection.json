@@ -102,7 +102,7 @@
             {
               "key": "avatar",
               "type": "file",
-              "src": "/Users/huynhngocbinh/Downloads/studyhub-platform/avatar.jpg"
+              "src": "../avatar.jpg"
             }
           ]
         }
