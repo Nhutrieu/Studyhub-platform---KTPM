@@ -38,19 +38,23 @@
         },
         "url": {
           "raw": "{{authBaseUrl}}/login",
-          "host": ["{{authBaseUrl}}"],
-          "path": ["login"]
+          "host": [
+            "{{authBaseUrl}}"
+          ],
+          "path": [
+            "login"
+          ]
         }
       }
     },
     {
-      "name": "🔑 Đăng nhập Group Owner (user2) (Lấy Access Token)",
+      "name": "🔑 Đăng nhập Group Owner (user1) (Lấy Access Token)",
       "event": [
         {
           "listen": "test",
           "script": {
             "exec": [
-              "pm.test('Status 200 - Đăng nhập Group Owner (user2) thành công', () => pm.response.to.have.status(200));",
+              "pm.test('Status 200 - Đăng nhập Group Owner (user1) thành công', () => pm.response.to.have.status(200));",
               "const json = pm.response.json();",
               "const resData = json.data || json;",
               "if (resData.access_token) {",
@@ -72,12 +76,16 @@
         ],
         "body": {
           "mode": "raw",
-          "raw": "{\n  \"email\": \"user2@example.com\",\n  \"password\": \"11111111\"\n}"
+          "raw": "{\n  \"email\": \"user1@example.com\",\n  \"password\": \"11111111\"\n}"
         },
         "url": {
           "raw": "{{authBaseUrl}}/login",
-          "host": ["{{authBaseUrl}}"],
-          "path": ["login"]
+          "host": [
+            "{{authBaseUrl}}"
+          ],
+          "path": [
+            "login"
+          ]
         }
       }
     },
@@ -113,8 +121,12 @@
         },
         "url": {
           "raw": "{{authBaseUrl}}/login",
-          "host": ["{{authBaseUrl}}"],
-          "path": ["login"]
+          "host": [
+            "{{authBaseUrl}}"
+          ],
+          "path": [
+            "login"
+          ]
         }
       }
     },
@@ -138,7 +150,9 @@
         },
         "url": {
           "raw": "{{groupBaseUrl}}",
-          "host": ["{{groupBaseUrl}}"]
+          "host": [
+            "{{groupBaseUrl}}"
+          ]
         }
       },
       "event": [
@@ -166,8 +180,12 @@
         ],
         "url": {
           "raw": "{{groupBaseUrl}}/{{emptyGroupId}}",
-          "host": ["{{groupBaseUrl}}"],
-          "path": ["{{emptyGroupId}}"]
+          "host": [
+            "{{groupBaseUrl}}"
+          ],
+          "path": [
+            "{{emptyGroupId}}"
+          ]
         }
       },
       "event": [
@@ -177,6 +195,171 @@
             "exec": [
               "pm.test('Status 200', () => pm.response.to.have.status(200));"
             ]
+          }
+        }
+      ]
+    },
+    {
+      "name": "🧪 Setup - Tạo group bảo vệ để test phân quyền xóa",
+      "request": {
+        "method": "POST",
+        "header": [
+          {
+            "key": "Authorization",
+            "value": "Bearer {{groupOwnerToken}}"
+          },
+          {
+            "key": "Content-Type",
+            "value": "application/json"
+          }
+        ],
+        "url": {
+          "raw": "{{groupBaseUrl}}",
+          "host": [
+            "{{groupBaseUrl}}"
+          ]
+        },
+        "body": {
+          "mode": "raw",
+          "raw": "{\n  \"name\": \"Setup - Tạo group bảo vệ để test phân quyề {{$timestamp}}\",\n  \"description\": \"Newman fixture group\",\n  \"access\": \"PUBLIC\"\n}"
+        }
+      },
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "exec": [
+              "pm.test('Status 201 - Tạo fixture group thành công', () => pm.response.to.have.status(201));",
+              "const json = pm.response.json();",
+              "if (json.data?.id) pm.collectionVariables.set('groupId', json.data.id);"
+            ],
+            "type": "text/javascript"
+          }
+        }
+      ]
+    },
+    {
+      "name": "🧪 Setup - Thêm user2 vào group bảo vệ",
+      "request": {
+        "method": "POST",
+        "header": [
+          {
+            "key": "Authorization",
+            "value": "Bearer {{groupOwnerToken}}"
+          },
+          {
+            "key": "Content-Type",
+            "value": "application/json"
+          }
+        ],
+        "url": {
+          "raw": "{{groupBaseUrl}}/{{groupId}}/invite",
+          "host": [
+            "{{groupBaseUrl}}"
+          ],
+          "path": [
+            "{{groupId}}",
+            "invite"
+          ]
+        },
+        "body": {
+          "mode": "raw",
+          "raw": "{\n  \"user_id\": \"11111111-2222-4222-8222-111111111113\"\n}"
+        }
+      },
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "exec": [
+              "pm.test('Status 200 - 🧪 Setup - Thêm user2 vào group bảo vệ', () => pm.response.to.have.status(200));"
+            ],
+            "type": "text/javascript"
+          }
+        }
+      ]
+    },
+    {
+      "name": "🧪 Setup - Nâng user2 thành MODERATOR",
+      "request": {
+        "method": "PATCH",
+        "header": [
+          {
+            "key": "Authorization",
+            "value": "Bearer {{groupOwnerToken}}"
+          },
+          {
+            "key": "Content-Type",
+            "value": "application/json"
+          }
+        ],
+        "url": {
+          "raw": "{{groupBaseUrl}}/members/{{groupId}}/user/11111111-2222-4222-8222-111111111113/role",
+          "host": [
+            "{{groupBaseUrl}}"
+          ],
+          "path": [
+            "members",
+            "{{groupId}}",
+            "user",
+            "11111111-2222-4222-8222-111111111113",
+            "role"
+          ]
+        },
+        "body": {
+          "mode": "raw",
+          "raw": "{\n  \"role\": \"MODERATOR\"\n}"
+        }
+      },
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "exec": [
+              "pm.test('Status 200 - 🧪 Setup - Nâng user2 thành MODERATOR', () => pm.response.to.have.status(200));"
+            ],
+            "type": "text/javascript"
+          }
+        }
+      ]
+    },
+    {
+      "name": "🧪 Setup - Thêm user3 làm member thường",
+      "request": {
+        "method": "POST",
+        "header": [
+          {
+            "key": "Authorization",
+            "value": "Bearer {{groupOwnerToken}}"
+          },
+          {
+            "key": "Content-Type",
+            "value": "application/json"
+          }
+        ],
+        "url": {
+          "raw": "{{groupBaseUrl}}/{{groupId}}/invite",
+          "host": [
+            "{{groupBaseUrl}}"
+          ],
+          "path": [
+            "{{groupId}}",
+            "invite"
+          ]
+        },
+        "body": {
+          "mode": "raw",
+          "raw": "{\n  \"user_id\": \"11111111-2222-4222-8222-111111111114\"\n}"
+        }
+      },
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "exec": [
+              "pm.test('Status 200 - 🧪 Setup - Thêm user3 làm member thường', () => pm.response.to.have.status(200));"
+            ],
+            "type": "text/javascript"
           }
         }
       ]
@@ -193,8 +376,12 @@
         ],
         "url": {
           "raw": "{{groupBaseUrl}}/{{groupId}}",
-          "host": ["{{groupBaseUrl}}"],
-          "path": ["{{groupId}}"]
+          "host": [
+            "{{groupBaseUrl}}"
+          ],
+          "path": [
+            "{{groupId}}"
+          ]
         }
       },
       "event": [
@@ -220,8 +407,12 @@
         ],
         "url": {
           "raw": "{{groupBaseUrl}}/{{groupId}}",
-          "host": ["{{groupBaseUrl}}"],
-          "path": ["{{groupId}}"]
+          "host": [
+            "{{groupBaseUrl}}"
+          ],
+          "path": [
+            "{{groupId}}"
+          ]
         }
       },
       "event": [
@@ -284,7 +475,7 @@
     },
     {
       "key": "adminAccessToken",
-      "value": "{{REPLACE_WITH_REAL_ADMIN_TOKEN}}",
+      "value": "",
       "type": "string"
     },
     {
@@ -309,37 +500,37 @@
     },
     {
       "key": "anotherUserId",
-      "value": "{{REPLACE_WITH_REAL_USER_ID}}",
+      "value": "11111111-2222-4222-8222-111111111113",
       "type": "string"
     },
     {
       "key": "anotherUserAccessToken",
-      "value": "{{REPLACE_WITH_REAL_TOKEN_OF_anotherUserId}}",
+      "value": "",
       "type": "string"
     },
     {
       "key": "outsiderToken",
-      "value": "{{REPLACE_WITH_TOKEN_OF_USER_NOT_IN_ANY_GROUP_DOC}}",
+      "value": "",
       "type": "string"
     },
     {
       "key": "deletableUserId",
-      "value": "{{REPLACE_WITH_A_USER_ID_SAFE_TO_DELETE}}",
+      "value": "",
       "type": "string"
     },
     {
       "key": "blockedUserEmail",
-      "value": "{{REPLACE_WITH_EMAIL_OF_AN_ALREADY_BLOCKED_USER}}",
+      "value": "",
       "type": "string"
     },
     {
       "key": "privateUserId",
-      "value": "{{REPLACE_WITH_USER_ID_WHOSE_PROFILE_IS_PRIVATE}}",
+      "value": "",
       "type": "string"
     },
     {
       "key": "otherUserSocialLinkId",
-      "value": "{{REPLACE_WITH_SOCIAL_LINK_ID_OF_ANOTHER_USER}}",
+      "value": "",
       "type": "string"
     },
     {
@@ -349,17 +540,17 @@
     },
     {
       "key": "groupId",
-      "value": "aaaaaaaa-aaaa-4aaa-8aaa-aaaaaaaaaaa1",
+      "value": "",
       "type": "string"
     },
     {
       "key": "privateGroupId",
-      "value": "{{REPLACE_WITH_REAL_PRIVATE_GROUP_ID}}",
+      "value": "",
       "type": "string"
     },
     {
       "key": "emptyGroupId",
-      "value": "aaaaaaaa-aaaa-4aaa-8aaa-aaaaaaaaaaa2",
+      "value": "",
       "type": "string"
     },
     {
@@ -369,32 +560,32 @@
     },
     {
       "key": "joinRequestId2",
-      "value": "{{REPLACE_WITH_ANOTHER_PENDING_JOIN_REQUEST_ID}}",
+      "value": "",
       "type": "string"
     },
     {
       "key": "groupOwnerToken",
-      "value": "{{REPLACE_WITH_TOKEN_OF_GROUP_OWNER}}",
+      "value": "",
       "type": "string"
     },
     {
       "key": "groupOwnerUserId",
-      "value": "{{REPLACE_WITH_USER_ID_OF_GROUP_OWNER}}",
+      "value": "",
       "type": "string"
     },
     {
       "key": "groupManagerNotOwnerToken",
-      "value": "{{REPLACE_WITH_TOKEN_OF_A_MANAGER_WHO_IS_NOT_OWNER}}",
+      "value": "",
       "type": "string"
     },
     {
       "key": "memberToLeaveToken",
-      "value": "{{REPLACE_WITH_TOKEN_OF_A_REGULAR_MEMBER_TO_TEST_LEAVE}}",
+      "value": "",
       "type": "string"
     },
     {
       "key": "memberToKickId",
-      "value": "{{REPLACE_WITH_USER_ID_OF_A_MEMBER_TO_KICK}}",
+      "value": "11111111-2222-4222-8222-111111111117",
       "type": "string"
     },
     {
@@ -404,22 +595,22 @@
     },
     {
       "key": "privateDocumentId",
-      "value": "{{REPLACE_WITH_REAL_PRIVATE_DOCUMENT_ID}}",
+      "value": "",
       "type": "string"
     },
     {
       "key": "deletableDocumentId",
-      "value": "{{REPLACE_WITH_DOCUMENT_ID_SAFE_TO_DELETE}}",
+      "value": "",
       "type": "string"
     },
     {
       "key": "pendingDocumentId",
-      "value": "{{REPLACE_WITH_DOCUMENT_ID_PENDING_APPROVAL}}",
+      "value": "",
       "type": "string"
     },
     {
       "key": "pendingDocumentId2",
-      "value": "{{REPLACE_WITH_ANOTHER_DOCUMENT_ID_PENDING_APPROVAL}}",
+      "value": "",
       "type": "string"
     },
     {
@@ -429,7 +620,7 @@
     },
     {
       "key": "otherUserCommentId",
-      "value": "{{REPLACE_WITH_COMMENT_ID_OF_ANOTHER_USER}}",
+      "value": "",
       "type": "string"
     },
     {
@@ -439,12 +630,12 @@
     },
     {
       "key": "otherUserNotificationId",
-      "value": "{{REPLACE_WITH_NOTIFICATION_ID_OF_ANOTHER_USER}}",
+      "value": "",
       "type": "string"
     },
     {
       "key": "deletableNotificationId",
-      "value": "{{REPLACE_WITH_NOTIFICATION_ID_SAFE_TO_DELETE}}",
+      "value": "",
       "type": "string"
     },
     {
@@ -464,7 +655,7 @@
     },
     {
       "key": "otherUserMessageId",
-      "value": "{{REPLACE_WITH_MESSAGE_ID_OF_ANOTHER_USER}}",
+      "value": "",
       "type": "string"
     }
   ]

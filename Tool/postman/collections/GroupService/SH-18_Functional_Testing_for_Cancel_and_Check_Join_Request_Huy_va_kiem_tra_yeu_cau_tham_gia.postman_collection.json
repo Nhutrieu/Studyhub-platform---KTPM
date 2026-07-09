@@ -2,7 +2,7 @@
   "info": {
     "name": "SH-18 - Functional Testing for Cancel and Check Join Request (Huy va kiem tra yeu cau tham gia)",
     "description": "Jira Task SH-18: Sửa đổi luồng kiểm thử tự động. Bổ sung bước Gửi yêu cầu (POST) trước khi Hủy (DELETE) để đảm bảo tồn tại bản ghi PENDING trong database.",
-    "schema": "https://schema.getgetpostman.com/json/collection/v2.1.0/collection.json"
+    "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
   },
   "item": [
     {
@@ -37,10 +37,95 @@
         },
         "url": {
           "raw": "{{authBaseUrl}}/login",
-          "host": [ "{{authBaseUrl}}" ],
-          "path": [ "login" ]
+          "host": [
+            "{{authBaseUrl}}"
+          ],
+          "path": [
+            "login"
+          ]
         }
       }
+    },
+    {
+      "name": "🔑 Đăng nhập Group Owner (user2) để tạo group restricted",
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "exec": [
+              "pm.test('Status 200 - Đăng nhập Group Owner (user2) thành công', () => pm.response.to.have.status(200));",
+              "const json = pm.response.json();",
+              "const resData = json.data || json;",
+              "if (resData.access_token) {",
+              "    pm.collectionVariables.set('groupOwnerToken', resData.access_token);",
+              "    pm.collectionVariables.set('groupOwnerUserId', resData.user && resData.user.id);",
+              "}"
+            ],
+            "type": "text/javascript"
+          }
+        }
+      ],
+      "request": {
+        "method": "POST",
+        "header": [
+          {
+            "key": "Content-Type",
+            "value": "application/json"
+          }
+        ],
+        "body": {
+          "mode": "raw",
+          "raw": "{\n  \"email\": \"user2@example.com\",\n  \"password\": \"11111111\"\n}"
+        },
+        "url": {
+          "raw": "{{authBaseUrl}}/login",
+          "host": [
+            "{{authBaseUrl}}"
+          ],
+          "path": [
+            "login"
+          ]
+        }
+      }
+    },
+    {
+      "name": "🧪 Setup - Tạo group RESTRICTED cho cancel join",
+      "request": {
+        "method": "POST",
+        "header": [
+          {
+            "key": "Authorization",
+            "value": "Bearer {{groupOwnerToken}}"
+          },
+          {
+            "key": "Content-Type",
+            "value": "application/json"
+          }
+        ],
+        "body": {
+          "mode": "raw",
+          "raw": "{\n  \"name\": \"SH-18 Cancel Join {{$timestamp}}\",\n  \"description\": \"Newman fixture group\",\n  \"access\": \"RESTRICTED\"\n}"
+        },
+        "url": {
+          "raw": "{{groupBaseUrl}}",
+          "host": [
+            "{{groupBaseUrl}}"
+          ]
+        }
+      },
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "exec": [
+              "pm.test('Status 201 - Tạo group restricted thành công', () => pm.response.to.have.status(201));",
+              "const json = pm.response.json();",
+              "if (json.data?.id) pm.collectionVariables.set('privateGroupId', json.data.id);"
+            ],
+            "type": "text/javascript"
+          }
+        }
+      ]
     },
     {
       "name": "➕ Gửi yêu cầu tham gia Group Private (Tạo trạng thái PENDING)",
@@ -64,8 +149,13 @@
         ],
         "url": {
           "raw": "{{groupBaseUrl}}/{{privateGroupId}}/join",
-          "host": [ "{{groupBaseUrl}}" ],
-          "path": [ "{{privateGroupId}}", "join" ]
+          "host": [
+            "{{groupBaseUrl}}"
+          ],
+          "path": [
+            "{{privateGroupId}}",
+            "join"
+          ]
         }
       }
     },
@@ -81,8 +171,13 @@
         ],
         "url": {
           "raw": "{{groupBaseUrl}}/{{privateGroupId}}/check-join",
-          "host": [ "{{groupBaseUrl}}" ],
-          "path": [ "{{privateGroupId}}", "check-join" ]
+          "host": [
+            "{{groupBaseUrl}}"
+          ],
+          "path": [
+            "{{privateGroupId}}",
+            "check-join"
+          ]
         }
       },
       "event": [
@@ -109,8 +204,13 @@
         ],
         "url": {
           "raw": "{{groupBaseUrl}}/{{privateGroupId}}/join",
-          "host": [ "{{groupBaseUrl}}" ],
-          "path": [ "{{privateGroupId}}", "join" ]
+          "host": [
+            "{{groupBaseUrl}}"
+          ],
+          "path": [
+            "{{privateGroupId}}",
+            "join"
+          ]
         }
       },
       "event": [
@@ -136,8 +236,13 @@
         ],
         "url": {
           "raw": "{{groupBaseUrl}}/{{privateGroupId}}/join",
-          "host": [ "{{groupBaseUrl}}" ],
-          "path": [ "{{privateGroupId}}", "join" ]
+          "host": [
+            "{{groupBaseUrl}}"
+          ],
+          "path": [
+            "{{privateGroupId}}",
+            "join"
+          ]
         }
       },
       "event": [
@@ -153,9 +258,35 @@
     }
   ],
   "variable": [
-    { "key": "authBaseUrl", "value": "http://localhost:3000/api/v1/auth", "type": "string" },
-    { "key": "groupBaseUrl", "value": "http://localhost:3002/api/v1/group", "type": "string" },
-    { "key": "accessToken", "value": "", "type": "string" },
-    { "key": "privateGroupId", "value": "aaaaaaaa-aaaa-4aaa-8aaa-aaaaaaaaaaa2", "type": "string" }
+    {
+      "key": "authBaseUrl",
+      "value": "http://localhost:3000/api/v1/auth",
+      "type": "string"
+    },
+    {
+      "key": "groupBaseUrl",
+      "value": "http://localhost:3002/api/v1/group",
+      "type": "string"
+    },
+    {
+      "key": "accessToken",
+      "value": "",
+      "type": "string"
+    },
+    {
+      "key": "privateGroupId",
+      "value": "",
+      "type": "string"
+    },
+    {
+      "key": "groupOwnerToken",
+      "value": "",
+      "type": "string"
+    },
+    {
+      "key": "groupOwnerUserId",
+      "value": "",
+      "type": "string"
+    }
   ]
 }

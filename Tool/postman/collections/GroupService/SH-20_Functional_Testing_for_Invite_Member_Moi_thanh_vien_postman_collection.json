@@ -38,10 +38,135 @@
         },
         "url": {
           "raw": "{{authBaseUrl}}/login",
-          "host": ["{{authBaseUrl}}"],
-          "path": ["login"]
+          "host": [
+            "{{authBaseUrl}}"
+          ],
+          "path": [
+            "login"
+          ]
         }
       }
+    },
+    {
+      "name": "🔑 Đăng nhập Group Owner (user1) (Lấy Access Token)",
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "exec": [
+              "pm.test('Status 200 - Đăng nhập Group Owner (user1) thành công', () => pm.response.to.have.status(200));",
+              "const json = pm.response.json();",
+              "const resData = json.data || json;",
+              "if (resData.access_token) {",
+              "    pm.collectionVariables.set('groupOwnerToken', resData.access_token);",
+              "    pm.collectionVariables.set('groupOwnerUserId', resData.user && resData.user.id);",
+              "}"
+            ],
+            "type": "text/javascript"
+          }
+        }
+      ],
+      "request": {
+        "method": "POST",
+        "header": [
+          {
+            "key": "Content-Type",
+            "value": "application/json"
+          }
+        ],
+        "body": {
+          "mode": "raw",
+          "raw": "{\n  \"email\": \"user1@example.com\",\n  \"password\": \"11111111\"\n}"
+        },
+        "url": {
+          "raw": "{{authBaseUrl}}/login",
+          "host": [
+            "{{authBaseUrl}}"
+          ],
+          "path": [
+            "login"
+          ]
+        }
+      }
+    },
+    {
+      "name": "🧪 Tạo group PUBLIC dùng cho test invite",
+      "request": {
+        "method": "POST",
+        "header": [
+          {
+            "key": "Authorization",
+            "value": "Bearer {{groupOwnerToken}}"
+          },
+          {
+            "key": "Content-Type",
+            "value": "application/json"
+          }
+        ],
+        "body": {
+          "mode": "raw",
+          "raw": "{\n  \"name\": \"SH-20 Invite {{$timestamp}}\",\n  \"description\": \"Fixture group for invite test\",\n  \"access\": \"PUBLIC\"\n}"
+        },
+        "url": {
+          "raw": "{{groupBaseUrl}}",
+          "host": [
+            "{{groupBaseUrl}}"
+          ]
+        }
+      },
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "exec": [
+              "pm.test('Status 201 - Tạo group invite thành công', () => pm.response.to.have.status(201));",
+              "const json = pm.response.json();",
+              "if (json.data?.id) pm.collectionVariables.set('groupId', json.data.id);"
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "name": "🧪 Setup - Thêm user3 làm member thường",
+      "request": {
+        "method": "POST",
+        "header": [
+          {
+            "key": "Authorization",
+            "value": "Bearer {{groupOwnerToken}}"
+          },
+          {
+            "key": "Content-Type",
+            "value": "application/json"
+          }
+        ],
+        "url": {
+          "raw": "{{groupBaseUrl}}/{{groupId}}/invite",
+          "host": [
+            "{{groupBaseUrl}}"
+          ],
+          "path": [
+            "{{groupId}}",
+            "invite"
+          ]
+        },
+        "body": {
+          "mode": "raw",
+          "raw": "{\n  \"user_id\": \"11111111-2222-4222-8222-111111111114\"\n}"
+        }
+      },
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "exec": [
+              "pm.test('Status 200 - 🧪 Setup - Thêm user3 làm member thường', () => pm.response.to.have.status(200));"
+            ],
+            "type": "text/javascript"
+          }
+        }
+      ]
     },
     {
       "name": "❌ [Member thường] Mời thành viên - Bị từ chối",
@@ -83,84 +208,15 @@
         },
         "url": {
           "raw": "{{groupBaseUrl}}/{{groupId}}/invite",
-          "host": ["{{groupBaseUrl}}"],
-          "path": ["{{groupId}}", "invite"]
+          "host": [
+            "{{groupBaseUrl}}"
+          ],
+          "path": [
+            "{{groupId}}",
+            "invite"
+          ]
         }
       }
-    },
-    {
-      "name": "🔑 Đăng nhập Group Owner (user1) (Lấy Access Token)",
-      "event": [
-        {
-          "listen": "test",
-          "script": {
-            "exec": [
-              "pm.test('Status 200 - Đăng nhập Group Owner (user1) thành công', () => pm.response.to.have.status(200));",
-              "const json = pm.response.json();",
-              "const resData = json.data || json;",
-              "if (resData.access_token) {",
-              "    pm.collectionVariables.set('groupOwnerToken', resData.access_token);",
-              "    pm.collectionVariables.set('groupOwnerUserId', resData.user && resData.user.id);",
-              "}"
-            ],
-            "type": "text/javascript"
-          }
-        }
-      ],
-      "request": {
-        "method": "POST",
-        "header": [
-          {
-            "key": "Content-Type",
-            "value": "application/json"
-          }
-        ],
-        "body": {
-          "mode": "raw",
-          "raw": "{\n  \"email\": \"user1@example.com\",\n  \"password\": \"11111111\"\n}"
-        },
-        "url": {
-          "raw": "{{authBaseUrl}}/login",
-          "host": ["{{authBaseUrl}}"],
-          "path": ["login"]
-        }
-      }
-    },
-    {
-      "name": "🧪 Tạo group PUBLIC dùng cho test invite",
-      "request": {
-        "method": "POST",
-        "header": [
-          {
-            "key": "Authorization",
-            "value": "Bearer {{groupOwnerToken}}"
-          },
-          {
-            "key": "Content-Type",
-            "value": "application/json"
-          }
-        ],
-        "body": {
-          "mode": "raw",
-          "raw": "{\n  \"name\": \"SH-20 Invite {{$timestamp}}\",\n  \"description\": \"Fixture group for invite test\",\n  \"access\": \"PUBLIC\"\n}"
-        },
-        "url": {
-          "raw": "{{groupBaseUrl}}",
-          "host": ["{{groupBaseUrl}}"]
-        }
-      },
-      "event": [
-        {
-          "listen": "test",
-          "script": {
-            "exec": [
-              "pm.test('Status 201 - Tạo group invite thành công', () => pm.response.to.have.status(201));",
-              "const json = pm.response.json();",
-              "if (json.data?.id) pm.collectionVariables.set('groupId', json.data.id);"
-            ]
-          }
-        }
-      ]
     },
     {
       "name": "✅ [Manager] Mời thành viên vào group (invite)",
@@ -198,8 +254,13 @@
         },
         "url": {
           "raw": "{{groupBaseUrl}}/{{groupId}}/invite",
-          "host": ["{{groupBaseUrl}}"],
-          "path": ["{{groupId}}", "invite"]
+          "host": [
+            "{{groupBaseUrl}}"
+          ],
+          "path": [
+            "{{groupId}}",
+            "invite"
+          ]
         }
       }
     },
@@ -243,8 +304,13 @@
         },
         "url": {
           "raw": "{{groupBaseUrl}}/{{groupId}}/invite",
-          "host": ["{{groupBaseUrl}}"],
-          "path": ["{{groupId}}", "invite"]
+          "host": [
+            "{{groupBaseUrl}}"
+          ],
+          "path": [
+            "{{groupId}}",
+            "invite"
+          ]
         }
       }
     }
@@ -272,7 +338,7 @@
     },
     {
       "key": "groupId",
-      "value": "aaaaaaaa-aaaa-4aaa-8aaa-aaaaaaaaaaa1",
+      "value": "",
       "type": "string"
     },
     {

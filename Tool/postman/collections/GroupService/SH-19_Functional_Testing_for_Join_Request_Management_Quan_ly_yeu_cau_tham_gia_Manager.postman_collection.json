@@ -38,8 +38,12 @@
         },
         "url": {
           "raw": "{{authBaseUrl}}/login",
-          "host": [ "{{authBaseUrl}}" ],
-          "path": [ "login" ]
+          "host": [
+            "{{authBaseUrl}}"
+          ],
+          "path": [
+            "login"
+          ]
         }
       }
     },
@@ -76,10 +80,131 @@
         },
         "url": {
           "raw": "{{authBaseUrl}}/login",
-          "host": [ "{{authBaseUrl}}" ],
-          "path": [ "login" ]
+          "host": [
+            "{{authBaseUrl}}"
+          ],
+          "path": [
+            "login"
+          ]
         }
       }
+    },
+    {
+      "name": "🧪 Setup - Tạo group RESTRICTED cho join request",
+      "request": {
+        "method": "POST",
+        "header": [
+          {
+            "key": "Authorization",
+            "value": "Bearer {{groupOwnerToken}}"
+          },
+          {
+            "key": "Content-Type",
+            "value": "application/json"
+          }
+        ],
+        "url": {
+          "raw": "{{groupBaseUrl}}",
+          "host": [
+            "{{groupBaseUrl}}"
+          ]
+        },
+        "body": {
+          "mode": "raw",
+          "raw": "{\n  \"name\": \"Setup - Tạo group RESTRICTED cho join requ {{$timestamp}}\",\n  \"description\": \"Newman fixture group\",\n  \"access\": \"RESTRICTED\"\n}"
+        }
+      },
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "exec": [
+              "pm.test('Status 201 - Tạo fixture group thành công', () => pm.response.to.have.status(201));",
+              "const json = pm.response.json();",
+              "if (json.data?.id) pm.collectionVariables.set('groupId', json.data.id);"
+            ],
+            "type": "text/javascript"
+          }
+        }
+      ]
+    },
+    {
+      "name": "🧪 Setup - user1 gửi join request",
+      "request": {
+        "method": "POST",
+        "header": [
+          {
+            "key": "Authorization",
+            "value": "Bearer {{accessToken}}"
+          }
+        ],
+        "url": {
+          "raw": "{{groupBaseUrl}}/{{groupId}}/join",
+          "host": [
+            "{{groupBaseUrl}}"
+          ],
+          "path": [
+            "{{groupId}}",
+            "join"
+          ]
+        }
+      },
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "exec": [
+              "pm.test('Status 200 - 🧪 Setup - user1 gửi join request', () => pm.response.to.have.status(200));",
+              "const json = pm.response.json();",
+              "if (json.data?.id) pm.collectionVariables.set('joinRequestId', json.data.id);"
+            ],
+            "type": "text/javascript"
+          }
+        }
+      ]
+    },
+    {
+      "name": "🧪 Setup - Tạo join request thứ hai cho user8",
+      "request": {
+        "method": "POST",
+        "header": [
+          {
+            "key": "Authorization",
+            "value": "Bearer {{groupOwnerToken}}"
+          },
+          {
+            "key": "Content-Type",
+            "value": "application/json"
+          }
+        ],
+        "url": {
+          "raw": "{{groupBaseUrl}}/{{groupId}}/invite",
+          "host": [
+            "{{groupBaseUrl}}"
+          ],
+          "path": [
+            "{{groupId}}",
+            "invite"
+          ]
+        },
+        "body": {
+          "mode": "raw",
+          "raw": "{\n  \"user_id\": \"11111111-2222-4222-8222-111111111119\"\n}"
+        }
+      },
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "exec": [
+              "pm.test('Status 200 - 🧪 Setup - Tạo join request thứ hai cho user8', () => pm.response.to.have.status(200));",
+              "const json = pm.response.json();",
+              "if (json.data?.id) pm.collectionVariables.set('joinRequestId2', json.data.id);"
+            ],
+            "type": "text/javascript"
+          }
+        }
+      ]
     },
     {
       "name": "✅ [Manager] Xem danh sách join requests của group",
@@ -92,12 +217,23 @@
           }
         ],
         "url": {
-          "raw": "{{groupBaseUrl}}/aaaaaaaa-aaaa-4aaa-8aaa-aaaaaaaaaaa2/requests?limit=20&offset=0",
-          "host": [ "{{groupBaseUrl}}" ],
-          "path": [ "aaaaaaaa-aaaa-4aaa-8aaa-aaaaaaaaaaa2", "requests" ],
+          "raw": "{{groupBaseUrl}}/{{groupId}}/requests?limit=20&offset=0",
+          "host": [
+            "{{groupBaseUrl}}"
+          ],
+          "path": [
+            "{{groupId}}",
+            "requests"
+          ],
           "query": [
-            { "key": "limit", "value": "20" },
-            { "key": "offset", "value": "0" }
+            {
+              "key": "limit",
+              "value": "20"
+            },
+            {
+              "key": "offset",
+              "value": "0"
+            }
           ]
         }
       },
@@ -123,9 +259,14 @@
           }
         ],
         "url": {
-          "raw": "{{groupBaseUrl}}/aaaaaaaa-aaaa-4aaa-8aaa-aaaaaaaaaaa2/requests",
-          "host": [ "{{groupBaseUrl}}" ],
-          "path": [ "aaaaaaaa-aaaa-4aaa-8aaa-aaaaaaaaaaa2", "requests" ]
+          "raw": "{{groupBaseUrl}}/{{groupId}}/requests",
+          "host": [
+            "{{groupBaseUrl}}"
+          ],
+          "path": [
+            "{{groupId}}",
+            "requests"
+          ]
         }
       },
       "event": [
@@ -150,9 +291,16 @@
           }
         ],
         "url": {
-          "raw": "{{groupBaseUrl}}/requests/aaaaaaaa-aaaa-4aaa-8aaa-aaaaaaaaaaa2/req-bbbb-1111-4111-8111-aaaaaaaaaaa1/approve",
-          "host": [ "{{groupBaseUrl}}" ],
-          "path": [ "requests", "aaaaaaaa-aaaa-4aaa-8aaa-aaaaaaaaaaa2", "req-bbbb-1111-4111-8111-aaaaaaaaaaa1", "approve" ]
+          "raw": "{{groupBaseUrl}}/requests/{{groupId}}/{{joinRequestId}}/approve",
+          "host": [
+            "{{groupBaseUrl}}"
+          ],
+          "path": [
+            "requests",
+            "{{groupId}}",
+            "{{joinRequestId}}",
+            "approve"
+          ]
         }
       },
       "event": [
@@ -177,9 +325,16 @@
           }
         ],
         "url": {
-          "raw": "{{groupBaseUrl}}/requests/aaaaaaaa-aaaa-4aaa-8aaa-aaaaaaaaaaa2/req-bbbb-1111-4111-8111-aaaaaaaaaaa1/approve",
-          "host": [ "{{groupBaseUrl}}" ],
-          "path": [ "requests", "aaaaaaaa-aaaa-4aaa-8aaa-aaaaaaaaaaa2", "req-bbbb-1111-4111-8111-aaaaaaaaaaa1", "approve" ]
+          "raw": "{{groupBaseUrl}}/requests/{{groupId}}/{{joinRequestId}}/approve",
+          "host": [
+            "{{groupBaseUrl}}"
+          ],
+          "path": [
+            "requests",
+            "{{groupId}}",
+            "{{joinRequestId}}",
+            "approve"
+          ]
         }
       },
       "event": [
@@ -204,9 +359,16 @@
           }
         ],
         "url": {
-          "raw": "{{groupBaseUrl}}/requests/aaaaaaaa-aaaa-4aaa-8aaa-aaaaaaaaaaa2/req-bbbb-1111-4111-8111-aaaaaaaaaaa2/reject",
-          "host": [ "{{groupBaseUrl}}" ],
-          "path": [ "requests", "aaaaaaaa-aaaa-4aaa-8aaa-aaaaaaaaaaa2", "req-bbbb-1111-4111-8111-aaaaaaaaaaa2", "reject" ]
+          "raw": "{{groupBaseUrl}}/requests/{{groupId}}/{{joinRequestId2}}/reject",
+          "host": [
+            "{{groupBaseUrl}}"
+          ],
+          "path": [
+            "requests",
+            "{{groupId}}",
+            "{{joinRequestId2}}",
+            "reject"
+          ]
         }
       },
       "event": [
@@ -231,9 +393,16 @@
           }
         ],
         "url": {
-          "raw": "{{groupBaseUrl}}/requests/aaaaaaaa-aaaa-4aaa-8aaa-aaaaaaaaaaa2/00000000-0000-0000-0000-000000000000/approve",
-          "host": [ "{{groupBaseUrl}}" ],
-          "path": [ "requests", "aaaaaaaa-aaaa-4aaa-8aaa-aaaaaaaaaaa2", "00000000-0000-0000-0000-000000000000", "approve" ]
+          "raw": "{{groupBaseUrl}}/requests/{{groupId}}/00000000-0000-0000-0000-000000000000/approve",
+          "host": [
+            "{{groupBaseUrl}}"
+          ],
+          "path": [
+            "requests",
+            "{{groupId}}",
+            "00000000-0000-0000-0000-000000000000",
+            "approve"
+          ]
         }
       },
       "event": [
@@ -249,11 +418,50 @@
     }
   ],
   "variable": [
-    { "key": "authBaseUrl", "value": "http://localhost:3000/api/v1/auth", "type": "string" },
-    { "key": "groupBaseUrl", "value": "http://localhost:3002/api/v1/group", "type": "string" },
-    { "key": "accessToken", "value": "", "type": "string" },
-    { "key": "userId", "value": "", "type": "string" },
-    { "key": "groupOwnerToken", "value": "", "type": "string" },
-    { "key": "groupOwnerUserId", "value": "", "type": "string" }
+    {
+      "key": "authBaseUrl",
+      "value": "http://localhost:3000/api/v1/auth",
+      "type": "string"
+    },
+    {
+      "key": "groupBaseUrl",
+      "value": "http://localhost:3002/api/v1/group",
+      "type": "string"
+    },
+    {
+      "key": "accessToken",
+      "value": "",
+      "type": "string"
+    },
+    {
+      "key": "userId",
+      "value": "",
+      "type": "string"
+    },
+    {
+      "key": "groupOwnerToken",
+      "value": "",
+      "type": "string"
+    },
+    {
+      "key": "groupOwnerUserId",
+      "value": "",
+      "type": "string"
+    },
+    {
+      "key": "groupId",
+      "value": "",
+      "type": "string"
+    },
+    {
+      "key": "joinRequestId",
+      "value": "",
+      "type": "string"
+    },
+    {
+      "key": "joinRequestId2",
+      "value": "",
+      "type": "string"
+    }
   ]
 }

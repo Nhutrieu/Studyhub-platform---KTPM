@@ -38,10 +38,53 @@
         },
         "url": {
           "raw": "{{authBaseUrl}}/login",
-          "host": ["{{authBaseUrl}}"],
-          "path": ["login"]
+          "host": [
+            "{{authBaseUrl}}"
+          ],
+          "path": [
+            "login"
+          ]
         }
       }
+    },
+    {
+      "name": "🧪 Setup - Tạo fixture group",
+      "request": {
+        "method": "POST",
+        "header": [
+          {
+            "key": "Authorization",
+            "value": "Bearer {{accessToken}}"
+          },
+          {
+            "key": "Content-Type",
+            "value": "application/json"
+          }
+        ],
+        "url": {
+          "raw": "{{groupBaseUrl}}",
+          "host": [
+            "{{groupBaseUrl}}"
+          ]
+        },
+        "body": {
+          "mode": "raw",
+          "raw": "{\n  \"name\": \"Setup - Tạo fixture group {{$timestamp}}\",\n  \"description\": \"Newman fixture group\",\n  \"access\": \"PUBLIC\"\n}"
+        }
+      },
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "exec": [
+              "pm.test('Status 201 - Tạo fixture group thành công', () => pm.response.to.have.status(201));",
+              "const json = pm.response.json();",
+              "if (json.data?.id) pm.collectionVariables.set('groupId', json.data.id);"
+            ],
+            "type": "text/javascript"
+          }
+        }
+      ]
     },
     {
       "name": "✅ Xem chi tiết group",
@@ -55,8 +98,12 @@
         ],
         "url": {
           "raw": "{{groupBaseUrl}}/{{groupId}}",
-          "host": ["{{groupBaseUrl}}"],
-          "path": ["{{groupId}}"]
+          "host": [
+            "{{groupBaseUrl}}"
+          ],
+          "path": [
+            "{{groupId}}"
+          ]
         }
       },
       "event": [
@@ -83,8 +130,12 @@
         ],
         "url": {
           "raw": "{{groupBaseUrl}}/00000000-0000-0000-0000-000000000000",
-          "host": ["{{groupBaseUrl}}"],
-          "path": ["00000000-0000-0000-0000-000000000000"]
+          "host": [
+            "{{groupBaseUrl}}"
+          ],
+          "path": [
+            "00000000-0000-0000-0000-000000000000"
+          ]
         }
       },
       "event": [
@@ -105,8 +156,12 @@
         "header": [],
         "url": {
           "raw": "{{groupBaseUrl}}/{{groupId}}",
-          "host": ["{{groupBaseUrl}}"],
-          "path": ["{{groupId}}"]
+          "host": [
+            "{{groupBaseUrl}}"
+          ],
+          "path": [
+            "{{groupId}}"
+          ]
         }
       },
       "event": [
@@ -169,7 +224,7 @@
     },
     {
       "key": "adminAccessToken",
-      "value": "{{REPLACE_WITH_REAL_ADMIN_TOKEN}}",
+      "value": "",
       "type": "string"
     },
     {
@@ -194,37 +249,37 @@
     },
     {
       "key": "anotherUserId",
-      "value": "{{REPLACE_WITH_REAL_USER_ID}}",
+      "value": "11111111-2222-4222-8222-111111111113",
       "type": "string"
     },
     {
       "key": "anotherUserAccessToken",
-      "value": "{{REPLACE_WITH_REAL_TOKEN_OF_anotherUserId}}",
+      "value": "",
       "type": "string"
     },
     {
       "key": "outsiderToken",
-      "value": "{{REPLACE_WITH_TOKEN_OF_USER_NOT_IN_ANY_GROUP_DOC}}",
+      "value": "",
       "type": "string"
     },
     {
       "key": "deletableUserId",
-      "value": "{{REPLACE_WITH_A_USER_ID_SAFE_TO_DELETE}}",
+      "value": "",
       "type": "string"
     },
     {
       "key": "blockedUserEmail",
-      "value": "{{REPLACE_WITH_EMAIL_OF_AN_ALREADY_BLOCKED_USER}}",
+      "value": "",
       "type": "string"
     },
     {
       "key": "privateUserId",
-      "value": "{{REPLACE_WITH_USER_ID_WHOSE_PROFILE_IS_PRIVATE}}",
+      "value": "",
       "type": "string"
     },
     {
       "key": "otherUserSocialLinkId",
-      "value": "{{REPLACE_WITH_SOCIAL_LINK_ID_OF_ANOTHER_USER}}",
+      "value": "",
       "type": "string"
     },
     {
@@ -234,17 +289,17 @@
     },
     {
       "key": "groupId",
-      "value": "aaaaaaaa-aaaa-4aaa-8aaa-aaaaaaaaaaa1",
+      "value": "",
       "type": "string"
     },
     {
       "key": "privateGroupId",
-      "value": "{{REPLACE_WITH_REAL_PRIVATE_GROUP_ID}}",
+      "value": "",
       "type": "string"
     },
     {
       "key": "emptyGroupId",
-      "value": "{{REPLACE_WITH_GROUP_ID_SAFE_TO_DELETE}}",
+      "value": "",
       "type": "string"
     },
     {
@@ -254,32 +309,32 @@
     },
     {
       "key": "joinRequestId2",
-      "value": "{{REPLACE_WITH_ANOTHER_PENDING_JOIN_REQUEST_ID}}",
+      "value": "",
       "type": "string"
     },
     {
       "key": "groupOwnerToken",
-      "value": "{{REPLACE_WITH_TOKEN_OF_GROUP_OWNER}}",
+      "value": "",
       "type": "string"
     },
     {
       "key": "groupOwnerUserId",
-      "value": "{{REPLACE_WITH_USER_ID_OF_GROUP_OWNER}}",
+      "value": "",
       "type": "string"
     },
     {
       "key": "groupManagerNotOwnerToken",
-      "value": "{{REPLACE_WITH_TOKEN_OF_A_MANAGER_WHO_IS_NOT_OWNER}}",
+      "value": "",
       "type": "string"
     },
     {
       "key": "memberToLeaveToken",
-      "value": "{{REPLACE_WITH_TOKEN_OF_A_REGULAR_MEMBER_TO_TEST_LEAVE}}",
+      "value": "",
       "type": "string"
     },
     {
       "key": "memberToKickId",
-      "value": "{{REPLACE_WITH_USER_ID_OF_A_MEMBER_TO_KICK}}",
+      "value": "11111111-2222-4222-8222-111111111117",
       "type": "string"
     },
     {
@@ -289,22 +344,22 @@
     },
     {
       "key": "privateDocumentId",
-      "value": "{{REPLACE_WITH_REAL_PRIVATE_DOCUMENT_ID}}",
+      "value": "",
       "type": "string"
     },
     {
       "key": "deletableDocumentId",
-      "value": "{{REPLACE_WITH_DOCUMENT_ID_SAFE_TO_DELETE}}",
+      "value": "",
       "type": "string"
     },
     {
       "key": "pendingDocumentId",
-      "value": "{{REPLACE_WITH_DOCUMENT_ID_PENDING_APPROVAL}}",
+      "value": "",
       "type": "string"
     },
     {
       "key": "pendingDocumentId2",
-      "value": "{{REPLACE_WITH_ANOTHER_DOCUMENT_ID_PENDING_APPROVAL}}",
+      "value": "",
       "type": "string"
     },
     {
@@ -314,7 +369,7 @@
     },
     {
       "key": "otherUserCommentId",
-      "value": "{{REPLACE_WITH_COMMENT_ID_OF_ANOTHER_USER}}",
+      "value": "",
       "type": "string"
     },
     {
@@ -324,12 +379,12 @@
     },
     {
       "key": "otherUserNotificationId",
-      "value": "{{REPLACE_WITH_NOTIFICATION_ID_OF_ANOTHER_USER}}",
+      "value": "",
       "type": "string"
     },
     {
       "key": "deletableNotificationId",
-      "value": "{{REPLACE_WITH_NOTIFICATION_ID_SAFE_TO_DELETE}}",
+      "value": "",
       "type": "string"
     },
     {
@@ -349,7 +404,7 @@
     },
     {
       "key": "otherUserMessageId",
-      "value": "{{REPLACE_WITH_MESSAGE_ID_OF_ANOTHER_USER}}",
+      "value": "",
       "type": "string"
     }
   ]
