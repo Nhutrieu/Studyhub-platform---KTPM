@@ -48,6 +48,45 @@
       }
     },
     {
+      "name": "🧪 Setup - Tạo fixture group",
+      "request": {
+        "method": "POST",
+        "header": [
+          {
+            "key": "Authorization",
+            "value": "Bearer {{accessToken}}"
+          },
+          {
+            "key": "Content-Type",
+            "value": "application/json"
+          }
+        ],
+        "url": {
+          "raw": "{{groupBaseUrl}}",
+          "host": [
+            "{{groupBaseUrl}}"
+          ]
+        },
+        "body": {
+          "mode": "raw",
+          "raw": "{\n  \"name\": \"Setup - Tạo fixture group {{$timestamp}}\",\n  \"description\": \"Newman fixture group\",\n  \"access\": \"PUBLIC\"\n}"
+        }
+      },
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "exec": [
+              "pm.test('Status 201 - Tạo fixture group thành công', () => pm.response.to.have.status(201));",
+              "const json = pm.response.json();",
+              "if (json.data?.id) pm.collectionVariables.set('groupId', json.data.id);"
+            ],
+            "type": "text/javascript"
+          }
+        }
+      ]
+    },
+    {
       "name": "✅ BVA-1 Biên tối thiểu hợp lệ: limit=1",
       "event": [
         {
@@ -372,7 +411,7 @@
     },
     {
       "key": "groupId",
-      "value": "aaaaaaaa-aaaa-4aaa-8aaa-aaaaaaaaaaa1",
+      "value": "",
       "type": "string"
     }
   ]
