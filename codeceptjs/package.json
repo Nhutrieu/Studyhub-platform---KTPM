@@ -1,0 +1,21 @@
+{
+  "name": "studyhub-codeceptjs-e2e",
+  "version": "1.0.0",
+  "private": true,
+  "type": "commonjs",
+  "scripts": {
+    "test": "codeceptjs run --steps",
+    "test:dry": "codeceptjs dry-run --steps",
+    "test:headed": "HEADLESS=false codeceptjs run --steps",
+    "test:auth": "codeceptjs run --steps tests/auth-validation_test.js",
+    "test:routes": "codeceptjs run --steps tests/protected-routes_test.js",
+    "test:user": "codeceptjs run --steps tests/user-navigation_test.js",
+    "test:admin": "codeceptjs run --steps tests/admin_test.js",
+    "test:profile": "codeceptjs run --steps tests/login-profile_test.js",
+    "browsers": "playwright install"
+  },
+  "devDependencies": {
+    "codeceptjs": "^3.7.5",
+    "playwright": "^1.56.1"
+  }
+}
