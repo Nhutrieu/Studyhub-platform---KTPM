@@ -78,7 +78,12 @@ export class OAuthService {
           provider_user.email
         );
         if (existing_email) {
+          // Lấy thông tin user để xem họ có đăng ký password thường không
           user = await this.userRepo.findById(existing_email.user_id);
+          console.log("[DEBUG OAUTH] existing user password_hash:", user ? user.password_hash : null);
+          if (user && user.password_hash && user.password_hash !== "") {
+            throw new Error("Email already registered with password. Please login normally.");
+          }
         } else {
           // Create new user
           user = await this.userRepo.create({

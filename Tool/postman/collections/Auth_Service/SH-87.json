@@ -37,7 +37,9 @@
             "exec": [
               "pm.test('Status 200', () => pm.response.to.have.status(200));",
               "const json = pm.response.json();",
-              "pm.test('Có accessToken và refreshToken', () => { pm.expect(json).to.have.property('accessToken'); pm.expect(json).to.have.property('refreshToken'); });"
+              "pm.test('Có accessToken và refreshToken', () => { pm.expect(json).to.have.property('accessToken'); pm.expect(json).to.have.property('refreshToken'); });",
+              "if (json.accessToken) pm.collectionVariables.set('accessToken', json.accessToken);",
+              "if (json.refreshToken) pm.collectionVariables.set('refreshToken', json.refreshToken);"
             ]
           }
         }
