@@ -154,6 +154,41 @@
       ]
     },
     {
+      "name": "🔑 Đăng ký tài khoản thường để test trùng (Pre-requisite)",
+      "request": {
+        "method": "POST",
+        "header": [
+          {
+            "key": "Content-Type",
+            "value": "application/json"
+          }
+        ],
+        "url": {
+          "raw": "{{authBaseUrl}}/register",
+          "host": [
+            "{{authBaseUrl}}"
+          ],
+          "path": [
+            "register"
+          ]
+        },
+        "body": {
+          "mode": "raw",
+          "raw": "{\n  \"user_name\": \"nguyenvana2\",\n  \"email\": \"nguyenvana@example.com\",\n  \"password\": \"11111111\"\n}"
+        }
+      },
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "exec": [
+              "pm.test('Status 201 or 400', () => { pm.expect(pm.response.code).to.be.oneOf([201, 400]); });"
+            ]
+          }
+        }
+      ]
+    },
+    {
       "name": "❌ OAuth login - email OAuth trùng với tài khoản thường",
       "request": {
         "method": "POST",
