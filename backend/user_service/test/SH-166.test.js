@@ -7,6 +7,7 @@ jest.unstable_mockModule('../src/utils/jwt.js', () => ({
 
 const jwtUtils = await import('../src/utils/jwt.js');
 const { verifyAccessToken } = await import('../src/middlewares/auth.js');
+const { FollowService } = await import('../src/services/FollowService.js');
 
 describe('Auth Middleware - verifyAccessToken', () => {
   let req;
@@ -66,5 +67,79 @@ describe('Auth Middleware - verifyAccessToken', () => {
     expect(req.user).toEqual(mockPayload);
     expect(next).toHaveBeenCalled();
     expect(res.status).not.toHaveBeenCalled();
+  });
+});
+
+describe('FollowService - Unit Test', () => {
+  let followRepoMock;
+  let userRepoMock;
+  let followService;
+
+  beforeEach(() => {
+    followRepoMock = {
+      follow: jest.fn(),
+      unfollow: jest.fn(),
+      findByFollowerAndTarget: jest.fn(),
+      getFollowCounts: jest.fn(),
+      getFollowers: jest.fn(),
+      getFollowing: jest.fn(),
+      getFriends: jest.fn()
+    };
+    userRepoMock = {
+      findById: jest.fn().mockResolvedValue({ id: 'user' })
+    };
+    followService = new FollowService({
+      followRepo: followRepoMock,
+      userRepo: userRepoMock
+    });
+
+    jest.clearAllMocks();
+  });
+
+  it('should reject following self', async () => {
+    await expect(followService.follow('user-123', 'user-123')).rejects.toThrow('Cannot follow self');
+    expect(followRepoMock.follow).not.toHaveBeenCalled();
+  });
+
+  it('should reject follow when target user is not found', async () => {
+    userRepoMock.findById.mockImplementation((id) =>
+      Promise.resolve(id === 'missing-user' ? null : { id })
+    );
+
+    await expect(followService.follow('user-123', 'missing-user')).rejects.toThrow('User not found');
+    expect(followRepoMock.follow).not.toHaveBeenCalled();
+  });
+
+  it('should reject duplicate follow', async () => {
+    followRepoMock.findByFollowerAndTarget.mockResolvedValue({
+      follower_id: 'user-123',
+      target_user_id: 'user-456'
+    });
+
+    await expect(followService.follow('user-123', 'user-456')).rejects.toThrow('Already following this user');
+    expect(followRepoMock.follow).not.toHaveBeenCalled();
+  });
+
+  it('should follow a valid target user', async () => {
+    followRepoMock.findByFollowerAndTarget.mockResolvedValue(null);
+    followRepoMock.follow.mockResolvedValue({
+      follower_id: 'user-123',
+      target_user_id: 'user-456'
+    });
+
+    const result = await followService.follow('user-123', 'user-456');
+
+    expect(followRepoMock.follow).toHaveBeenCalledWith('user-123', 'user-456');
+    expect(result).toEqual({
+      follower_id: 'user-123',
+      target_user_id: 'user-456'
+    });
+  });
+
+  it('should reject unfollow when relationship does not exist', async () => {
+    followRepoMock.findByFollowerAndTarget.mockResolvedValue(null);
+
+    await expect(followService.unfollow('user-123', 'user-456')).rejects.toThrow('Follow relationship not found');
+    expect(followRepoMock.unfollow).not.toHaveBeenCalled();
   });
 });
