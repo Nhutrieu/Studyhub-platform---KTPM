@@ -296,8 +296,8 @@ describe("SH-215: Unit Test - GroupController", () => {
     it("trả về 403 khi actor không có quyền mời", async () => {
       const req = {
         params: { group_id: "g1" },
-        body: { user_id: "user-02" },
-        user: { id: "user-03" },
+        body: { user_id: "11111111-2222-3333-4444-555555555555" },
+        user: { id: "66666666-7777-8888-9999-000000000000" },
       };
       const err = new Error("No permission to invite");
       err.status = 403;
@@ -305,7 +305,7 @@ describe("SH-215: Unit Test - GroupController", () => {
  
       await controller.inviteMember(req, res);
  
-      expect(groupService.inviteMember).toHaveBeenCalledWith("g1", "user-02", "user-03");
+      expect(groupService.inviteMember).toHaveBeenCalledWith("g1", "11111111-2222-3333-4444-555555555555", "66666666-7777-8888-9999-000000000000");
       expect(res.status).toHaveBeenCalledWith(403);
       expect(res.json).toHaveBeenCalledWith({ success: false, message: "No permission to invite" });
     });
@@ -351,7 +351,7 @@ describe("SH-215: Unit Test - GroupController", () => {
   // ============================================================
   describe("updateGroup()", () => {
     it("trả về 500 khi groupService.updateGroup ném lỗi", async () => {
-      const req = { params: { group_id: "g1" }, body: { name: "X" } };
+      const req = { params: { group_id: "g1" }, body: { name: "Valid Name" } };
       groupService.updateGroup.mockRejectedValue(new Error("DB error"));
  
       await controller.updateGroup(req, res);
@@ -467,16 +467,16 @@ describe("SH-215: Unit Test - GroupController", () => {
     it("trả về 200 kèm data khi mời thành viên thành công", async () => {
       const req = {
         params: { group_id: "g1" },
-        body: { user_id: "user-02" },
+        body: { user_id: "11111111-2222-3333-4444-555555555555" },
         user: { id: "owner-01" },
       };
-      groupService.inviteMember.mockResolvedValue({ user_id: "user-02", role: "MEMBER" });
+      groupService.inviteMember.mockResolvedValue({ user_id: "11111111-2222-3333-4444-555555555555", role: "MEMBER" });
  
       await controller.inviteMember(req, res);
  
       expect(res.json).toHaveBeenCalledWith({
         success: true,
-        data: { user_id: "user-02", role: "MEMBER" },
+        data: { user_id: "11111111-2222-3333-4444-555555555555", role: "MEMBER" },
       });
     });
   });
